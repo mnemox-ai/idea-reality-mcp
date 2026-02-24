@@ -26,17 +26,23 @@ async def idea_check(
     """
     keywords = extract_keywords(idea_text)
 
+    deep_note = None
     if depth == "deep":
         # Stub for v0.2 — falls back to quick for now
-        pass
+        deep_note = "deep mode not yet available (v0.2), using quick mode"
 
     github_results = await search_github_repos(keywords)
     hn_results = await search_hn(keywords)
 
-    return compute_signal(
+    result = compute_signal(
         idea_text=idea_text,
         keywords=keywords,
         github_results=github_results,
         hn_results=hn_results,
         depth=depth,
     )
+
+    if deep_note:
+        result["note"] = deep_note
+
+    return result
