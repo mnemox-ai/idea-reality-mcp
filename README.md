@@ -5,17 +5,21 @@ Pre-build reality check for AI coding agents. Stop building what already exists.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
+[![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 
 ## What it does
 
-`idea-reality-mcp` is an MCP server that provides the `idea_check` tool. When an AI coding agent is about to build something, it can call this tool to check whether similar projects already exist on GitHub and Hacker News.
+`idea-reality-mcp` is an MCP server that provides the `idea_check` tool. When an AI coding agent is about to build something, it can call this tool to check whether similar projects already exist across multiple sources.
+
+**Quick mode** (default): GitHub + Hacker News
+**Deep mode**: GitHub + HN + npm + PyPI + Product Hunt (all sources in parallel)
 
 The tool returns:
 
-- **reality_signal** (0–100): How much existing work overlaps with your idea
+- **reality_signal** (0-100): How much existing work overlaps with your idea
 - **duplicate_likelihood**: low / medium / high
-- **evidence**: Raw search data from GitHub and HN
-- **top_similars**: Top 5 similar GitHub repos with stars, URLs, descriptions
+- **evidence**: Raw search data from all queried sources
+- **top_similars**: Top similar projects from GitHub, npm, PyPI, and Product Hunt
 - **pivot_hints**: 3 actionable suggestions based on the competitive landscape
 
 ## Quickstart
@@ -30,10 +34,14 @@ cd idea-reality-mcp
 uv run idea-reality-mcp
 ```
 
-### Optional: Set GitHub token for higher rate limits
+### Optional: Environment variables
 
 ```bash
+# Higher GitHub API rate limits
 export GITHUB_TOKEN=ghp_your_token_here
+
+# Enable Product Hunt search (deep mode)
+export PRODUCTHUNT_TOKEN=your_ph_token_here
 ```
 
 ## Claude Desktop config
@@ -75,7 +83,7 @@ Add to `.cursor/mcp.json` in your project root:
 | Parameter   | Type                      | Required | Description                          |
 |-------------|---------------------------|----------|--------------------------------------|
 | `idea_text` | string                    | yes      | Natural-language description of idea |
-| `depth`     | `"quick"` \| `"deep"`     | no       | `"quick"` = GitHub + HN (default). `"deep"` = reserved for v0.2 |
+| `depth`     | `"quick"` \| `"deep"`     | no       | `"quick"` = GitHub + HN (default). `"deep"` = all 5 sources in parallel |
 
 **Output:**
 
@@ -86,10 +94,15 @@ Add to `.cursor/mcp.json` in your project root:
   "evidence": [
     {"source": "github", "type": "repo_count", "query": "...", "count": 342, "detail": "..."},
     {"source": "github", "type": "max_stars", "query": "...", "count": 15000, "detail": "..."},
-    {"source": "hackernews", "type": "mention_count", "query": "...", "count": 18, "detail": "..."}
+    {"source": "hackernews", "type": "mention_count", "query": "...", "count": 18, "detail": "..."},
+    {"source": "npm", "type": "package_count", "query": "...", "count": 56, "detail": "..."},
+    {"source": "pypi", "type": "package_count", "query": "...", "count": 23, "detail": "..."},
+    {"source": "producthunt", "type": "product_count", "query": "...", "count": 8, "detail": "..."}
   ],
   "top_similars": [
-    {"name": "user/repo", "url": "https://github.com/user/repo", "stars": 15000, "updated": "2025-12-01T...", "description": "..."}
+    {"name": "user/repo", "url": "https://github.com/...", "stars": 15000, "updated": "...", "description": "..."},
+    {"name": "npm:cool-pkg", "url": "https://npmjs.com/...", "stars": 0, "updated": "", "description": "..."},
+    {"name": "pypi:cool-pkg", "url": "https://pypi.org/...", "stars": 0, "updated": "", "description": "..."}
   ],
   "pivot_hints": [
     "High existing competition detected. Consider a niche differentiator...",
@@ -97,13 +110,21 @@ Add to `.cursor/mcp.json` in your project root:
     "Consider building an integration or plugin..."
   ],
   "meta": {
-    "checked_at": "2025-12-15T10:30:00+00:00",
-    "sources_used": ["github", "hackernews"],
-    "depth": "quick",
-    "version": "0.1.0"
+    "checked_at": "2026-02-25T10:30:00+00:00",
+    "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
+    "depth": "deep",
+    "version": "0.2.0"
   }
 }
 ```
+
+### Scoring weights
+
+**Quick mode:** GitHub repos 60% + GitHub stars 20% + HN mentions 20%
+
+**Deep mode:** GitHub repos 25% + GitHub stars 10% + HN mentions 15% + npm 20% + PyPI 15% + Product Hunt 15%
+
+If Product Hunt is unavailable (no token), its weight is automatically redistributed to the other sources.
 
 ## Sample prompts
 
@@ -111,7 +132,7 @@ Add to `.cursor/mcp.json` in your project root:
 Before building, check if this already exists: a CLI tool that converts
 Figma designs to React components automatically
 
-idea_check: AI-powered code review bot for GitHub PRs that suggests fixes
+idea_check("AI-powered code review bot for GitHub PRs", depth="deep")
 
 Check market reality: real-time collaborative markdown editor with AI
 autocomplete
@@ -119,8 +140,8 @@ autocomplete
 
 ## Roadmap
 
-- **v0.1** — GitHub + HN search, basic scoring (current)
-- **v0.2** — `depth: "deep"` with Product Hunt, npm/PyPI registry search
+- **v0.1** — GitHub + HN search, basic scoring
+- **v0.2** — `depth: "deep"` with npm, PyPI, Product Hunt; improved keyword extraction (current)
 - **v0.3** — LLM-powered keyword extraction and semantic similarity
 - **v0.4** — Trend detection and timing analysis
 
