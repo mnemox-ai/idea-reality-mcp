@@ -7,6 +7,8 @@ Pre-build reality check for AI coding agents. Stop building what already exists.
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 
+> **v0.3 is coming** — LLM-powered keyword extraction for much better accuracy. [Get notified](https://docs.google.com/forms/d/e/1FAIpQLSdwgHUjbQUWbeZgfnA6sDVHIC28-WmovsO4aGD4Co2Hw7Hu6g/viewform) when it drops + help shape the roadmap.
+
 ## What it does
 
 `idea-reality-mcp` is an MCP server that provides the `idea_check` tool. When an AI coding agent is about to build something, it can call this tool to check whether similar projects already exist across multiple sources.
