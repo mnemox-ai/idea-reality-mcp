@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 |---------|--------------------|
-| 0.1.x   | :white_check_mark: |
+| 0.2.x   | :white_check_mark: |
+| 0.1.x   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -24,5 +25,8 @@ This project makes outbound HTTP requests to:
 
 - `api.github.com` — GitHub Search API
 - `hn.algolia.com` — Hacker News Algolia API
+- `registry.npmjs.org` — npm Registry API (deep mode)
+- `pypi.org` — PyPI Registry (deep mode)
+- `api.producthunt.com` — Product Hunt GraphQL API (deep mode, optional — only when `PRODUCTHUNT_TOKEN` is set)
 
-No user data is stored or transmitted to any other service. The optional `GITHUB_TOKEN` environment variable is used solely for GitHub API authentication and is never logged or persisted.
+No user data is stored or transmitted to any other service. The optional `GITHUB_TOKEN` and `PRODUCTHUNT_TOKEN` environment variables are used solely for API authentication and are never logged or persisted.
