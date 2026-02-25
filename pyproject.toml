@@ -8,6 +8,18 @@ authors = [
     { name = "Mnemox AI", email = "dev@mnemox.ai" }
 ]
 requires-python = ">=3.11"
+keywords = ["mcp", "ai", "idea-validation", "market-research", "developer-tools", "github", "product-hunt"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+]
 dependencies = [
     "fastmcp>=2.0.0",
     "httpx>=0.27.0",
@@ -15,8 +27,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/mnemox-ai/idea-reality-mcp"
+Documentation = "https://github.com/mnemox-ai/idea-reality-mcp#readme"
 Repository = "https://github.com/mnemox-ai/idea-reality-mcp"
 Issues = "https://github.com/mnemox-ai/idea-reality-mcp/issues"
+Changelog = "https://github.com/mnemox-ai/idea-reality-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 idea-reality-mcp = "idea_reality_mcp:main"
