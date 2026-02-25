@@ -74,6 +74,16 @@ Add to `.cursor/mcp.json` in your project root:
 }
 ```
 
+## Recommended: Add to your CLAUDE.md
+
+To ensure your AI agent automatically uses `idea_check` when you discuss new ideas, add this line to your project's `CLAUDE.md` (or equivalent instructions file):
+
+```
+When users discuss new project ideas or ask about competition, use the idea_check tool from idea-reality-mcp.
+```
+
+This helps the agent recognize when to call the tool without you having to explicitly name it.
+
 ## Tool schema
 
 ### `idea_check`

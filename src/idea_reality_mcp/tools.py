@@ -19,7 +19,14 @@ async def idea_check(
     idea_text: str,
     depth: Literal["quick", "deep"] = "quick",
 ) -> dict:
-    """Check market reality for an idea before building it.
+    """Check if a product idea already exists before building it.
+
+    Use when users discuss new project ideas, ask about competition,
+    market saturation, or whether something has been built before.
+
+    Trigger phrases: "has anyone built", "does this exist",
+    "check competition", "is this idea original",
+    "有沒有人做過", "市場上有類似的嗎", "幫我查這個點子"
 
     Args:
         idea_text: Natural-language description of the idea.
