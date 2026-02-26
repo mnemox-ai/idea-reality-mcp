@@ -71,6 +71,9 @@ COMPOUND_TERMS = [
     "model context protocol", "tool calling", "prompt engineering",
     "vector search", "semantic search", "knowledge base",
     "red teaming", "function calling", "retrieval augmented",
+    "customer service", "push notification", "job queue",
+    "task queue", "log aggregation", "stock trading",
+    "fine tuning",
 ]
 
 # Technology / framework keywords — get priority in ranking and bypass
@@ -97,28 +100,57 @@ TECH_KEYWORDS = frozenset({
 # Chinese tech term → English equivalent (v0.3: mixed-language support).
 # Applied before tokenisation so Chinese intent is preserved.
 CHINESE_TECH_MAP: dict[str, str] = {
+    # AI / LLM core
     "監控": "monitoring", "監測": "monitoring", "告警": "alerting",
     "評測": "evaluation", "評估": "evaluation", "評分": "scoring",
-    "爬蟲": "scraping", "爬取": "scraping", "抓取": "scraping",
-    "自動化": "automation", "自動": "automation",
-    "工作流": "workflow", "流水線": "pipeline",
-    "代理": "agent", "智能體": "agent",
-    "助手": "assistant", "客服": "customer service",
-    "模型": "model", "大模型": "llm",
+    "模型": "model", "大模型": "llm", "大語言模型": "llm",
+    "微調": "finetuning", "訓練": "training",
+    "推理": "inference", "生成": "generation",
     "向量": "embedding", "嵌入": "embedding",
     "檢索": "retrieval", "搜索": "search", "搜尋": "search",
+    "護欄": "guardrails", "安全": "safety",
+    # Agent / workflow
+    "代理": "agent", "智能體": "agent",
+    "助手": "assistant", "機器人": "bot",
+    "自動化": "automation", "自動": "automation",
+    "工作流": "workflow", "流水線": "pipeline",
+    # Developer
+    "爬蟲": "scraping", "爬取": "scraping", "抓取": "scraping",
     "命令行": "cli", "命令列": "cli", "終端": "terminal",
     "資料庫": "database", "數據庫": "database",
-    "分析": "analytics", "儀表板": "dashboard",
     "部署": "deployment", "佈署": "deployment",
     "測試": "testing", "基準": "benchmark",
-    "聊天": "chatbot", "對話": "chat",
     "程式碼": "code", "代碼": "code",
-    "知識庫": "knowledge base",
+    "編輯器": "editor",
     "日誌": "logging", "追蹤": "tracing",
+    "排程": "scheduling", "定時": "cron",
+    "快取": "caching", "緩存": "caching",
+    # Business / SaaS
+    "電商": "ecommerce", "商城": "ecommerce", "網店": "ecommerce",
+    "後台": "backend", "管理": "management",
+    "客服": "customer service", "客戶服務": "customer service",
+    "付款": "payment", "支付": "payment", "結帳": "checkout",
+    "訂閱": "subscription", "帳單": "billing",
+    "通知": "notification", "推播": "notification",
+    "預約": "booking", "預訂": "reservation",
+    "庫存": "inventory",
+    "發票": "invoice",
+    "報表": "reporting", "報告": "reporting",
+    "權限": "authorization", "認證": "authentication",
+    # Content / media
+    "分析": "analytics", "儀表板": "dashboard",
+    "聊天": "chatbot", "對話": "chat",
+    "知識庫": "knowledge base",
     "摘要": "summarization", "翻譯": "translation",
     "分類": "classification", "推薦": "recommendation",
-    "標註": "annotation", "微調": "finetuning",
+    "標註": "annotation",
+    "字幕": "subtitle", "轉錄": "transcription",
+    # Domain specific
+    "股票": "stock", "交易": "trading", "金融": "fintech",
+    "教育": "education", "課程": "course",
+    "醫療": "healthcare", "健康": "health",
+    "物流": "logistics", "運送": "shipping",
+    "地圖": "map", "定位": "geolocation",
 }
 
 
@@ -141,6 +173,10 @@ def extract_keywords(idea_text: str) -> list[str]:
 
     lowered = text.lower()
 
+    # Normalize hyphens so "fine-tuning" matches compound "fine tuning",
+    # "e-commerce" matches "e commerce", "real-time" matches "real time", etc.
+    lowered = lowered.replace("-", " ")
+
     # Extract compound terms before stripping punctuation
     found_compounds: list[str] = []
     remaining = lowered
@@ -153,10 +189,13 @@ def extract_keywords(idea_text: str) -> list[str]:
     cleaned = re.sub(r"[^a-zA-Z0-9\s]", " ", remaining)
     tokens = [w for w in cleaned.split() if len(w) > 1]
 
-    # Stage A hard filter: STOP_WORDS + GENERIC_WORDS (tech keywords bypass)
+    # Stage A hard filter: STOP_WORDS + GENERIC_WORDS
+    # Tech keywords and intent anchors always bypass the generic filter.
     clean_tokens = [
         w for w in tokens
-        if w in TECH_KEYWORDS or (w not in STOP_WORDS and w not in GENERIC_WORDS)
+        if w in TECH_KEYWORDS
+        or w in INTENT_ANCHORS
+        or (w not in STOP_WORDS and w not in GENERIC_WORDS)
     ]
 
     tech_tokens = [w for w in clean_tokens if w in TECH_KEYWORDS]

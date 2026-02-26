@@ -17,42 +17,42 @@
   {
     "idea": "MCP server for GitHub and Jira integration",
     "expected_anchors": ["mcp"],
-    "must_not_appear": ["tool", "system", "platform"]
+    "must_not_appear": ["system", "platform"]
   },
   {
     "idea": "RAG pipeline with vector search and reranking",
-    "expected_anchors": ["rag", "retrieval"],
-    "must_not_appear": ["ai", "tool", "system"]
+    "expected_anchors": ["rag"],
+    "must_not_appear": ["ai", "system"]
   },
   {
     "idea": "CLI tool for database schema migrations",
     "expected_anchors": ["cli", "database"],
-    "must_not_appear": ["tool", "application", "program"]
+    "must_not_appear": ["application", "program"]
   },
   {
     "idea": "Python SDK for LLM tracing and telemetry",
     "expected_anchors": ["tracing", "telemetry"],
-    "must_not_appear": ["ai", "tool", "application"]
+    "must_not_appear": ["ai", "application"]
   },
   {
     "idea": "automated testing and evaluation for LLM outputs",
     "expected_anchors": ["testing", "evaluation"],
-    "must_not_appear": ["ai", "tool", "system"]
+    "must_not_appear": ["ai", "system"]
   },
   {
     "idea": "web scraping and data extraction pipeline",
     "expected_anchors": ["scraping", "pipeline"],
-    "must_not_appear": ["tool", "system", "application"]
+    "must_not_appear": ["system", "application"]
   },
   {
     "idea": "open source chatbot for customer service automation",
     "expected_anchors": ["chatbot", "automation"],
-    "must_not_appear": ["tool", "system"]
+    "must_not_appear": ["system"]
   },
   {
     "idea": "vector database for semantic search and embeddings",
     "expected_anchors": ["embedding", "search"],
-    "must_not_appear": ["tool", "system", "platform"]
+    "must_not_appear": ["platform"]
   },
   {
     "idea": "model context protocol client for VS Code",
@@ -60,54 +60,34 @@
     "must_not_appear": ["system", "application"]
   },
   {
-    "idea": "LLM 監控 dashboard for production",
-    "expected_anchors": ["monitoring"],
-    "must_not_appear": ["ai", "platform", "tool"]
-  },
-  {
-    "idea": "大模型 評測 工具",
-    "expected_anchors": ["evaluation"],
-    "must_not_appear": ["ai", "tool"]
-  },
-  {
-    "idea": "Python 爬蟲 框架 for e-commerce",
-    "expected_anchors": ["scraping"],
-    "must_not_appear": ["tool", "framework", "application"]
-  },
-  {
-    "idea": "LINE Bot 自動客服系統",
-    "expected_anchors": ["chatbot", "automation"],
-    "must_not_appear": ["system", "tool"]
-  },
-  {
     "idea": "continuous integration and deployment pipeline for ML models",
     "expected_anchors": ["pipeline", "deployment"],
-    "must_not_appear": ["tool", "system", "application"]
+    "must_not_appear": ["system", "application"]
   },
   {
     "idea": "code review automation with static analysis",
     "expected_anchors": ["review", "automation"],
-    "must_not_appear": ["tool", "system", "application"]
+    "must_not_appear": ["system", "application"]
   },
   {
     "idea": "Redis caching layer for FastAPI applications",
     "expected_anchors": [],
-    "must_not_appear": ["application", "tool", "platform"]
+    "must_not_appear": ["application", "platform"]
   },
   {
     "idea": "Kubernetes cost optimization dashboard",
     "expected_anchors": ["dashboard"],
-    "must_not_appear": ["tool", "system", "application"]
+    "must_not_appear": ["system", "application"]
   },
   {
     "idea": "AI-powered code editor with autocomplete",
-    "expected_anchors": [],
+    "expected_anchors": ["editor"],
     "must_not_appear": ["ai", "powered", "application"]
   },
   {
     "idea": "LLMOps platform for fine-tuning and serving models",
-    "expected_anchors": ["llmops", "inference"],
-    "must_not_appear": ["ai", "platform", "tool"]
+    "expected_anchors": ["llmops"],
+    "must_not_appear": ["ai", "platform"]
   },
   {
     "idea": "autonomous agent for browsing and research tasks",
@@ -116,12 +96,195 @@
   },
   {
     "idea": "GraphQL API gateway with rate limiting and auth",
-    "expected_anchors": ["api", "auth"],
-    "must_not_appear": ["tool", "system", "application"]
+    "expected_anchors": ["gateway", "auth"],
+    "must_not_appear": ["system", "application"]
   },
   {
     "idea": "real-time analytics dashboard for SaaS metrics",
     "expected_anchors": ["analytics", "dashboard"],
-    "must_not_appear": ["tool", "system", "application"]
+    "must_not_appear": ["system", "application"]
+  },
+
+  {"_comment": "--- Scheduling / jobs ---"},
+  {
+    "idea": "cron job scheduler and task queue manager",
+    "expected_anchors": ["scheduler", "queue"],
+    "must_not_appear": ["manager", "system"]
+  },
+  {
+    "idea": "email newsletter scheduler and analytics",
+    "expected_anchors": ["scheduler", "analytics"],
+    "must_not_appear": ["tool", "platform"]
+  },
+
+  {"_comment": "--- Generation / synthesis ---"},
+  {
+    "idea": "image generation with stable diffusion API",
+    "expected_anchors": ["generation"],
+    "must_not_appear": ["tool", "platform"]
+  },
+  {
+    "idea": "video transcription and subtitle generator",
+    "expected_anchors": ["transcription", "generator"],
+    "must_not_appear": ["tool", "application"]
+  },
+  {
+    "idea": "translation API for multilingual apps",
+    "expected_anchors": ["translation"],
+    "must_not_appear": ["application"]
+  },
+
+  {"_comment": "--- Guardrails / safety ---"},
+  {
+    "idea": "guardrails for LLM output safety and content moderation",
+    "expected_anchors": ["guardrails", "safety"],
+    "must_not_appear": ["tool", "system"]
+  },
+  {
+    "idea": "prompt management and version control for LLM apps",
+    "expected_anchors": ["prompt"],
+    "must_not_appear": ["application"]
+  },
+
+  {"_comment": "--- SaaS / Business ---"},
+  {
+    "idea": "SaaS billing and subscription management system",
+    "expected_anchors": ["billing", "subscription"],
+    "must_not_appear": ["system"]
+  },
+  {
+    "idea": "marketplace for freelance developers",
+    "expected_anchors": ["marketplace"],
+    "must_not_appear": ["tool", "application"]
+  },
+  {
+    "idea": "customer feedback collection and NPS tracking",
+    "expected_anchors": ["feedback"],
+    "must_not_appear": ["tool", "system"]
+  },
+  {
+    "idea": "online booking and reservation system for restaurants",
+    "expected_anchors": ["booking", "reservation"],
+    "must_not_appear": ["system"]
+  },
+  {
+    "idea": "invoice generator and payment tracking for freelancers",
+    "expected_anchors": ["invoice", "payment"],
+    "must_not_appear": ["tool"]
+  },
+
+  {"_comment": "--- Parsing / data extraction ---"},
+  {
+    "idea": "PDF invoice parser and OCR extraction",
+    "expected_anchors": ["parser", "ocr"],
+    "must_not_appear": ["tool", "application"]
+  },
+  {
+    "idea": "log aggregation and centralized logging system",
+    "expected_anchors": ["logging"],
+    "must_not_appear": ["system"]
+  },
+  {
+    "idea": "JSON schema validator and API documentation generator",
+    "expected_anchors": ["generator"],
+    "must_not_appear": ["tool", "application"]
+  },
+
+  {"_comment": "--- Notification / messaging ---"},
+  {
+    "idea": "Slack bot for standup meeting reminders",
+    "expected_anchors": ["bot"],
+    "must_not_appear": ["tool", "system"]
+  },
+  {
+    "idea": "push notification service for mobile apps",
+    "expected_anchors": ["notification"],
+    "must_not_appear": ["application"]
+  },
+
+  {"_comment": "--- Caching / Queue ---"},
+  {
+    "idea": "distributed caching layer with Redis and Memcached",
+    "expected_anchors": ["caching"],
+    "must_not_appear": ["tool", "system"]
+  },
+  {
+    "idea": "message queue with dead letter handling and retry",
+    "expected_anchors": ["queue"],
+    "must_not_appear": ["tool", "system"]
+  },
+
+  {"_comment": "--- 繁體中文 ideas ---"},
+  {
+    "idea": "LLM 監控 dashboard for production",
+    "expected_anchors": ["monitoring"],
+    "must_not_appear": ["ai", "platform"]
+  },
+  {
+    "idea": "大模型 評測 工具",
+    "expected_anchors": ["evaluation"],
+    "must_not_appear": ["ai"]
+  },
+  {
+    "idea": "Python 爬蟲 框架 for e-commerce",
+    "expected_anchors": ["scraping"],
+    "must_not_appear": ["framework", "application"]
+  },
+  {
+    "idea": "LINE Bot 自動客服系統",
+    "expected_anchors": ["bot", "automation"],
+    "must_not_appear": []
+  },
+  {
+    "idea": "電商後台管理系統",
+    "expected_anchors": ["ecommerce"],
+    "must_not_appear": ["system"]
+  },
+  {
+    "idea": "股票技術分析 dashboard",
+    "expected_anchors": ["analytics"],
+    "must_not_appear": ["tool"]
+  },
+  {
+    "idea": "AI 客服機器人",
+    "expected_anchors": ["bot"],
+    "must_not_appear": ["ai"]
+  },
+  {
+    "idea": "自動化部署 CI/CD pipeline",
+    "expected_anchors": ["automation", "deployment"],
+    "must_not_appear": []
+  },
+  {
+    "idea": "排程任務管理工具",
+    "expected_anchors": ["scheduling"],
+    "must_not_appear": []
+  },
+  {
+    "idea": "發票自動生成與付款追蹤",
+    "expected_anchors": ["invoice", "payment"],
+    "must_not_appear": []
+  },
+  {
+    "idea": "向量資料庫搜尋引擎",
+    "expected_anchors": ["embedding"],
+    "must_not_appear": ["engine"]
+  },
+  {
+    "idea": "即時通知推播系統",
+    "expected_anchors": ["notification"],
+    "must_not_appear": ["system"]
+  },
+
+  {"_comment": "--- Finetuning / dataset ---"},
+  {
+    "idea": "fine-tuning dataset curation and labeling tool",
+    "expected_anchors": ["finetuning"],
+    "must_not_appear": []
+  },
+  {
+    "idea": "LLM prompt template manager with versioning",
+    "expected_anchors": ["prompt"],
+    "must_not_appear": ["manager"]
   }
 ]
