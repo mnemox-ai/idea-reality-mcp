@@ -4,6 +4,28 @@
 
 本專案所有重要變更都會記錄在此檔案。
 
+## [0.3.0] - 2026-02-27
+
+### 變更
+- **關鍵字萃取全面改寫** — 三段式 Pipeline（Stage A/B/C）
+  - Stage A：硬性過濾泛詞（`ai`、`tool`、`platform`、`system`、`framework`、`engine` 等）+ 擴充停用詞
+  - Stage B：意圖錨點偵測 — 識別 1–2 個意圖核心詞（`monitoring`、`agent`、`rag`、`mcp`、`evaluation`、`cli`、`scraping`、`embedding`、`tracing`、`chatbot`…）
+  - Stage C：同義詞展開（100+ 詞手寫字典），生成 3–8 條錨定查詢（`monitoring` → `observability / tracing / telemetry`；`evaluation` → `evals / benchmark`；`agent` → `tool calling / orchestration`…）
+- 中文與中英混合輸入 tokenization 改善：輸入前自動映射（監控→monitoring、評測→evaluation、爬蟲→scraping、自動化→automation…）
+- `extract_keywords()` 現在回傳最多 8 條 variant（原為 4 條），且每條都錨定在偵測到的意圖上
+
+### 新增
+- `scoring/synonyms.py` — SYNONYMS 同義詞字典 + INTENT_ANCHORS 意圖錨點集合（新模組）
+- `tests/golden_ideas.json` — 25 條固定評測 ideas
+- `tests/eval_keywords.py` — 關鍵字品質評測腳本（執行：`python tests/eval_keywords.py`）
+- 20 個新 keyword 測試（共 93 個，原為 73 個）
+
+### 改善
+- Golden set 意圖錨點命中率：100%
+- 垃圾詞比例：25 條 ideas 平均 2%
+- 中文 / 中英混合輸入 → 穩定、準確的 query set
+- `meta.version` 更新為 `"0.3.0"`
+
 ## [0.2.0] - 2026-02-25
 
 ### 新增

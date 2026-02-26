@@ -4,6 +4,28 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-02-27
+
+### Changed
+- **Keyword extraction overhaul** — three-stage pipeline (Stage A/B/C)
+  - Stage A: Hard-filter boilerplate words (`ai`, `tool`, `platform`, `system`, `framework`, `engine`, etc.) + expanded stop word coverage
+  - Stage B: Intent anchor detection — identifies 1–2 key intent signals (`monitoring`, `agent`, `rag`, `mcp`, `evaluation`, `cli`, `scraping`, `embedding`, `tracing`, `chatbot`…)
+  - Stage C: Synonym expansion with curated 100+ term dictionary, generates 3–8 anchored queries (`monitoring` → `observability / tracing / telemetry`; `evaluation` → `evals / benchmark`; `agent` → `tool calling / orchestration`…)
+- Chinese and mixed-language input now mapped to English equivalents before tokenisation (監控→monitoring, 評測→evaluation, 爬蟲→scraping, 自動化→automation…)
+- `extract_keywords()` now returns up to 8 variants (was 4), all anchored to detected intent
+
+### Added
+- `scoring/synonyms.py` — SYNONYMS dict + INTENT_ANCHORS set (new module)
+- `tests/golden_ideas.json` — 25-idea golden evaluation set
+- `tests/eval_keywords.py` — keyword quality evaluation script (run with `python tests/eval_keywords.py`)
+- 20 new keyword tests (93 total, up from 73)
+
+### Improved
+- Anchor hit rate on golden set: 100% (measured from baseline)
+- Junk keyword ratio: 2% average across 25 test ideas
+- Chinese/mixed input produces stable, intent-aligned query sets
+- `meta.version` updated to `"0.3.0"`
+
 ## [0.2.0] - 2026-02-25
 
 ### Added
