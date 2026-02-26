@@ -154,11 +154,13 @@ autocomplete
 
 ## Roadmap
 
-- **v0.1** — GitHub + HN search, basic scoring
-- **v0.2** — `depth: "deep"` with npm, PyPI, Product Hunt; improved keyword extraction
-- **v0.3** — 3-stage keyword pipeline (Stage A/B/C), 150+ Chinese term mappings, synonym expansion (current)
-- **v0.4** — LLM-powered keyword extraction and semantic similarity
-- **v0.5** — Trend detection and timing analysis
+- [x] **v0.1** — GitHub + HN search, basic scoring
+- [x] **v0.2** — `depth: "deep"` with npm, PyPI, Product Hunt; improved keyword extraction
+- [x] **v0.3** — 3-stage keyword pipeline (Stage A/B/C), 150+ Chinese term mappings, synonym expansion
+- [x] **v0.3.1** — Non-tech domain search precision fix, relevance-weighted result ranking (current)
+- [ ] **v0.4** — LLM-powered keyword extraction and semantic similarity
+- [ ] **v0.5** — Trend detection and timing analysis
+- [ ] **v1.0** — Idea Memory Dataset (opt-in anonymous logging of checks)
 
 ## License
 

@@ -153,11 +153,13 @@ idea_check("AI code review bot for GitHub PRs", depth="deep")
 
 ## Roadmap
 
-- **v0.1** — GitHub + HN 搜尋，基本評分
-- **v0.2** — `depth: "deep"` 支援 npm、PyPI、Product Hunt；改進關鍵字萃取
-- **v0.3** — 三段式關鍵字 Pipeline（Stage A/B/C）、150+ 中文詞彙對照、同義詞展開（目前版本）
-- **v0.4** — LLM 驅動的關鍵字萃取和語意相似度比對
-- **v0.5** — 趨勢偵測和時機分析
+- [x] **v0.1** — GitHub + HN 搜尋，基本評分
+- [x] **v0.2** — `depth: "deep"` 支援 npm、PyPI、Product Hunt；改進關鍵字萃取
+- [x] **v0.3** — 三段式關鍵字 Pipeline（Stage A/B/C）、150+ 中文詞彙對照、同義詞展開
+- [x] **v0.3.1** — 非科技領域搜尋精準度修復，相關性加權排序（目前版本）
+- [ ] **v0.4** — LLM 驅動的關鍵字萃取和語意相似度比對
+- [ ] **v0.5** — 趨勢偵測和時機分析
+- [ ] **v1.0** — Idea Memory Dataset（匿名使用紀錄）
 
 ## 授權
 
