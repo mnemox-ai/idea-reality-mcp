@@ -1,7 +1,7 @@
 # IDEA-REALITY-MCP — Project Context
 
 ## What This Is
-Mnemox Idea Reality MCP Server v0.2.0 — a workflow-native pre-build reality check for AI coding agents.
+Mnemox Idea Reality MCP Server v0.3.0 — a workflow-native pre-build reality check for AI coding agents.
 MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you build, returns reality_signal (0-100).
 
 ## Org
@@ -14,14 +14,16 @@ MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you b
 - Python 3.11+, FastMCP 3.x, httpx (async), uv
 - Sources: GitHub Search API, HN Algolia API, npm Registry, PyPI (HTML scraping), Product Hunt GraphQL (optional)
 - Entry: `python -m idea_reality_mcp` or `uv run python -m idea_reality_mcp`
-- Tests: `uv run pytest tests/ -v` (73 tests)
+- Tests: `uv run pytest tests/ -v` (93 tests)
 
 ## Architecture
 ```
 src/idea_reality_mcp/
 ├── server.py          # FastMCP server
 ├── tools.py           # idea_check tool (quick + deep mode, asyncio.gather)
-├── scoring/engine.py  # reality_signal weighted formula + keyword extraction
+├── scoring/
+│   ├── engine.py      # reality_signal weighted formula + 3-stage keyword extraction
+│   └── synonyms.py    # INTENT_ANCHORS (90+) + SYNONYMS dict (80+ keys)
 └── sources/
     ├── __init__.py    # exports all sources
     ├── github.py      # GitHub Search API adapter
@@ -36,29 +38,34 @@ src/idea_reality_mcp/
 - **deep**: all 5 sources in parallel — weights: repos 25% + stars 10% + HN 15% + npm 20% + PyPI 15% + PH 15%
 - PH weight auto-redistributed when PRODUCTHUNT_TOKEN not set
 
-## Current Status (v0.2.0)
+## Current Status (v0.3.0)
 - ✅ Core MCP server working (stdio transport)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ depth="deep" parallel mode
-- ✅ Improved keyword extraction (compound terms, tech keywords)
-- ✅ 73/73 tests passing
-- ✅ Published to PyPI (v0.2.0) + GitHub Release
+- ✅ 3-stage keyword extraction pipeline (Stage A/B/C)
+- ✅ 150+ Chinese term mappings (CHINESE_TECH_MAP), 15+ domains
+- ✅ 90+ intent anchors, 80+ synonym expansions
+- ✅ 93/93 tests passing, 54/54 golden eval (100% anchor hit)
+- ✅ Published to PyPI (v0.3.0) + GitHub Release
 - ✅ CI/CD: GitHub Actions (tests + PyPI trusted publisher)
 - ✅ README, LICENSE (MIT), SECURITY.md, CONTRIBUTING.md, CHANGELOG.md
+- ✅ Full bilingual docs (EN + zh-TW)
 - ✅ awesome-mcp-servers PR #2346 submitted
+- ✅ Live demo: mnemox.ai/check (Render API backend)
 
-## Roadmap (v0.3+)
+## Roadmap (v0.4+)
 - [ ] LLM-powered keyword extraction and semantic similarity
 - [ ] Idea Memory Dataset (opt-in anonymous logging of checks)
 - [ ] Trend detection and timing analysis
 
 ## Key Design Decisions
-- Protocol, not SaaS — no dashboard, no website UI
+- Protocol, not SaaS — no dashboard, no website UI (except /check demo)
 - Zero storage by default — doesn't store any user input
 - GITHUB_TOKEN optional — works without but rate-limited (10 req/min)
 - PRODUCTHUNT_TOKEN optional — skipped gracefully if not set
 - Scoring is intentionally simple and explainable, not ML
 - Graceful degradation — partial results if any source fails
+- Chinese support via dictionary (150+ terms), not LLM translation
 
 ## Communication Style
 - Sean prefers 繁體中文 for discussion, English for code/docs
