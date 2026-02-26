@@ -9,7 +9,7 @@ Pre-build reality check for AI coding agents. Stop building what already exists.
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 
-> **v0.3 is coming** — LLM-powered keyword extraction for much better accuracy. [Get notified](https://docs.google.com/forms/d/e/1FAIpQLSdwgHUjbQUWbeZgfnA6sDVHIC28-WmovsO4aGD4Co2Hw7Hu6g/viewform) when it drops + help shape the roadmap.
+> **v0.3 is here** — 3-stage keyword extraction pipeline, 150+ Chinese term mappings, 90+ intent anchors, 80+ synonym expansions. Supports Chinese and mixed-language input out of the box.
 
 ## What it does
 
@@ -127,7 +127,7 @@ This helps the agent recognize when to call the tool without you having to expli
     "checked_at": "2026-02-25T10:30:00+00:00",
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "depth": "deep",
-    "version": "0.2.0"
+    "version": "0.3.0"
   }
 }
 ```
@@ -155,9 +155,10 @@ autocomplete
 ## Roadmap
 
 - **v0.1** — GitHub + HN search, basic scoring
-- **v0.2** — `depth: "deep"` with npm, PyPI, Product Hunt; improved keyword extraction (current)
-- **v0.3** — LLM-powered keyword extraction and semantic similarity
-- **v0.4** — Trend detection and timing analysis
+- **v0.2** — `depth: "deep"` with npm, PyPI, Product Hunt; improved keyword extraction
+- **v0.3** — 3-stage keyword pipeline (Stage A/B/C), 150+ Chinese term mappings, synonym expansion (current)
+- **v0.4** — LLM-powered keyword extraction and semantic similarity
+- **v0.5** — Trend detection and timing analysis
 
 ## License
 

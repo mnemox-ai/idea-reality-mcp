@@ -11,19 +11,28 @@ All notable changes to this project will be documented in this file.
   - Stage A: Hard-filter boilerplate words (`ai`, `tool`, `platform`, `system`, `framework`, `engine`, etc.) + expanded stop word coverage
   - Stage B: Intent anchor detection — identifies 1–2 key intent signals (`monitoring`, `agent`, `rag`, `mcp`, `evaluation`, `cli`, `scraping`, `embedding`, `tracing`, `chatbot`…)
   - Stage C: Synonym expansion with curated 100+ term dictionary, generates 3–8 anchored queries (`monitoring` → `observability / tracing / telemetry`; `evaluation` → `evals / benchmark`; `agent` → `tool calling / orchestration`…)
-- Chinese and mixed-language input now mapped to English equivalents before tokenisation (監控→monitoring, 評測→evaluation, 爬蟲→scraping, 自動化→automation…)
+- **Chinese/mixed-language support** — 150+ term `CHINESE_TECH_MAP` covering 15+ domains (tech, SaaS, medical, legal, education, manufacturing, agriculture, aerospace, religion, art, gaming, government…)
+  - Sorted by key length (longest first) to prevent compound match collisions
+  - Never returns raw Chinese text — fallback strips unmapped chars
 - `extract_keywords()` now returns up to 8 variants (was 4), all anchored to detected intent
 
 ### Added
-- `scoring/synonyms.py` — SYNONYMS dict + INTENT_ANCHORS set (new module)
-- `tests/golden_ideas.json` — 25-idea golden evaluation set
+- `scoring/synonyms.py` — SYNONYMS dict (80+ keys) + INTENT_ANCHORS set (90+ entries)
+- `tests/golden_ideas.json` — 54-idea golden evaluation set (EN + ZH)
 - `tests/eval_keywords.py` — keyword quality evaluation script (run with `python tests/eval_keywords.py`)
+- `tests/test_tw_chinese.py` — 46 Taiwanese Chinese input test cases
+- `tests/test_tw_niche.py` — 53 niche domain Chinese input test cases (15 categories)
 - 20 new keyword tests (93 total, up from 73)
 
+### Fixed
+- Synonym expansion duplicate word bug (`"redis redis"`, `"mcp server server"`)
+- `追蹤` mapped to general `tracking` (was infra-specific `tracing`)
+
 ### Improved
-- Anchor hit rate on golden set: 100% (measured from baseline)
-- Junk keyword ratio: 2% average across 25 test ideas
-- Chinese/mixed input produces stable, intent-aligned query sets
+- Anchor hit rate on golden set: 100% (54/54 ideas)
+- Junk keyword ratio: 4% average across 54 test ideas
+- TW Chinese input: 98%+ pass rate (99 test cases across general + niche domains)
+- Zero Chinese character leakage in query output
 - `meta.version` updated to `"0.3.0"`
 
 ## [0.2.0] - 2026-02-25

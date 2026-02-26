@@ -9,7 +9,7 @@ AI 開發前的現實查核工具。別再重複造輪子了。
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 
-> **v0.3 即將推出** — LLM 驅動的關鍵字萃取，大幅提升準確度。[訂閱通知](https://docs.google.com/forms/d/e/1FAIpQLSdwgHUjbQUWbeZgfnA6sDVHIC28-WmovsO4aGD4Co2Hw7Hu6g/viewform)搶先知道 + 參與 roadmap 規劃。
+> **v0.3 正式發布** — 三段式關鍵字萃取 Pipeline、150+ 中文詞彙對照、90+ 意圖錨點、80+ 同義詞展開。直接支援中文和中英混合輸入。
 
 ## 這是什麼
 
@@ -127,7 +127,7 @@ export PRODUCTHUNT_TOKEN=your_ph_token_here
     "checked_at": "2026-02-25T10:30:00+00:00",
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "depth": "deep",
-    "version": "0.2.0"
+    "version": "0.3.0"
   }
 }
 ```
@@ -154,9 +154,10 @@ idea_check("AI code review bot for GitHub PRs", depth="deep")
 ## Roadmap
 
 - **v0.1** — GitHub + HN 搜尋，基本評分
-- **v0.2** — `depth: "deep"` 支援 npm、PyPI、Product Hunt；改進關鍵字萃取（目前版本）
-- **v0.3** — LLM 驅動的關鍵字萃取和語意相似度比對
-- **v0.4** — 趨勢偵測和時機分析
+- **v0.2** — `depth: "deep"` 支援 npm、PyPI、Product Hunt；改進關鍵字萃取
+- **v0.3** — 三段式關鍵字 Pipeline（Stage A/B/C）、150+ 中文詞彙對照、同義詞展開（目前版本）
+- **v0.4** — LLM 驅動的關鍵字萃取和語意相似度比對
+- **v0.5** — 趨勢偵測和時機分析
 
 ## 授權
 

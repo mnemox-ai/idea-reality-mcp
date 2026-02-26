@@ -11,19 +11,28 @@
   - Stage A：硬性過濾泛詞（`ai`、`tool`、`platform`、`system`、`framework`、`engine` 等）+ 擴充停用詞
   - Stage B：意圖錨點偵測 — 識別 1–2 個意圖核心詞（`monitoring`、`agent`、`rag`、`mcp`、`evaluation`、`cli`、`scraping`、`embedding`、`tracing`、`chatbot`…）
   - Stage C：同義詞展開（100+ 詞手寫字典），生成 3–8 條錨定查詢（`monitoring` → `observability / tracing / telemetry`；`evaluation` → `evals / benchmark`；`agent` → `tool calling / orchestration`…）
-- 中文與中英混合輸入 tokenization 改善：輸入前自動映射（監控→monitoring、評測→evaluation、爬蟲→scraping、自動化→automation…）
+- **中文／中英混合輸入全面支援** — 150+ 詞的 `CHINESE_TECH_MAP`，涵蓋 15+ 領域（科技、SaaS、醫療、法律、教育、製造、農業、太空、宗教、藝術、遊戲、政府…）
+  - 按 key 長度排序（最長優先），避免複合詞被短詞搶先匹配
+  - 絕不回傳原始中文 — 未映射字元自動清除
 - `extract_keywords()` 現在回傳最多 8 條 variant（原為 4 條），且每條都錨定在偵測到的意圖上
 
 ### 新增
-- `scoring/synonyms.py` — SYNONYMS 同義詞字典 + INTENT_ANCHORS 意圖錨點集合（新模組）
-- `tests/golden_ideas.json` — 25 條固定評測 ideas
+- `scoring/synonyms.py` — SYNONYMS 同義詞字典（80+ key）+ INTENT_ANCHORS 意圖錨點集合（90+ 項）
+- `tests/golden_ideas.json` — 54 條固定評測 ideas（中英文）
 - `tests/eval_keywords.py` — 關鍵字品質評測腳本（執行：`python tests/eval_keywords.py`）
+- `tests/test_tw_chinese.py` — 46 個台灣中文輸入測試案例
+- `tests/test_tw_niche.py` — 53 個跨領域中文輸入測試案例（15 大類）
 - 20 個新 keyword 測試（共 93 個，原為 73 個）
 
+### 修復
+- 同義詞展開重複字 bug（`"redis redis"`、`"mcp server server"`）
+- `追蹤` 改對應通用 `tracking`（原為 infra 限定的 `tracing`）
+
 ### 改善
-- Golden set 意圖錨點命中率：100%
-- 垃圾詞比例：25 條 ideas 平均 2%
-- 中文 / 中英混合輸入 → 穩定、準確的 query set
+- Golden set 意圖錨點命中率：100%（54/54 ideas）
+- 垃圾詞比例：54 條 ideas 平均 4%
+- 台灣中文輸入：98%+ 通過率（99 個測試案例，涵蓋一般 + 跨領域）
+- 查詢輸出零中文字元洩漏
 - `meta.version` 更新為 `"0.3.0"`
 
 ## [0.2.0] - 2026-02-25
