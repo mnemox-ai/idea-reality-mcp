@@ -1,0 +1,127 @@
+[
+  {
+    "idea": "LLM monitoring and observability platform",
+    "expected_anchors": ["monitoring", "observability"],
+    "must_not_appear": ["ai", "platform", "tool"]
+  },
+  {
+    "idea": "LLM evaluation and benchmarking framework",
+    "expected_anchors": ["evaluation", "benchmark"],
+    "must_not_appear": ["ai", "framework", "tool"]
+  },
+  {
+    "idea": "AI agent workflow orchestration for coding tasks",
+    "expected_anchors": ["agent", "workflow"],
+    "must_not_appear": ["ai", "system"]
+  },
+  {
+    "idea": "MCP server for GitHub and Jira integration",
+    "expected_anchors": ["mcp"],
+    "must_not_appear": ["tool", "system", "platform"]
+  },
+  {
+    "idea": "RAG pipeline with vector search and reranking",
+    "expected_anchors": ["rag", "retrieval"],
+    "must_not_appear": ["ai", "tool", "system"]
+  },
+  {
+    "idea": "CLI tool for database schema migrations",
+    "expected_anchors": ["cli", "database"],
+    "must_not_appear": ["tool", "application", "program"]
+  },
+  {
+    "idea": "Python SDK for LLM tracing and telemetry",
+    "expected_anchors": ["tracing", "telemetry"],
+    "must_not_appear": ["ai", "tool", "application"]
+  },
+  {
+    "idea": "automated testing and evaluation for LLM outputs",
+    "expected_anchors": ["testing", "evaluation"],
+    "must_not_appear": ["ai", "tool", "system"]
+  },
+  {
+    "idea": "web scraping and data extraction pipeline",
+    "expected_anchors": ["scraping", "pipeline"],
+    "must_not_appear": ["tool", "system", "application"]
+  },
+  {
+    "idea": "open source chatbot for customer service automation",
+    "expected_anchors": ["chatbot", "automation"],
+    "must_not_appear": ["tool", "system"]
+  },
+  {
+    "idea": "vector database for semantic search and embeddings",
+    "expected_anchors": ["embedding", "search"],
+    "must_not_appear": ["tool", "system", "platform"]
+  },
+  {
+    "idea": "model context protocol client for VS Code",
+    "expected_anchors": ["model context protocol"],
+    "must_not_appear": ["system", "application"]
+  },
+  {
+    "idea": "LLM 監控 dashboard for production",
+    "expected_anchors": ["monitoring"],
+    "must_not_appear": ["ai", "platform", "tool"]
+  },
+  {
+    "idea": "大模型 評測 工具",
+    "expected_anchors": ["evaluation"],
+    "must_not_appear": ["ai", "tool"]
+  },
+  {
+    "idea": "Python 爬蟲 框架 for e-commerce",
+    "expected_anchors": ["scraping"],
+    "must_not_appear": ["tool", "framework", "application"]
+  },
+  {
+    "idea": "LINE Bot 自動客服系統",
+    "expected_anchors": ["chatbot", "automation"],
+    "must_not_appear": ["system", "tool"]
+  },
+  {
+    "idea": "continuous integration and deployment pipeline for ML models",
+    "expected_anchors": ["pipeline", "deployment"],
+    "must_not_appear": ["tool", "system", "application"]
+  },
+  {
+    "idea": "code review automation with static analysis",
+    "expected_anchors": ["review", "automation"],
+    "must_not_appear": ["tool", "system", "application"]
+  },
+  {
+    "idea": "Redis caching layer for FastAPI applications",
+    "expected_anchors": [],
+    "must_not_appear": ["application", "tool", "platform"]
+  },
+  {
+    "idea": "Kubernetes cost optimization dashboard",
+    "expected_anchors": ["dashboard"],
+    "must_not_appear": ["tool", "system", "application"]
+  },
+  {
+    "idea": "AI-powered code editor with autocomplete",
+    "expected_anchors": [],
+    "must_not_appear": ["ai", "powered", "application"]
+  },
+  {
+    "idea": "LLMOps platform for fine-tuning and serving models",
+    "expected_anchors": ["llmops", "inference"],
+    "must_not_appear": ["ai", "platform", "tool"]
+  },
+  {
+    "idea": "autonomous agent for browsing and research tasks",
+    "expected_anchors": ["agent"],
+    "must_not_appear": ["ai", "application"]
+  },
+  {
+    "idea": "GraphQL API gateway with rate limiting and auth",
+    "expected_anchors": ["api", "auth"],
+    "must_not_appear": ["tool", "system", "application"]
+  },
+  {
+    "idea": "real-time analytics dashboard for SaaS metrics",
+    "expected_anchors": ["analytics", "dashboard"],
+    "must_not_appear": ["tool", "system", "application"]
+  }
+]

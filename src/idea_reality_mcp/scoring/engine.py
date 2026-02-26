@@ -11,9 +11,10 @@ from ..sources.hn import HNResults
 from ..sources.npm import NpmResults
 from ..sources.pypi import PyPIResults
 from ..sources.producthunt import ProductHuntResults
+from .synonyms import INTENT_ANCHORS, SYNONYMS
 
 # ---------------------------------------------------------------------------
-# Keyword extraction
+# Keyword extraction constants
 # ---------------------------------------------------------------------------
 
 # Common English stop words
@@ -35,12 +36,23 @@ STOP_WORDS = frozenset({
     "even", "back", "any", "let", "really", "already", "every",
 })
 
-# Words too generic to be useful in searches on their own, but kept if
-# they appear inside a compound term.
+# Stage A boilerplate filter — too generic to anchor a meaningful query.
+# Tech keywords (TECH_KEYWORDS) always bypass this filter.
 GENERIC_WORDS = frozenset({
+    # Original v0.2
     "build", "make", "create", "app", "tool", "using", "use", "thing",
     "something", "platform", "system", "service", "project", "idea",
     "solution", "product", "software", "program", "application",
+    # Stage A additions (v0.3) — hard-filter per plan
+    "ai", "engine", "framework", "library", "helper", "manager",
+    "builder", "generator",
+    # Marketing filler
+    "powered", "based", "driven", "enabled", "smart", "intelligent",
+    "automatic", "automated", "simple", "easy", "better", "best",
+    "good", "great", "modern", "fast", "lightweight",
+    # Meta words
+    "open", "feature", "support", "custom", "provide", "allow",
+    "enable", "help", "version", "free",
 })
 
 # Compound terms that should be kept together as a single token.
@@ -55,9 +67,14 @@ COMPOUND_TERMS = [
     "object detection", "image recognition", "text to speech",
     "speech to text", "time series", "knowledge graph",
     "supply chain", "social media", "e commerce", "ecommerce",
+    # v0.3 additions
+    "model context protocol", "tool calling", "prompt engineering",
+    "vector search", "semantic search", "knowledge base",
+    "red teaming", "function calling", "retrieval augmented",
 ]
 
-# Technology / framework keywords that get priority in ranking.
+# Technology / framework keywords — get priority in ranking and bypass
+# GENERIC_WORDS filter even if they would otherwise be excluded.
 TECH_KEYWORDS = frozenset({
     "react", "vue", "angular", "svelte", "nextjs", "nuxt", "remix",
     "python", "javascript", "typescript", "rust", "go", "golang",
@@ -71,24 +88,60 @@ TECH_KEYWORDS = frozenset({
     "blockchain", "ethereum", "solana", "bitcoin",
     "electron", "tauri", "flutter", "ionic",
     "mcp", "onnx", "llm", "rag", "cli", "api", "sdk", "orm",
+    # v0.3 additions
+    "otel", "opentelemetry", "langfuse", "weave", "arize",
+    "weaviate", "pinecone", "chroma", "qdrant", "faiss",
+    "llamafile", "vllm", "litellm", "guidance", "dspy",
 })
+
+# Chinese tech term → English equivalent (v0.3: mixed-language support).
+# Applied before tokenisation so Chinese intent is preserved.
+CHINESE_TECH_MAP: dict[str, str] = {
+    "監控": "monitoring", "監測": "monitoring", "告警": "alerting",
+    "評測": "evaluation", "評估": "evaluation", "評分": "scoring",
+    "爬蟲": "scraping", "爬取": "scraping", "抓取": "scraping",
+    "自動化": "automation", "自動": "automation",
+    "工作流": "workflow", "流水線": "pipeline",
+    "代理": "agent", "智能體": "agent",
+    "助手": "assistant", "客服": "customer service",
+    "模型": "model", "大模型": "llm",
+    "向量": "embedding", "嵌入": "embedding",
+    "檢索": "retrieval", "搜索": "search", "搜尋": "search",
+    "命令行": "cli", "命令列": "cli", "終端": "terminal",
+    "資料庫": "database", "數據庫": "database",
+    "分析": "analytics", "儀表板": "dashboard",
+    "部署": "deployment", "佈署": "deployment",
+    "測試": "testing", "基準": "benchmark",
+    "聊天": "chatbot", "對話": "chat",
+    "程式碼": "code", "代碼": "code",
+    "知識庫": "knowledge base",
+    "日誌": "logging", "追蹤": "tracing",
+    "摘要": "summarization", "翻譯": "translation",
+    "分類": "classification", "推薦": "recommendation",
+    "標註": "annotation", "微調": "finetuning",
+}
 
 
 def extract_keywords(idea_text: str) -> list[str]:
-    """Extract search query variants from idea text.
+    """Extract search query variants — Stage A/B/C pipeline (v0.3).
 
-    Strategy:
-    1. Detect and preserve compound terms.
-    2. Filter stop words and generic words.
-    3. Prioritise technology keywords.
-    4. Return up to 4 variants optimised for different search targets.
+    Stage A: Clean input, map Chinese terms, hard-filter boilerplate.
+    Stage B: Detect intent anchors (1–2 key intent signals).
+    Stage C: Synonym expansion + query template generation (3–8 queries).
 
     Returns:
-        List of 3-4 query strings.
+        List of 3–8 query strings, intent-anchored and synonym-expanded.
     """
-    lowered = idea_text.lower().strip()
+    text = idea_text.strip()
 
-    # --- Phase 1: extract compound terms first --------------------------------
+    # --- Stage A: Chinese/mixed-language mapping -----------------------------
+    for zh, en in CHINESE_TECH_MAP.items():
+        if zh in text:
+            text = text.replace(zh, f" {en} ")
+
+    lowered = text.lower()
+
+    # Extract compound terms before stripping punctuation
     found_compounds: list[str] = []
     remaining = lowered
     for compound in sorted(COMPOUND_TERMS, key=len, reverse=True):
@@ -96,45 +149,104 @@ def extract_keywords(idea_text: str) -> list[str]:
             found_compounds.append(compound)
             remaining = remaining.replace(compound, " ")
 
-    # --- Phase 2: tokenise the rest -------------------------------------------
+    # Tokenise: strip non-alphanumeric, minimum 2 chars
     cleaned = re.sub(r"[^a-zA-Z0-9\s]", " ", remaining)
     tokens = [w for w in cleaned.split() if len(w) > 1]
 
-    # Separate meaningful words from generic/stop
-    meaningful = [w for w in tokens if w not in STOP_WORDS and w not in GENERIC_WORDS]
-    tech_tokens = [w for w in meaningful if w in TECH_KEYWORDS]
-    non_tech = [w for w in meaningful if w not in TECH_KEYWORDS]
+    # Stage A hard filter: STOP_WORDS + GENERIC_WORDS (tech keywords bypass)
+    clean_tokens = [
+        w for w in tokens
+        if w in TECH_KEYWORDS or (w not in STOP_WORDS and w not in GENERIC_WORDS)
+    ]
 
-    # Combine: compounds first, then tech, then others
-    all_keywords = found_compounds + tech_tokens + non_tech
+    tech_tokens = [w for w in clean_tokens if w in TECH_KEYWORDS]
+    non_tech = [w for w in clean_tokens if w not in TECH_KEYWORDS]
 
-    if not all_keywords:
-        # Fallback: use the raw text
+    # All meaningful tokens: compounds first, tech next, then others
+    all_tokens: list[str] = found_compounds + tech_tokens + non_tech
+
+    if not all_tokens:
         return [idea_text.strip()[:80]] * 3
 
-    # --- Phase 3: build query variants ----------------------------------------
-    # Variant 1: full phrase (compounds + keywords, up to 8 tokens)
-    full_phrase = " ".join(all_keywords[:8])
+    # --- Stage B: Intent anchor detection ------------------------------------
+    anchors: list[str] = []
+    for token in all_tokens:
+        if token in INTENT_ANCHORS and token not in anchors:
+            anchors.append(token)
+            if len(anchors) >= 2:
+                break
 
-    # Variant 2: top 3 keywords by specificity (length proxy), tech first
-    ranked = tech_tokens + sorted(set(non_tech), key=lambda w: (-len(w), w))
-    if found_compounds:
-        ranked = [found_compounds[0]] + ranked
-    top3 = " ".join(dict.fromkeys(ranked[:3]))
+    # Non-anchor tokens to combine with anchors
+    non_anchor = [t for t in all_tokens if t not in anchors]
 
-    # Variant 3: top 2 keywords
-    top2 = " ".join(dict.fromkeys(ranked[:2]))
+    # --- Stage C: Query template generation ----------------------------------
+    queries: list[str] = []
 
-    # Variant 4: registry-optimised (1-2 core terms, best for npm/PyPI)
-    registry_terms = tech_tokens[:2] if tech_tokens else ranked[:2]
-    registry_query = " ".join(dict.fromkeys(registry_terms))
+    def _add(q: str) -> None:
+        q = q.strip()
+        if q and q not in queries:
+            queries.append(q)
 
-    variants = list(dict.fromkeys([full_phrase, top3, top2, registry_query]))
-    # Ensure at least 3
-    while len(variants) < 3:
-        variants.append(variants[0])
+    if anchors:
+        anchor = anchors[0]
+        # Primary keyword: first non-anchor tech token, then any non-anchor
+        tech_non_anchor = [t for t in tech_tokens if t not in anchors]
+        primary_candidates = tech_non_anchor + [t for t in non_anchor if t not in tech_tokens]
+        primary = primary_candidates[0] if primary_candidates else ""
 
-    return variants[:4]
+        # Template 1: anchor + primary keyword
+        if primary:
+            _add(f"{anchor} {primary}")
+        else:
+            _add(anchor)
+
+        # Template 2: anchor + top non-anchor tokens (up to 3)
+        top_ctx = " ".join(dict.fromkeys(non_anchor[:3]))
+        if top_ctx:
+            _add(f"{anchor} {top_ctx}")
+
+        # Template 3: anchor + primary + github (for GitHub search)
+        if primary:
+            _add(f"{anchor} {primary} github")
+
+        # Template 4-5: synonym expansion
+        syns = SYNONYMS.get(anchor, [])
+        if primary:
+            for syn in syns[:2]:
+                _add(f"{syn} {primary}")
+        else:
+            for syn in syns[:2]:
+                _add(syn)
+
+        # Template 6: second anchor if present
+        if len(anchors) > 1:
+            anchor2 = anchors[1]
+            _add(f"{anchor} {anchor2}")
+            if primary:
+                _add(f"{anchor2} {primary}")
+
+        # Template 7: registry-optimised (anchor + tech keyword, no noise)
+        if tech_non_anchor:
+            _add(f"{anchor} {tech_non_anchor[0]}")
+
+    else:
+        # No anchor found — fall back to ranked-token approach (cleaner than v0.2)
+        ranked = tech_tokens + sorted(set(non_tech), key=lambda w: (-len(w), w))
+        if found_compounds:
+            ranked = [found_compounds[0]] + ranked
+        ranked = list(dict.fromkeys(ranked))
+
+        _add(" ".join(ranked[:5]))
+        _add(" ".join(ranked[:3]))
+        _add(" ".join(ranked[:2]))
+        if tech_tokens:
+            _add(" ".join(tech_tokens[:2]))
+
+    # Ensure minimum 3, cap at 8
+    while len(queries) < 3:
+        queries.append(queries[0] if queries else idea_text.strip()[:80])
+
+    return queries[:8]
 
 
 # ---------------------------------------------------------------------------
@@ -436,6 +548,6 @@ def compute_signal(
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "sources_used": sources_used,
             "depth": depth,
-            "version": "0.2.0",
+            "version": "0.3.0",
         },
     }

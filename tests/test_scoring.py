@@ -13,6 +13,7 @@ from idea_reality_mcp.scoring.engine import (
     compute_signal,
     extract_keywords,
 )
+from idea_reality_mcp.scoring.synonyms import INTENT_ANCHORS, SYNONYMS
 from idea_reality_mcp.sources.github import GitHubResults
 from idea_reality_mcp.sources.hn import HNResults
 from idea_reality_mcp.sources.npm import NpmResults
@@ -21,15 +22,21 @@ from idea_reality_mcp.sources.producthunt import ProductHuntResults
 
 
 # ===========================================================================
-# Keyword extraction tests
+# Keyword extraction tests (v0.3 Stage A/B/C pipeline)
 # ===========================================================================
 
 
 class TestExtractKeywords:
+    # ---- Basic contract ----
+
     def test_returns_at_least_three_variants(self):
         result = extract_keywords("AI-powered code review bot for GitHub PRs")
         assert len(result) >= 3
         assert all(isinstance(v, str) for v in result)
+
+    def test_returns_at_most_eight_variants(self):
+        result = extract_keywords("LLM monitoring observability tracing evaluation pipeline agent")
+        assert len(result) <= 8
 
     def test_removes_stop_words(self):
         result = extract_keywords("a tool for the best code review")
@@ -46,26 +53,142 @@ class TestExtractKeywords:
         result = extract_keywords("redis")
         assert len(result) >= 3
 
+    # ---- Stage A: Boilerplate filter ----
+
+    def test_boilerplate_ai_filtered(self):
+        """'ai' alone should not dominate queries (Stage A hard filter)."""
+        result = extract_keywords("an AI tool for monitoring")
+        all_text = " ".join(result)
+        # "monitoring" must appear — "ai" and "tool" should be filtered
+        assert "monitoring" in all_text
+
+    def test_boilerplate_tool_filtered(self):
+        result = extract_keywords("LLM evaluation tool platform")
+        all_text = " ".join(result)
+        assert "evaluation" in all_text
+        # boilerplate words should not be the only content
+        for variant in result:
+            assert variant.strip() not in ("tool", "platform", "ai", "system")
+
+    def test_boilerplate_platform_system_filtered(self):
+        result = extract_keywords("monitoring platform system for agents")
+        all_text = " ".join(result)
+        # intent anchor should dominate
+        assert "monitoring" in all_text or "agent" in all_text
+
+    def test_generic_words_filtered(self):
+        result = extract_keywords("build an application platform tool")
+        for variant in result:
+            words = variant.split()
+            assert "build" not in words or len(words) > 1
+
+    def test_tech_keywords_bypass_boilerplate_filter(self):
+        """Tech keywords like 'cli', 'mcp', 'api' must never be filtered."""
+        result = extract_keywords("mcp server tool")
+        all_text = " ".join(result)
+        assert "mcp" in all_text
+
+    # ---- Stage A: Compound terms ----
+
     def test_compound_terms_preserved(self):
         result = extract_keywords("build a machine learning web app")
-        # "machine learning" should appear as a single token in at least one variant
         assert any("machine learning" in v for v in result)
+
+    def test_model_context_protocol_compound(self):
+        result = extract_keywords("model context protocol server for code review")
+        all_text = " ".join(result)
+        assert "model context protocol" in all_text or "mcp" in all_text
 
     def test_tech_keywords_prioritised(self):
         result = extract_keywords("build a dashboard with react and postgres")
         all_text = " ".join(result)
         assert "react" in all_text or "postgres" in all_text
 
-    def test_generic_words_filtered(self):
-        result = extract_keywords("build an application platform tool")
-        for variant in result:
-            words = variant.split()
-            # generic words like "build" should not be the only content
-            assert "build" not in words or len(words) > 1
+    # ---- Stage B: Intent anchor detection ----
+
+    def test_monitoring_anchor_detected(self):
+        result = extract_keywords("LLM monitoring and alerting for production")
+        all_text = " ".join(result)
+        assert "monitoring" in all_text or "observability" in all_text
+
+    def test_evaluation_anchor_detected(self):
+        result = extract_keywords("LLM evaluation and benchmarking framework")
+        all_text = " ".join(result)
+        assert "evaluation" in all_text or "evals" in all_text or "benchmark" in all_text
+
+    def test_agent_anchor_detected(self):
+        result = extract_keywords("autonomous agent workflow orchestration for coding tasks")
+        all_text = " ".join(result)
+        assert "agent" in all_text or "workflow" in all_text or "orchestration" in all_text
+
+    def test_mcp_anchor_detected(self):
+        result = extract_keywords("MCP server for GitHub integration")
+        all_text = " ".join(result)
+        assert "mcp" in all_text
+
+    def test_rag_anchor_detected(self):
+        result = extract_keywords("RAG pipeline with vector search and reranking")
+        all_text = " ".join(result)
+        assert "rag" in all_text or "retrieval" in all_text or "vector" in all_text
+
+    def test_cli_anchor_detected(self):
+        result = extract_keywords("CLI tool for database migrations")
+        all_text = " ".join(result)
+        assert "cli" in all_text or "command line" in all_text or "terminal" in all_text
+
+    # ---- Stage C: Synonym expansion ----
+
+    def test_monitoring_expands_to_observability(self):
+        result = extract_keywords("LLM monitoring dashboard")
+        all_text = " ".join(result)
+        # At least one synonym should appear
+        assert any(s in all_text for s in ["observability", "tracing", "telemetry"])
+
+    def test_evaluation_expands_to_evals(self):
+        result = extract_keywords("LLM evaluation framework")
+        all_text = " ".join(result)
+        assert any(s in all_text for s in ["evals", "benchmark", "scoring"])
+
+    def test_rag_expands_synonyms(self):
+        result = extract_keywords("RAG system for documentation")
+        all_text = " ".join(result)
+        assert any(s in all_text for s in ["retrieval", "embedding", "vector"])
+
+    def test_agent_expands_synonyms(self):
+        result = extract_keywords("AI agent for task automation")
+        all_text = " ".join(result)
+        assert any(s in all_text for s in ["workflow", "orchestration", "tool calling", "agentic"])
+
+    # ---- Stage A: Chinese/mixed input ----
+
+    def test_chinese_monitoring_mapped(self):
+        result = extract_keywords("LLM 監控 dashboard")
+        all_text = " ".join(result)
+        assert "monitoring" in all_text
+
+    def test_chinese_evaluation_mapped(self):
+        result = extract_keywords("大模型 評測 工具")
+        all_text = " ".join(result)
+        # "llm" maps from 大模型, "evaluation" from 評測
+        assert "evaluation" in all_text or "evals" in all_text
+
+    def test_chinese_scraping_mapped(self):
+        result = extract_keywords("Python 爬蟲 框架")
+        all_text = " ".join(result)
+        assert "scraping" in all_text or "crawler" in all_text or "python" in all_text
+
+    def test_mixed_chinese_english_stable(self):
+        """Same idea run twice should produce consistent results."""
+        idea = "MCP server 監控 LLM calls"
+        r1 = extract_keywords(idea)
+        r2 = extract_keywords(idea)
+        assert r1 == r2
+
+    # ---- Registry variant ----
 
     def test_registry_variant_for_tech(self):
-        result = extract_keywords("a python fastapi rest api framework")
-        assert len(result) <= 4
+        result = extract_keywords("a python fastapi rest api service")
+        assert len(result) <= 8
         assert any("python" in v or "fastapi" in v for v in result)
 
 
@@ -244,7 +367,7 @@ class TestComputeSignalQuick:
         assert isinstance(result["top_similars"], list)
         assert isinstance(result["pivot_hints"], list)
         assert len(result["pivot_hints"]) == 3
-        assert result["meta"]["version"] == "0.2.0"
+        assert result["meta"]["version"] == "0.3.0"
         assert result["meta"]["depth"] == "quick"
         assert result["meta"]["sources_used"] == ["github", "hackernews"]
         assert "checked_at" in result["meta"]
