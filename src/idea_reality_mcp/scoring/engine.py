@@ -99,6 +99,8 @@ TECH_KEYWORDS = frozenset({
 
 # Chinese tech term → English equivalent (v0.3: mixed-language support).
 # Applied before tokenisation so Chinese intent is preserved.
+# IMPORTANT: Iteration is sorted by key length (longest first) at usage site
+# to prevent shorter keys from clobbering longer compound matches.
 CHINESE_TECH_MAP: dict[str, str] = {
     # AI / LLM core
     "監控": "monitoring", "監測": "monitoring", "告警": "alerting",
@@ -122,14 +124,22 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "測試": "testing", "基準": "benchmark",
     "程式碼": "code", "代碼": "code",
     "編輯器": "editor",
-    "日誌": "logging", "追蹤": "tracing",
+    "日誌": "logging",
+    "追蹤": "tracking",  # General "tracking", not infra "tracing"
     "排程": "scheduling", "定時": "cron",
     "快取": "caching", "緩存": "caching",
+    "遷移": "migration", "升級": "upgrade",
+    "開發": "development", "框架": "framework",
+    "前端": "frontend", "後端": "backend",
+    "介面": "interface", "套件": "package",
+    "串接": "integration", "整合": "integration",
     # Business / SaaS
     "電商": "ecommerce", "商城": "ecommerce", "網店": "ecommerce",
     "後台": "backend", "管理": "management",
+    "客戶關係": "crm",  # Compound: must appear before 客戶
     "客服": "customer service", "客戶服務": "customer service",
     "付款": "payment", "支付": "payment", "結帳": "checkout",
+    "金流": "payment", "收款": "payment",
     "訂閱": "subscription", "帳單": "billing",
     "通知": "notification", "推播": "notification",
     "預約": "booking", "預訂": "reservation",
@@ -137,6 +147,10 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "發票": "invoice",
     "報表": "reporting", "報告": "reporting",
     "權限": "authorization", "認證": "authentication",
+    "訂單": "order", "訂餐": "food ordering",
+    "會員": "membership", "註冊": "registration",
+    "記帳": "accounting", "對帳": "reconciliation",
+    "線上": "online", "網路": "web",
     # Content / media
     "分析": "analytics", "儀表板": "dashboard",
     "聊天": "chatbot", "對話": "chat",
@@ -145,12 +159,68 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "分類": "classification", "推薦": "recommendation",
     "標註": "annotation",
     "字幕": "subtitle", "轉錄": "transcription",
+    "社群媒體": "social media",  # Compound: must appear before 社群
+    "社群": "social", "媒體": "media",
+    "發文": "posting", "貼文": "post",
     # Domain specific
     "股票": "stock", "交易": "trading", "金融": "fintech",
+    "加密貨幣": "cryptocurrency", "虛擬貨幣": "cryptocurrency",
     "教育": "education", "課程": "course",
-    "醫療": "healthcare", "健康": "health",
-    "物流": "logistics", "運送": "shipping",
+    "醫療": "healthcare", "健康": "health", "健保": "health insurance",
+    "物流": "logistics", "運送": "shipping", "外送": "delivery",
     "地圖": "map", "定位": "geolocation",
+    "機票": "flight booking", "旅遊": "travel",
+    "餐廳": "restaurant", "美食": "food",
+    "健身": "fitness",
+    "價格": "price", "比價": "price comparison",
+    "租屋": "rental", "房屋": "housing",
+    "食譜": "recipe", "烹飪": "cooking",
+    # Cross-domain general-purpose verbs / concepts
+    "模擬": "simulation", "模擬器": "simulator",
+    "辨識": "recognition", "識別": "recognition",
+    "偵測": "detection", "檢測": "detection", "檢查": "inspection",
+    "查詢": "search", "搜尋引擎": "search engine",
+    "影像": "image", "圖片": "image", "照片": "photo",
+    "計算": "calculation", "計算器": "calculator",
+    "學習": "learning", "教學": "teaching", "練習": "practice",
+    "考試": "exam", "出題": "quiz", "作業": "homework",
+    "設計": "design", "繪圖": "drawing", "繪製": "drawing",
+    "轉換": "conversion", "轉檔": "conversion",
+    "收集": "collection", "蒐集": "collection",
+    "維護": "maintenance", "修復": "repair",
+    "配方": "formula", "比較": "comparison",
+    "媒合": "matching", "配對": "matching",
+    "繳費": "payment",
+    "數據": "data", "資料": "data",
+    "產品": "product",
+    "品質": "quality", "檢驗": "inspection",
+    # Extended domains
+    "遊戲": "game", "手遊": "mobile game", "電競": "esports",
+    "音樂": "music", "樂譜": "music score", "作曲": "composition",
+    "畫作": "artwork", "書法": "calligraphy", "藝術": "art",
+    "動物": "animal", "寵物": "pet",
+    "農業": "agriculture", "農場": "farm", "灌溉": "irrigation",
+    "太空": "space", "衛星": "satellite", "軌道": "orbit",
+    "物理": "physics", "化學": "chemistry", "實驗": "experiment",
+    "量子": "quantum", "分子": "molecular",
+    "法律": "legal", "合約": "contract", "律師": "lawyer",
+    "判決": "court ruling", "案件": "case",
+    "中醫": "tcm", "針灸": "acupuncture", "穴位": "acupoint",
+    "藥材": "herbs", "中藥": "herbal medicine", "處方": "prescription",
+    "病歷": "medical record", "掛號": "appointment",
+    "佛教": "buddhism", "冥想": "meditation",
+    "教堂": "church", "宗教": "religion", "經文": "scripture",
+    "選舉": "election", "民調": "poll", "公文": "official document",
+    "市政": "municipal", "報修": "maintenance request",
+    "工廠": "factory", "設備": "equipment", "產線": "production line",
+    "供應鏈": "supply chain",
+    "社區": "community", "裝修": "renovation",
+    # Common education / science
+    "數學": "math", "國小": "elementary school",
+    "互動": "interactive",
+    "溯源": "traceability",
+    "家教": "tutor", "導師": "mentor",
+    "元素": "element",
 }
 
 
@@ -167,7 +237,9 @@ def extract_keywords(idea_text: str) -> list[str]:
     text = idea_text.strip()
 
     # --- Stage A: Chinese/mixed-language mapping -----------------------------
-    for zh, en in CHINESE_TECH_MAP.items():
+    # Sort by key length (longest first) so compound Chinese terms like
+    # 客戶關係 are matched before shorter substrings like 客戶.
+    for zh, en in sorted(CHINESE_TECH_MAP.items(), key=lambda x: len(x[0]), reverse=True):
         if zh in text:
             text = text.replace(zh, f" {en} ")
 
@@ -205,6 +277,12 @@ def extract_keywords(idea_text: str) -> list[str]:
     all_tokens: list[str] = found_compounds + tech_tokens + non_tech
 
     if not all_tokens:
+        # Fallback: strip any remaining non-ASCII chars and use whatever survives.
+        # Avoids returning raw Chinese text as queries (would fail on English search engines).
+        ascii_fallback = re.sub(r"[^a-zA-Z0-9\s]", " ", idea_text.lower()).strip()
+        ascii_tokens = [w for w in ascii_fallback.split() if len(w) > 1 and w not in STOP_WORDS]
+        if ascii_tokens:
+            return [" ".join(ascii_tokens[:5])] * 3
         return [idea_text.strip()[:80]] * 3
 
     # --- Stage B: Intent anchor detection ------------------------------------
@@ -249,10 +327,14 @@ def extract_keywords(idea_text: str) -> list[str]:
             _add(f"{anchor} {primary} github")
 
         # Template 4-5: synonym expansion
+        # Skip if synonym already contains the primary word (avoids "redis redis")
         syns = SYNONYMS.get(anchor, [])
         if primary:
             for syn in syns[:2]:
-                _add(f"{syn} {primary}")
+                if primary not in syn.split():
+                    _add(f"{syn} {primary}")
+                else:
+                    _add(syn)
         else:
             for syn in syns[:2]:
                 _add(syn)
@@ -280,6 +362,9 @@ def extract_keywords(idea_text: str) -> list[str]:
         _add(" ".join(ranked[:2]))
         if tech_tokens:
             _add(" ".join(tech_tokens[:2]))
+        # When few tokens remain, add individual tokens for query variety
+        for token in ranked[:3]:
+            _add(token)
 
     # Ensure minimum 3, cap at 8
     while len(queries) < 3:

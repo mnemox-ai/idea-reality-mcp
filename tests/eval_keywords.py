@@ -102,6 +102,8 @@ def run_eval(golden_path: str, verbose: bool = False) -> None:
     with open(golden_path, encoding="utf-8") as f:
         ideas = json.load(f)
 
+    # Skip comment entries (e.g. {"_comment": "..."})
+    ideas = [i for i in ideas if "idea" in i]
     results = [eval_one(idea, verbose=verbose) for idea in ideas]
     n = len(results)
 
