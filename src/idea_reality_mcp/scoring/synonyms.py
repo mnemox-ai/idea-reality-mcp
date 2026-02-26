@@ -13,7 +13,7 @@ from __future__ import annotations
 # ---------------------------------------------------------------------------
 INTENT_ANCHORS: frozenset[str] = frozenset({
     # LLM / AI ops
-    "evaluation", "evals", "eval",
+    "evaluation", "evals", "eval", "analysis",
     "monitoring", "observability",
     "tracing", "telemetry", "metrics",
     "llmops", "inference", "serving",
@@ -91,6 +91,7 @@ SYNONYMS: dict[str, list[str]] = {
     "telemetry":    ["tracing", "observability", "monitoring", "metrics"],
     "evaluation":   ["evals", "benchmark", "regression testing", "grading", "scoring"],
     "evals":        ["evaluation", "benchmark", "testing", "regression", "scoring"],
+    "analysis":     ["analytics", "processing", "examination", "inspection", "parsing"],
     "llmops":       ["mlops", "model deployment", "inference serving", "llm pipeline"],
     "inference":    ["serving", "deployment", "model serving", "runtime"],
     "guardrails":   ["safety", "moderation", "content filter", "output validation"],

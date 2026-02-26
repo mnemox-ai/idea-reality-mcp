@@ -40,6 +40,9 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     max_stars = 0
     all_repos: list[dict] = []
 
+    # Track how many queries each repo matched (relevance signal)
+    repo_query_hits: dict[str, int] = {}
+
     async with httpx.AsyncClient(timeout=15.0) as client:
         for query in keywords:
             try:
@@ -56,8 +59,10 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                     stars = item.get("stargazers_count", 0)
                     if stars > max_stars:
                         max_stars = stars
+                    name = item.get("full_name", "")
+                    repo_query_hits[name] = repo_query_hits.get(name, 0) + 1
                     all_repos.append({
-                        "name": item.get("full_name", ""),
+                        "name": name,
                         "url": item.get("html_url", ""),
                         "stars": stars,
                         "updated": item.get("updated_at", ""),
@@ -66,10 +71,15 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
             except httpx.HTTPError:
                 continue
 
-    # Deduplicate by name and sort by stars
+    # Deduplicate by name and sort by relevance (query hits) then stars.
+    # Repos matching multiple query variants are more likely to be relevant.
     seen = set()
     unique_repos = []
-    for repo in sorted(all_repos, key=lambda r: r["stars"], reverse=True):
+    for repo in sorted(
+        all_repos,
+        key=lambda r: (repo_query_hits.get(r["name"], 0), r["stars"]),
+        reverse=True,
+    ):
         if repo["name"] not in seen:
             seen.add(repo["name"])
             unique_repos.append(repo)

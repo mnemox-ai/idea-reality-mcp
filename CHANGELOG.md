@@ -4,6 +4,22 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-02-27
+
+### Fixed
+- **Search precision for non-tech domains** — improved keyword extraction and result ranking for domains like legal, medical (TCM), agriculture, religion, etc.
+  - Added missing Chinese mappings: `文件` (document), `文檔` (document), `智慧` (smart), `問診` (consultation)
+  - Changed `分析` mapping from `analytics` (BI-specific) to `analysis` (general)
+  - Added compound `數據分析` → `data analytics` to preserve BI context
+  - Added `analysis` to INTENT_ANCHORS with synonym expansion
+  - New "domain-first" query template: puts domain nouns before action verbs for better non-tech results
+  - Fixed "anchor + anchor" template to include domain context (prevents overly broad queries)
+- **GitHub result relevance ranking** — repos now sorted by query-match frequency first, then by stars. Repos matching multiple query variants rank higher than popular but irrelevant repos.
+
+### Added
+- 9 new non-tech domain tests (102 total, up from 93): TCM, legal, agriculture, buddhism, pet health, consultation
+- `meta.version` updated to `"0.3.1"`
+
 ## [0.3.0] - 2026-02-27
 
 ### Changed

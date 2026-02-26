@@ -184,6 +184,64 @@ class TestExtractKeywords:
         r2 = extract_keywords(idea)
         assert r1 == r2
 
+    # ---- Stage A: Non-tech domain mappings (v0.3.1) ----
+
+    def test_chinese_tcm_mapped(self):
+        """中醫 should produce TCM-related queries."""
+        result = extract_keywords("中醫針灸穴位查詢")
+        all_text = " ".join(result)
+        assert "tcm" in all_text
+        assert "acupuncture" in all_text
+
+    def test_chinese_legal_document_mapped(self):
+        """法律文件 should include 'document' in queries (v0.3.1 fix)."""
+        result = extract_keywords("法律文件自動分析")
+        all_text = " ".join(result)
+        assert "legal" in all_text
+        assert "document" in all_text
+
+    def test_chinese_agriculture_mapped(self):
+        result = extract_keywords("農業灌溉智慧系統")
+        all_text = " ".join(result)
+        assert "agriculture" in all_text
+        assert "irrigation" in all_text
+
+    def test_chinese_analysis_mapped(self):
+        """分析 should map to 'analysis' (not 'analytics') for general use."""
+        result = extract_keywords("法律文件自動分析")
+        all_text = " ".join(result)
+        assert "analysis" in all_text
+
+    def test_chinese_data_analytics_compound(self):
+        """數據分析 (compound) should map to 'data analytics' for BI context."""
+        result = extract_keywords("數據分析儀表板")
+        all_text = " ".join(result)
+        assert "data analytics" in all_text or "analytics" in all_text
+
+    def test_chinese_buddhism_scripture_mapped(self):
+        result = extract_keywords("佛教經文搜尋 app")
+        all_text = " ".join(result)
+        assert "buddhism" in all_text
+        assert "scripture" in all_text
+
+    def test_chinese_pet_health_mapped(self):
+        result = extract_keywords("寵物健康追蹤")
+        all_text = " ".join(result)
+        assert "pet" in all_text
+        assert "health" in all_text
+
+    def test_chinese_consultation_mapped(self):
+        """問診 should map to 'consultation'."""
+        result = extract_keywords("中醫問診 AI 助手")
+        all_text = " ".join(result)
+        assert "consultation" in all_text
+
+    def test_domain_first_query_generated(self):
+        """Non-tech domains should have a domain-first query variant."""
+        result = extract_keywords("法律文件自動分析")
+        # At least one query should start with a domain noun, not the anchor verb
+        assert any(q.startswith("legal") for q in result)
+
     # ---- Registry variant ----
 
     def test_registry_variant_for_tech(self):
@@ -367,7 +425,7 @@ class TestComputeSignalQuick:
         assert isinstance(result["top_similars"], list)
         assert isinstance(result["pivot_hints"], list)
         assert len(result["pivot_hints"]) == 3
-        assert result["meta"]["version"] == "0.3.0"
+        assert result["meta"]["version"] == "0.3.1"
         assert result["meta"]["depth"] == "quick"
         assert result["meta"]["sources_used"] == ["github", "hackernews"]
         assert "checked_at" in result["meta"]

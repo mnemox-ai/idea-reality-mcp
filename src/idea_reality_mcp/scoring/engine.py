@@ -152,7 +152,8 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "記帳": "accounting", "對帳": "reconciliation",
     "線上": "online", "網路": "web",
     # Content / media
-    "分析": "analytics", "儀表板": "dashboard",
+    "數據分析": "data analytics",  # Compound: must appear before 分析
+    "分析": "analysis", "儀表板": "dashboard",
     "聊天": "chatbot", "對話": "chat",
     "知識庫": "knowledge base",
     "摘要": "summarization", "翻譯": "translation",
@@ -176,6 +177,8 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "租屋": "rental", "房屋": "housing",
     "食譜": "recipe", "烹飪": "cooking",
     # Cross-domain general-purpose verbs / concepts
+    "文件": "document", "文檔": "document",
+    "智慧": "smart", "問診": "consultation",
     "模擬": "simulation", "模擬器": "simulator",
     "辨識": "recognition", "識別": "recognition",
     "偵測": "detection", "檢測": "detection", "檢查": "inspection",
@@ -322,11 +325,19 @@ def extract_keywords(idea_text: str) -> list[str]:
         if top_ctx:
             _add(f"{anchor} {top_ctx}")
 
-        # Template 3: anchor + primary + github (for GitHub search)
+        # Template 3: domain-first query (non-anchor tokens + anchor)
+        # Helps non-tech domains where domain nouns (legal, medical) are more
+        # descriptive than the action anchor (automation, analysis, search).
+        if len(non_anchor) >= 2:
+            _add(f"{' '.join(non_anchor[:3])} {anchor}")
+        elif primary:
+            _add(f"{primary} {anchor}")
+
+        # Template 4: anchor + primary + github (for GitHub search)
         if primary:
             _add(f"{anchor} {primary} github")
 
-        # Template 4-5: synonym expansion
+        # Template 5-6: synonym expansion
         # Skip if synonym already contains the primary word (avoids "redis redis")
         syns = SYNONYMS.get(anchor, [])
         if primary:
@@ -339,14 +350,16 @@ def extract_keywords(idea_text: str) -> list[str]:
             for syn in syns[:2]:
                 _add(syn)
 
-        # Template 6: second anchor if present
+        # Template 7: second anchor if present (always include primary for context)
         if len(anchors) > 1:
             anchor2 = anchors[1]
-            _add(f"{anchor} {anchor2}")
             if primary:
+                _add(f"{anchor} {anchor2} {primary}")
                 _add(f"{anchor2} {primary}")
+            else:
+                _add(f"{anchor} {anchor2}")
 
-        # Template 7: registry-optimised (anchor + tech keyword, no noise)
+        # Template 8: registry-optimised (anchor + tech keyword, no noise)
         if tech_non_anchor:
             _add(f"{anchor} {tech_non_anchor[0]}")
 
@@ -672,6 +685,6 @@ def compute_signal(
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "sources_used": sources_used,
             "depth": depth,
-            "version": "0.3.0",
+            "version": "0.3.1",
         },
     }
