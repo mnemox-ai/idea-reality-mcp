@@ -1,0 +1,28 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      githubToken:
+        type: string
+        description: "GitHub personal access token for higher API rate limits (optional)"
+      producthuntToken:
+        type: string
+        description: "Product Hunt API token for deep mode search (optional)"
+    required: []
+  commandFunction: |-
+    (config) => {
+      const env = {};
+      if (config.githubToken) {
+        env.GITHUB_TOKEN = config.githubToken;
+      }
+      if (config.producthuntToken) {
+        env.PRODUCTHUNT_TOKEN = config.producthuntToken;
+      }
+      return {
+        command: "uvx",
+        args: ["idea-reality-mcp"],
+        env
+      };
+    }
