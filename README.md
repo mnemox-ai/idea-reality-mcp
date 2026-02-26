@@ -160,3 +160,11 @@ autocomplete
 ## License
 
 MIT — see [LICENSE](LICENSE)
+
+## Try it live
+
+Visit [mnemox.ai/check](https://mnemox.ai/check) to try the idea reality check in your browser — no install required.
+
+## Contact
+
+Built by [Mnemox AI](https://mnemox.ai) · [dev@mnemox.ai](mailto:dev@mnemox.ai)
