@@ -1,3 +1,5 @@
+English | [繁體中文](CONTRIBUTING.zh-TW.md)
+
 # Contributing to idea-reality-mcp
 
 Thanks for your interest in contributing.

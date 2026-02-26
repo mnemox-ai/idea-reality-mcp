@@ -1,3 +1,5 @@
+English | [繁體中文](SECURITY.zh-TW.md)
+
 # Security Policy
 
 ## Supported Versions

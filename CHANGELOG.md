@@ -1,3 +1,5 @@
+English | [繁體中文](CHANGELOG.zh-TW.md)
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

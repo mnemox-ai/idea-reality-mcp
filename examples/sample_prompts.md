@@ -1,3 +1,5 @@
+English | [繁體中文](sample_prompts.zh-TW.md)
+
 # Sample prompts for idea_check
 
 ## Basic usage

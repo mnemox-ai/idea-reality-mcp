@@ -1,3 +1,5 @@
+English | [繁體中文](README.zh-TW.md)
+
 # idea-reality-mcp
 
 Pre-build reality check for AI coding agents. Stop building what already exists.
