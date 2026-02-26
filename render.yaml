@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: idea-reality-check
+    runtime: python
+    buildCommand: pip install -e . && pip install -r api/requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: PRODUCTHUNT_TOKEN
+        sync: false   # set manually in Render dashboard (optional)
