@@ -3,6 +3,7 @@
 Exposes:
   GET  /health       — liveness probe
   POST /api/check    — idea reality check
+  ANY  /mcp          — MCP Streamable HTTP transport (for Smithery / MCP clients)
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from idea_reality_mcp.scoring.engine import compute_signal, extract_keywords
+from idea_reality_mcp.server import mcp  # registers all tools via server.py
 from idea_reality_mcp.sources.github import search_github_repos
 from idea_reality_mcp.sources.hn import search_hn
 from idea_reality_mcp.sources.npm import search_npm
@@ -124,3 +126,11 @@ async def check(req: CheckRequest):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# MCP Streamable HTTP transport — mounted at /mcp
+# Enables Smithery and other MCP clients to connect via HTTP
+# ---------------------------------------------------------------------------
+
+app.mount("/mcp", mcp.http_app(transport="streamable-http", stateless_http=True))
