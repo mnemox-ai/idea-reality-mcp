@@ -13,3 +13,7 @@ wheels/
 .env
 .env.*
 .env.local
+
+# MCP Publisher CLI binary
+mcp-publisher.exe
+mcp-publisher_*.tar.gz
