@@ -1,8 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.mnemox-ai/idea-reality",
-  "title": "Idea Reality Check",
-  "description": "Pre-build reality check for AI coding agents. Scans GitHub, HN, npm, PyPI, Product Hunt — returns a quantified reality signal (0-100) before you build.",
+  "name": "io.github.mnemox-ai/idea-reality-mcp",
+  "description": "The only AI-native idea validator that searches real data. Scans GitHub, HN, npm, PyPI, and Product Hunt — returns reality_signal 0-100.",
   "repository": {
     "url": "https://github.com/mnemox-ai/idea-reality-mcp",
     "source": "github"
@@ -13,29 +12,21 @@
       "registryType": "pypi",
       "identifier": "idea-reality-mcp",
       "version": "0.3.2",
-      "transport": {
-        "type": "stdio"
-      },
+      "transport": { "type": "stdio" },
       "environmentVariables": [
         {
           "name": "GITHUB_TOKEN",
-          "description": "GitHub personal access token (optional, increases rate limit)",
+          "description": "GitHub PAT for higher rate limits (optional)",
           "isRequired": false,
           "isSecret": true
         },
         {
           "name": "PRODUCTHUNT_TOKEN",
-          "description": "Product Hunt API token (optional, enables Product Hunt source in deep mode)",
+          "description": "Product Hunt API token for deep mode (optional)",
           "isRequired": false,
           "isSecret": true
         }
       ]
-    }
-  ],
-  "remotes": [
-    {
-      "type": "streamable-http",
-      "url": "https://idea-reality-mcp.onrender.com/mcp"
     }
   ]
 }
