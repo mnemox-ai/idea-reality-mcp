@@ -4,6 +4,21 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **MCP Streamable HTTP transport** at `/mcp` endpoint — enables Smithery and MCP HTTP clients to connect via `https://idea-reality-mcp.onrender.com/mcp`
+- `smithery.yaml` configuration for Smithery marketplace
+- Smithery install badge in README
+
+### Changed
+- FastAPI version in `api/main.py` updated from `0.2.0` to `0.3.1`
+- `app.mount("/", mcp_http)` pattern to avoid POST 307 redirect issues with MCP clients
+
+### Distribution
+- Published to Smithery marketplace (listed)
+- Submitted to 9+ MCP directories: Smithery, PulseMCP, MCP Market, Glama, mcp.so, Cursor Directory, ClaudeMCP.com (PR #45), mcp-get (PR #176), Fleur (PR #37)
+
 ## [0.3.1] - 2026-02-27
 
 ### Fixed

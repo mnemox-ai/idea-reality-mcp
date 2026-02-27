@@ -4,6 +4,21 @@
 
 本專案所有重要變更都會記錄在此檔案。
 
+## [未發布]
+
+### 新增
+- **MCP Streamable HTTP transport**（`/mcp` 端點）— 讓 Smithery 和 MCP HTTP clients 透過 `https://idea-reality-mcp.onrender.com/mcp` 連接
+- `smithery.yaml` Smithery marketplace 設定檔
+- README 加入 Smithery 安裝 badge
+
+### 變更
+- `api/main.py` FastAPI version 從 `0.2.0` 更新為 `0.3.1`
+- 使用 `app.mount("/", mcp_http)` 模式避免 MCP clients 遇到 POST 307 redirect
+
+### 發布通路
+- 上架 Smithery marketplace（已公開）
+- 提交至 9+ MCP 目錄：Smithery、PulseMCP、MCP Market、Glama、mcp.so、Cursor Directory、ClaudeMCP.com（PR #45）、mcp-get（PR #176）、Fleur（PR #37）
+
 ## [0.3.1] - 2026-02-27
 
 ### 修復

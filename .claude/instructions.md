@@ -39,7 +39,7 @@ src/idea_reality_mcp/
 - PH weight auto-redistributed when PRODUCTHUNT_TOKEN not set
 
 ## Current Status (v0.3.1)
-- ✅ Core MCP server working (stdio transport)
+- ✅ Core MCP server working (stdio + Streamable HTTP transport)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ depth="deep" parallel mode
 - ✅ 3-stage keyword extraction pipeline (Stage A/B/C)
@@ -53,7 +53,10 @@ src/idea_reality_mcp/
 - ✅ awesome-mcp-servers PR #2346 submitted
 - ✅ Live demo: mnemox.ai/check (Render API backend)
 - ✅ Non-tech domain search precision fix (relevance-weighted ranking)
-- ✅ mnemox.ai/check: smart suggestions, copy-to-AI, email collection, pivot hints zh translation
+- ✅ mnemox.ai/check: smart suggestions, copy-to-AI, pivot hints zh translation
+- ✅ MCP Streamable HTTP at /mcp endpoint (Render deployment)
+- ✅ smithery.yaml + published to Smithery marketplace
+- ✅ Listed on 9+ directories: Smithery, PulseMCP, MCP Market, Glama, mcp.so, Cursor Directory, ClaudeMCP.com, mcp-get, Fleur
 
 ## Roadmap (v0.4+)
 - [ ] LLM-powered keyword extraction and semantic similarity
