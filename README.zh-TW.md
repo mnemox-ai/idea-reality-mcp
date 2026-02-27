@@ -8,7 +8,7 @@ AI 開發前的現實查核工具。別再重複造輪子了。
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
-[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
+[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://idea-reality-mcp--mnemox-ai.run.tools)
 
 > **v0.3 正式發布** — 三段式關鍵字萃取 Pipeline、150+ 中文詞彙對照、90+ 意圖錨點、80+ 同義詞展開。直接支援中文和中英混合輸入。
 

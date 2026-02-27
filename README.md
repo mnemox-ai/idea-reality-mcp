@@ -8,7 +8,7 @@ Pre-build reality check for AI coding agents. Stop building what already exists.
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
-[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
+[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://idea-reality-mcp--mnemox-ai.run.tools)
 
 > **v0.3 is here** — 3-stage keyword extraction pipeline, 150+ Chinese term mappings, 90+ intent anchors, 80+ synonym expansions. Supports Chinese and mixed-language input out of the box.
 
