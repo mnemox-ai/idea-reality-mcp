@@ -27,7 +27,7 @@ from idea_reality_mcp.sources.pypi import search_pypi
 # MCP HTTP sub-app — must be created BEFORE FastAPI app so lifespan can be passed
 # ---------------------------------------------------------------------------
 
-mcp_http = mcp.http_app(path="/", transport="streamable-http", stateless_http=True)
+mcp_http = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
 
 # ---------------------------------------------------------------------------
 # App — lifespan=mcp_http.lifespan initialises the MCP task group on startup
@@ -140,4 +140,4 @@ async def check(req: CheckRequest):
 #   https://idea-reality-mcp.onrender.com/mcp
 # ---------------------------------------------------------------------------
 
-app.mount("/mcp", mcp_http)
+app.mount("/", mcp_http)
