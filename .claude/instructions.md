@@ -1,7 +1,7 @@
 # IDEA-REALITY-MCP — Project Context
 
 ## What This Is
-Mnemox Idea Reality MCP Server v0.3.1 — a workflow-native pre-build reality check for AI coding agents.
+Mnemox Idea Reality MCP Server v0.3.2 — a workflow-native pre-build reality check for AI coding agents.
 MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you build, returns reality_signal (0-100).
 
 ## Org
@@ -14,7 +14,7 @@ MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you b
 - Python 3.11+, FastMCP 3.x, httpx (async), uv
 - Sources: GitHub Search API, HN Algolia API, npm Registry, PyPI (HTML scraping), Product Hunt GraphQL (optional)
 - Entry: `python -m idea_reality_mcp` or `uv run python -m idea_reality_mcp`
-- Tests: `uv run pytest tests/ -v` (102 tests)
+- Tests: `uv run pytest tests/ -v` (120 tests)
 
 ## Architecture
 ```
@@ -38,30 +38,28 @@ src/idea_reality_mcp/
 - **deep**: all 5 sources in parallel — weights: repos 25% + stars 10% + HN 15% + npm 20% + PyPI 15% + PH 15%
 - PH weight auto-redistributed when PRODUCTHUNT_TOKEN not set
 
-## Current Status (v0.3.1)
+## Current Status (v0.3.2)
 - ✅ Core MCP server working (stdio + Streamable HTTP transport)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ depth="deep" parallel mode
 - ✅ 3-stage keyword extraction pipeline (Stage A/B/C)
 - ✅ 150+ Chinese term mappings (CHINESE_TECH_MAP), 15+ domains
 - ✅ 90+ intent anchors, 80+ synonym expansions
-- ✅ 102/102 tests passing, 54/54 golden eval (100% anchor hit)
-- ✅ Published to PyPI (v0.3.1) + GitHub Release
+- ✅ LLM keyword extraction (Haiku 4.5) on Render API, dictionary-only on MCP stdio
+- ✅ 120/120 tests passing, 54/54 golden eval (100% dictionary anchor hit)
+- ✅ Published to PyPI (v0.3.2) + GitHub Release
 - ✅ CI/CD: GitHub Actions (tests + PyPI trusted publisher)
-- ✅ README, LICENSE (MIT), SECURITY.md, CONTRIBUTING.md, CHANGELOG.md
+- ✅ README rewritten: "We search. They guess." positioning
 - ✅ Full bilingual docs (EN + zh-TW)
-- ✅ awesome-mcp-servers PR #2346 submitted
 - ✅ Live demo: mnemox.ai/check (Render API backend)
-- ✅ Non-tech domain search precision fix (relevance-weighted ranking)
-- ✅ mnemox.ai/check: smart suggestions, copy-to-AI, pivot hints zh translation
-- ✅ MCP Streamable HTTP at /mcp endpoint (Render deployment)
+- ✅ MCP Streamable HTTP at /mcp endpoint
 - ✅ smithery.yaml + published to Smithery marketplace
-- ✅ Listed on 9+ directories: Smithery, PulseMCP, MCP Market, Glama, mcp.so, Cursor Directory, ClaudeMCP.com, mcp-get, Fleur
+- ✅ Listed on 9+ directories
+- ✅ MCP Registry metadata (server.json) prepared
 
 ## Roadmap (v0.4+)
-- [ ] LLM-powered keyword extraction and semantic similarity
-- [ ] Idea Memory Dataset (opt-in anonymous logging of checks)
 - [ ] Trend detection and timing analysis
+- [ ] Idea Memory Dataset (opt-in anonymous logging of checks)
 
 ## Key Design Decisions
 - Protocol, not SaaS — no dashboard, no website UI (except /check demo)
@@ -70,7 +68,7 @@ src/idea_reality_mcp/
 - PRODUCTHUNT_TOKEN optional — skipped gracefully if not set
 - Scoring is intentionally simple and explainable, not ML
 - Graceful degradation — partial results if any source fails
-- Chinese support via dictionary (150+ terms), not LLM translation
+- Chinese support via dictionary (150+ terms) for MCP stdio; LLM (Haiku 4.5) for Render API
 
 ## Communication Style
 - Sean prefers 繁體中文 for discussion, English for code/docs

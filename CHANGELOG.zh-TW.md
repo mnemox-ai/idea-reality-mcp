@@ -4,18 +4,40 @@
 
 本專案所有重要變更都會記錄在此檔案。
 
-## [未發布]
+## [0.3.2] - 2026-02-27
 
 ### 新增
-- **MCP Streamable HTTP transport**（`/mcp` 端點）— 讓 Smithery 和 MCP HTTP clients 透過 `https://idea-reality-mcp.onrender.com/mcp` 連接
-- `smithery.yaml` Smithery marketplace 設定檔
-- README 加入 Smithery 安裝 badge
+- **LLM 驅動關鍵字萃取（Render API）** — Claude Haiku 4.5 從任何語言的 idea 描述生成最佳搜尋查詢，失敗時自動 fallback 到字典 pipeline
+- `POST /api/extract-keywords` 公開端點（速率限制：50/IP/天）— 獨立關鍵字萃取
+- 回應 `meta` 新增 `keyword_source` 欄位 — 標示關鍵字來自 `"llm"` 或 `"dictionary"`
+- 記憶體內速率限制器（每 IP 每日重置）
+- `scoring/llm.py` — MCP 客戶端呼叫 Render API（8 秒超時 + graceful fallback）
+- `tests/test_llm.py` — 10 個 LLM 客戶端測試
+- `tests/test_api_extract_keywords.py` — 8 個 API 端點測試
+- `tests/eval_llm_vs_dict.py` — LLM vs 字典 54 條 golden ideas 評估腳本
+- `docs/v0.4-comparison.md` — LLM vs 字典比較報告
+- `api/requirements.txt` 新增 `anthropic>=0.40.0`
+- `render.yaml` 新增 `ANTHROPIC_API_KEY` 環境變數
 
 ### 變更
-- `api/main.py` FastAPI version 從 `0.2.0` 更新為 `0.3.1`
-- 使用 `app.mount("/", mcp_http)` 模式避免 MCP clients 遇到 POST 307 redirect
+- **README 全面改寫** — 攻擊性定位（「我們搜。他們猜。」）、競品比較表、「為什麼不直接問 ChatGPT？」段落
+- `api/main.py` 在 `/api/check` 優先用 Haiku 萃取關鍵字，失敗時 fallback 到字典
+- Haiku 回應的 markdown code fence 自動清除（模型會用 ``` 包住 JSON）
+- MCP stdio（`tools.py`）使用 dictionary-only pipeline（100% anchor hit、無外部依賴）
+- 版本號更新至 `0.3.2`
 
-### 發布通路
+### 基礎設施
+- **MCP Streamable HTTP transport**（`/mcp` 端點）— 支援 Smithery 和 MCP HTTP clients
+- `smithery.yaml` Smithery marketplace 設定檔
+- 上架 Smithery + 提交至 9+ MCP 目錄
+
+### 統計
+- 120 個測試通過（102 原有 + 18 新增）
+- LLM eval：54/54 ideas 處理完成，50/54 anchor 命中（93%），0 次失敗
+- 字典 eval：54/54 anchor 命中（100%）
+- 中文 idea 品質：LLM 較佳 3/10、平手 6/10、字典較佳 1/10
+
+### 發布通路（自 v0.3.1 起累積）
 - 上架 Smithery marketplace（已公開）
 - 提交至 9+ MCP 目錄：Smithery、PulseMCP、MCP Market、Glama、mcp.so、Cursor Directory、ClaudeMCP.com（PR #45）、mcp-get（PR #176）、Fleur（PR #37）
 

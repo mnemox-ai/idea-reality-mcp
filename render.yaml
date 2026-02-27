@@ -10,3 +10,5 @@ services:
         value: "3.11"
       - key: PRODUCTHUNT_TOKEN
         sync: false   # set manually in Render dashboard (optional)
+      - key: ANTHROPIC_API_KEY
+        sync: false   # set manually in Render dashboard

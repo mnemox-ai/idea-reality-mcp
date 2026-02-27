@@ -4,20 +4,38 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.3.2] - 2026-02-27
 
 ### Added
-- **MCP Streamable HTTP transport** at `/mcp` endpoint — enables Smithery and MCP HTTP clients to connect via `https://idea-reality-mcp.onrender.com/mcp`
-- `smithery.yaml` configuration for Smithery marketplace
-- Smithery install badge in README
+- **LLM-powered keyword extraction (Render API)** — Claude Haiku 4.5 generates optimal search queries from idea descriptions in any language, with automatic fallback to the dictionary pipeline
+- `POST /api/extract-keywords` public endpoint (rate-limited: 50/IP/day) for standalone keyword extraction
+- `keyword_source` field in response `meta` — indicates whether keywords came from `"llm"` or `"dictionary"`
+- In-memory rate limiter for LLM endpoint (daily reset per IP)
+- `scoring/llm.py` — MCP client-side caller for Render API with 8s timeout and graceful fallback
+- `tests/test_llm.py` — 10 tests for LLM client module
+- `tests/test_api_extract_keywords.py` — 8 tests for API endpoint
+- `tests/eval_llm_vs_dict.py` — evaluation script comparing LLM vs dictionary on 54 golden ideas
+- `docs/v0.4-comparison.md` — LLM vs dictionary comparison report
+- `anthropic>=0.40.0` dependency for API server (`api/requirements.txt`)
+- `ANTHROPIC_API_KEY` env var support in `render.yaml`
 
 ### Changed
-- FastAPI version in `api/main.py` updated from `0.2.0` to `0.3.1`
-- `app.mount("/", mcp_http)` pattern to avoid POST 307 redirect issues with MCP clients
+- **README completely rewritten** — aggressive positioning ("We search. They guess."), competitor comparison table, "Why not just ask ChatGPT?" section
+- `api/main.py` now calls Haiku for keyword extraction in `/api/check`, falling back to dictionary on any failure
+- Markdown code fence stripping for Haiku responses (model wraps JSON in ``` fences)
+- MCP stdio (`tools.py`) uses dictionary-only pipeline (100% anchor hit, no external dependency)
+- Version bumped to `0.3.2`
 
-### Distribution
-- Published to Smithery marketplace (listed)
-- Submitted to 9+ MCP directories: Smithery, PulseMCP, MCP Market, Glama, mcp.so, Cursor Directory, ClaudeMCP.com (PR #45), mcp-get (PR #176), Fleur (PR #37)
+### Infrastructure
+- **MCP Streamable HTTP transport** at `/mcp` endpoint — enables Smithery and MCP HTTP clients
+- `smithery.yaml` configuration for Smithery marketplace
+- Published to Smithery + submitted to 9+ MCP directories
+
+### Stats
+- 120 tests passing (102 original + 18 new)
+- LLM eval: 54/54 ideas processed, 50/54 anchor hit (93%), 0 failures
+- Dictionary eval: 54/54 anchor hit (100%)
+- Chinese idea quality: LLM better in 3/10, tie in 6/10, dictionary better in 1/10
 
 ## [0.3.1] - 2026-02-27
 

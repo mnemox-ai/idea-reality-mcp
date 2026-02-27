@@ -35,6 +35,10 @@ async def idea_check(
     Returns:
         Reality check report with signal score, evidence, similar projects, and pivot hints.
     """
+    # Dictionary pipeline — proven 100% anchor hit on golden set, fast, no network dependency.
+    # LLM extraction is available via the Render API (/api/check, /api/extract-keywords)
+    # for web users; MCP stdio clients get the reliable dictionary path.
+    keyword_source = "dictionary"
     keywords = extract_keywords(idea_text)
 
     if depth == "deep":
@@ -51,7 +55,7 @@ async def idea_check(
             )
         )
 
-        return compute_signal(
+        result = compute_signal(
             idea_text=idea_text,
             keywords=keywords,
             github_results=github_results,
@@ -66,10 +70,13 @@ async def idea_check(
         github_results = await search_github_repos(keywords)
         hn_results = await search_hn(keywords)
 
-        return compute_signal(
+        result = compute_signal(
             idea_text=idea_text,
             keywords=keywords,
             github_results=github_results,
             hn_results=hn_results,
             depth=depth,
         )
+
+    result["meta"]["keyword_source"] = keyword_source
+    return result
