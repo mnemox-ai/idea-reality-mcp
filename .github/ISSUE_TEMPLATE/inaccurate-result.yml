@@ -1,0 +1,46 @@
+name: Inaccurate Result
+description: The tool missed competitors or returned irrelevant results
+title: "[Result] "
+labels: ["feedback", "keyword-improvement"]
+body:
+  - type: textarea
+    id: idea_text
+    attributes:
+      label: What idea did you check?
+      description: Paste the exact idea_text you used
+      placeholder: "e.g. AI-powered code review bot for GitHub PRs"
+    validations:
+      required: true
+  - type: dropdown
+    id: depth
+    attributes:
+      label: Which mode?
+      options:
+        - quick (default)
+        - deep
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What was the result?
+      description: Paste the reality_signal, top_similars, or screenshot from mnemox.ai/check
+      placeholder: "reality_signal: 12, but there are clearly 5+ mature competitors..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Which competitors or projects should it have found?
+      placeholder: "It should have found project-x (5k stars) and package-y on npm"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Language used (EN/ZH/mixed), domain, anything else
+      placeholder: "I used Traditional Chinese input, domain is legal/law"
+    validations:
+      required: false
