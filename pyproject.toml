@@ -1,6 +1,6 @@
 [project]
 name = "idea-reality-mcp"
-version = "0.3.3"
+version = "0.3.4"
 description = "Pre-build reality check for AI coding agents. Stop building what already exists."
 readme = "README.md"
 license = "MIT"

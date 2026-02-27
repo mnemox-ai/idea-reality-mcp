@@ -6,12 +6,12 @@
     "url": "https://github.com/mnemox-ai/idea-reality-mcp",
     "source": "github"
   },
-  "version": "0.3.3",
+  "version": "0.3.4",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "idea-reality-mcp",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {

@@ -1,6 +1,6 @@
 """idea-reality-mcp: Pre-build reality check for AI coding agents."""
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 
 
 def main() -> None:
