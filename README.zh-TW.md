@@ -197,9 +197,9 @@ export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
     {"name": "user/repo", "url": "https://github.com/...", "stars": 15000, "description": "..."}
   ],
   "pivot_hints": [
-    "High competition. Consider a niche differentiator...",
-    "The leading project may have gaps in...",
-    "Consider building an integration or plugin..."
+    "競爭激烈。考慮找一個利基差異化方向...",
+    "領先專案（user/repo, 15000 stars）可能在某些面向有缺口...",
+    "考慮做整合或外掛，而非從頭造輪子..."
   ],
   "meta": {
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
