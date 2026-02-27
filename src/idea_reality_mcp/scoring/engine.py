@@ -685,6 +685,6 @@ def compute_signal(
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "sources_used": sources_used,
             "depth": depth,
-            "version": "0.3.2",
+            "version": "0.3.3",
         },
     }

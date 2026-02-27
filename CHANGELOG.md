@@ -4,6 +4,12 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2026-02-27
+
+### Added
+- Published to MCP Registry (`io.github.mnemox-ai/idea-reality-mcp`)
+- `server.json` updated to official MCP Registry schema
+
 ## [0.3.2] - 2026-02-27
 
 ### Added

@@ -17,3 +17,5 @@ wheels/
 # MCP Publisher CLI binary
 mcp-publisher.exe
 mcp-publisher_*.tar.gz
+*.mcpregistry_*
+.claude/settings.local.json

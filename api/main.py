@@ -44,7 +44,7 @@ mcp_http = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http
 app = FastAPI(
     title="idea-reality-mcp API",
     description="Pre-build reality check for AI coding agents.",
-    version="0.3.2",
+    version="0.3.3",
     lifespan=mcp_http.lifespan,
 )
 

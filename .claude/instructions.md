@@ -1,7 +1,7 @@
 # IDEA-REALITY-MCP — Project Context
 
 ## What This Is
-Mnemox Idea Reality MCP Server v0.3.2 — a workflow-native pre-build reality check for AI coding agents.
+Mnemox Idea Reality MCP Server v0.3.3 — a workflow-native pre-build reality check for AI coding agents.
 MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you build, returns reality_signal (0-100).
 
 ## Org
@@ -38,7 +38,7 @@ src/idea_reality_mcp/
 - **deep**: all 5 sources in parallel — weights: repos 25% + stars 10% + HN 15% + npm 20% + PyPI 15% + PH 15%
 - PH weight auto-redistributed when PRODUCTHUNT_TOKEN not set
 
-## Current Status (v0.3.2)
+## Current Status (v0.3.3)
 - ✅ Core MCP server working (stdio + Streamable HTTP transport)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ depth="deep" parallel mode
@@ -47,7 +47,7 @@ src/idea_reality_mcp/
 - ✅ 90+ intent anchors, 80+ synonym expansions
 - ✅ LLM keyword extraction (Haiku 4.5) on Render API, dictionary-only on MCP stdio
 - ✅ 120/120 tests passing, 54/54 golden eval (100% dictionary anchor hit)
-- ✅ Published to PyPI (v0.3.2) + GitHub Release
+- ✅ Published to PyPI (v0.3.3) + GitHub Release
 - ✅ CI/CD: GitHub Actions (tests + PyPI trusted publisher)
 - ✅ README rewritten: "We search. They guess." positioning
 - ✅ Full bilingual docs (EN + zh-TW)
