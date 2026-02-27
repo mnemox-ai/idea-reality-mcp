@@ -1,4 +1,8 @@
-"""Tests for the /api/extract-keywords endpoint in api/main.py."""
+"""Tests for the /api/extract-keywords endpoint in api/main.py.
+
+Requires ``fastapi`` and ``anthropic`` — skipped in CI where only core deps
+are installed.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +11,9 @@ from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
+# Skip entire module if fastapi is not installed (CI only has core deps)
+fastapi = pytest.importorskip("fastapi", reason="fastapi not installed (API server tests)")
 
 # Add project root to path so ``api.main`` is importable
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
