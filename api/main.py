@@ -133,4 +133,4 @@ async def check(req: CheckRequest):
 # Enables Smithery and other MCP clients to connect via HTTP
 # ---------------------------------------------------------------------------
 
-app.mount("/mcp", mcp.http_app(transport="streamable-http", stateless_http=True))
+app.mount("/mcp", mcp.http_app(path="/", transport="streamable-http", stateless_http=True))
