@@ -9,7 +9,6 @@ Exposes:
 from __future__ import annotations
 
 import asyncio
-import os
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
@@ -25,13 +24,20 @@ from idea_reality_mcp.sources.producthunt import search_producthunt
 from idea_reality_mcp.sources.pypi import search_pypi
 
 # ---------------------------------------------------------------------------
-# App
+# MCP HTTP sub-app — must be created BEFORE FastAPI app so lifespan can be passed
+# ---------------------------------------------------------------------------
+
+mcp_http = mcp.http_app(path="/", transport="streamable-http", stateless_http=True)
+
+# ---------------------------------------------------------------------------
+# App — lifespan=mcp_http.lifespan initialises the MCP task group on startup
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="idea-reality-mcp API",
     description="Pre-build reality check for AI coding agents.",
     version="0.2.0",
+    lifespan=mcp_http.lifespan,
 )
 
 # CORS — allow GitHub Pages and local dev
@@ -129,8 +135,9 @@ async def check(req: CheckRequest):
 
 
 # ---------------------------------------------------------------------------
-# MCP Streamable HTTP transport — mounted at /mcp
-# Enables Smithery and other MCP clients to connect via HTTP
+# Mount MCP Streamable HTTP at /mcp
+# Enables Smithery and MCP HTTP clients to connect via:
+#   https://idea-reality-mcp.onrender.com/mcp
 # ---------------------------------------------------------------------------
 
-app.mount("/mcp", mcp.http_app(path="/", transport="streamable-http", stateless_http=True))
+app.mount("/mcp", mcp_http)
