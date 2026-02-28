@@ -480,25 +480,35 @@ def _filter_relevant_similars(
 
     Prevents high-star repos from broad keyword matches (e.g. 'natural language')
     from appearing as "similar" when they have nothing to do with the idea.
+
+    Uses a two-tier approach:
+    - "Strong match" = 2+ keyword hits → definitely relevant
+    - "Weak match" = 1 keyword hit → relevant only if the word is 5+ chars
+    - No match → fallback (shown last)
     """
     if not similars:
         return similars
 
-    # Build a set of check-words from idea text + keywords (lowercased, 3+ chars)
+    # Build a set of check-words from idea text + keywords (lowercased, 4+ chars)
     idea_words = set()
     for word in idea_text.lower().split():
-        if len(word) >= 3:
+        if len(word) >= 4:
             idea_words.add(word)
     for kw in keywords:
         for word in kw.lower().split():
-            if len(word) >= 3:
+            if len(word) >= 4:
                 idea_words.add(word)
 
-    # Remove very generic words that match everything
+    # Remove generic words that match everything (tech + common)
     generic = {
         "the", "and", "for", "with", "that", "this", "from", "your", "tool",
         "app", "based", "using", "open", "source", "project", "system",
         "new", "use", "can", "get", "all", "how", "what", "build",
+        "code", "data", "test", "file", "user", "list", "type", "node",
+        "free", "just", "like", "help", "need", "work", "make", "auto",
+        "best", "easy", "fast", "good", "high", "self", "real", "time",
+        "management", "service", "platform", "framework", "library",
+        "server", "client", "plugin", "module", "package",
     }
     idea_words -= generic
 
@@ -509,8 +519,12 @@ def _filter_relevant_similars(
     fallback = []
     for s in similars:
         text = (s.get("name", "") + " " + s.get("description", "")).lower()
-        # Check if at least 1 idea-specific word appears in name+description
-        if any(w in text for w in idea_words):
+        matches = [w for w in idea_words if w in text]
+        if len(matches) >= 2:
+            # Strong match — 2+ keywords found
+            relevant.append(s)
+        elif len(matches) == 1 and len(matches[0]) >= 5:
+            # Weak match — only count if the matching word is specific enough
             relevant.append(s)
         else:
             fallback.append(s)
