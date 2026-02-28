@@ -2,9 +2,9 @@
 
 # idea-reality-mcp
 
-**我們搜真實數據。他們用 AI 猜。**
+**你的 AI Agent 在動手前自動檢查。不需要你記。**
 
-唯一搜真實數據的 idea 驗證工具。5 個來源。量化分數。零幻覺。
+唯一能在 Agent 寫第一行 code 前搜尋 5 個真實資料庫的 MCP 工具。不用手動搜尋。不會忘記。只有事實。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -14,20 +14,10 @@
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
 
 <p align="center">
-  <img src="assets/demo_flow_zh.gif" alt="idea-reality-mcp 示範" width="600" />
+  <a href="https://mnemox.ai/check"><strong>👉 在瀏覽器直接試用 — 免安裝</strong></a>
 </p>
 
-## 問題
-
-每個開發者都踩過這個坑：花了好幾天做一個 side project，結果 GitHub 一搜發現有人做了，而且有 5,000 stars。
-
-你問 ChatGPT：*「有沒有人做過 X？」*
-
-ChatGPT 說：*「這是個很好的點子！市面上有一些類似工具，但你一定可以做得更好！」*
-
-**這不是驗證。這是啦啦隊。**
-
-## 我們的做法
+## 它做什麼
 
 ```
 你：「AI code review 工具」
@@ -41,81 +31,78 @@ idea-reality-mcp：
 └── 判定: HIGH — 建議找利基切入
 ```
 
-一個給你鼓勵，另一個給你事實。
+一個數字。五個真實來源。Agent 自己決定下一步。
 
-**你下一個 3 個月要賭在哪個上面？**
+## 問題
 
-## 立刻試用（30 秒）
+每個開發者都踩過這個坑：花了好幾天做一個 side project，結果 GitHub 一搜發現有人做了，而且有 5,000 stars。
+
+你問 ChatGPT：*「有沒有人做過 X？」*
+
+ChatGPT 說：*「這是個很好的點子！市面上有一些類似工具，但你一定可以做得更好！」*
+
+**這不是驗證。這是啦啦隊。**
+
+## 「為什麼不直接 Google？」
+
+這是我們最常被問的問題。老實回答：
+
+**Google 很好用 — 前提是你記得去搜。** 問題不在搜尋品質，而是你的 AI Agent 在開始寫 code 前從來不會 Google。
+
+idea-reality-mcp 跑在你的 Agent **裡面**。自動觸發。不管你記不記得，搜尋都會發生。
+
+| | Google | ChatGPT / SaaS 驗證工具 | idea-reality-mcp |
+|---|---|---|---|
+| **誰來跑** | 你，手動 | 你，手動 | 你的 Agent，自動 |
+| **輸入** | 自己想關鍵字 | 自然語言 | 自然語言 |
+| **輸出** | 10 條藍色連結 — 自己判斷 | 「聽起來不錯！」 | 0-100 分 + 證據 + 競品 |
+| **來源** | 網頁 | 無（LLM 生成） | GitHub + HN + npm + PyPI + PH |
+| **跨平台** | 每個站分開搜 | N/A | 5 個來源平行搜，一次搞定 |
+| **工作流** | Tab 之間複製貼上 | 另一個 App | MCP / CLI / API / CI |
+| **可驗證** | 是（手動） | 否 | 是（每個數字有來源） |
+| **價格** | 免費 | 免費試用 → 付費牆 | 免費、開源、永久 |
+
+**一句話：不是你在用它，是你的 Agent 在用。這才是重點。**
+
+## 試用（30 秒）
 
 ```bash
 uvx idea-reality-mcp
 ```
 
-或[在瀏覽器直接試用](https://mnemox.ai/check) — 不需安裝。
+或[在瀏覽器直接試用](https://mnemox.ai/check) — 不需安裝，即時結果。
 
-## 為什麼不直接問 ChatGPT？
+## 安裝
 
-| | idea-reality-mcp | ChatGPT / ValidatorAI / IdeaProof |
-|---|---|---|
-| **資料來源** | GitHub + HN + npm + PyPI + Product Hunt（即時搜尋） | LLM 生成（沒搜任何真實來源） |
-| **輸出** | 0-100 分數 + 真實專案含 star 數 | 文字意見（「聽起來不錯！」） |
-| **可驗證** | 每個數字都有來源 | 無法驗證 |
-| **整合** | MCP / CLI / API / 網頁 | 只有網頁 |
-| **價格** | 免費、開源、永久 | 免費試用 → 付費牆 |
-| **適合誰** | 開發者（寫 code 前） | 非技術創辦人（寫 pitch deck 前） |
-
-**一句話：我們搜 5 個真實資料庫。他們生成意見。**
-
-## 新功能：AI 驅動的搜尋智能
-
-**Claude Haiku 4.5** 從你的 idea 描述生成最佳搜尋查詢 — 支援任何語言 — 並自動 fallback 到經過實戰驗證的字典 pipeline。
-
-| | 之前 | 現在 |
-|---|---|---|
-| 英文 idea | ✅ 良好 | ✅ 良好 |
-| 中文 / 非英文 idea | ⚠️ 字典查找（150+ 詞彙） | ✅ 原生理解 |
-| 模糊描述 | ⚠️ 關鍵字比對 | ✅ 語意萃取 |
-| 可靠性 | 100%（不需外部 API） | 100%（自動 fallback 到字典） |
-
-LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
-
-## 安裝（5 分鐘）
-
-### Claude Desktop
-
-貼入 `~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows）：
-
-```json
-{
-  "mcpServers": {
-    "idea-reality": {
-      "command": "uvx",
-      "args": ["idea-reality-mcp"]
-    }
-  }
-}
-```
-
-### Cursor
-
-貼入專案根目錄的 `.cursor/mcp.json`：
-
-```json
-{
-  "mcpServers": {
-    "idea-reality": {
-      "command": "uvx",
-      "args": ["idea-reality-mcp"]
-    }
-  }
-}
-```
-
-### Claude Code（CLI）
+### Claude Code（CLI）— 最快
 
 ```bash
 claude mcp add idea-reality -- uvx idea-reality-mcp
 ```
+
+### Claude Desktop / Cursor
+
+貼入你的 MCP 設定檔（`claude_desktop_config.json` 或 `.cursor/mcp.json`）：
+
+```json
+{
+  "mcpServers": {
+    "idea-reality": {
+      "command": "uvx",
+      "args": ["idea-reality-mcp"]
+    }
+  }
+}
+```
+
+<details>
+<summary>設定檔位置</summary>
+
+- **Claude Desktop (macOS):** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Claude Desktop (Windows):** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Cursor:** 專案根目錄的 `.cursor/mcp.json`
+
+</details>
 
 ### Smithery（遠端）
 
@@ -132,19 +119,19 @@ export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
 
 ### 可選：Agent 自動觸發
 
-MCP tool 描述已經告訴你的 agent `idea_check` 做什麼。如果想讓它**主動執行**（每個新專案自動檢查），加一行提示：
+MCP tool 描述已經告訴你的 Agent `idea_check` 做什麼。如果想讓它**主動執行**（每個新專案自動檢查），加一行到你的 `CLAUDE.md`、`.cursorrules` 或 `.github/copilot-instructions.md`：
 
 ```
 開始新專案時，用 idea_check MCP tool 檢查是否已有類似專案存在。
 ```
 
-> 加入你的 `CLAUDE.md`、`.cursorrules`、`.windsurfrules` 或 `.github/copilot-instructions.md`。完整範本見 [templates/](templates/)。
+> 完整範本見 [templates/](templates/)。
 
 ## 使用方式
 
 ### 「我有個 side project 點子，該不該做？」
 
-對你的 AI agent 說：
+對你的 AI Agent 說：
 
 ```
 在開始之前，幫我查一下有沒有人做過：
@@ -169,6 +156,19 @@ Deep mode 平行掃描全部 5 個來源 — GitHub repos、HN 討論、npm 套�
 ```
 
 如果 signal 回來 85+，而且有成熟的開源替代品——你剛省了團隊 2 週。
+
+## 新功能：AI 驅動的搜尋智能
+
+**Claude Haiku 4.5** 從你的 idea 描述生成最佳搜尋查詢 — 支援任何語言 — 並自動 fallback 到經過實戰驗證的字典 pipeline。
+
+| | 之前 | 現在 |
+|---|---|---|
+| 英文 idea | ✅ 良好 | ✅ 良好 |
+| 中文 / 非英文 idea | ⚠️ 字典查找（150+ 詞彙） | ✅ 原生理解 |
+| 模糊描述 | ⚠️ 關鍵字比對 | ✅ 語意萃取 |
+| 可靠性 | 100%（不需外部 API） | 100%（自動 fallback 到字典） |
+
+LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
 
 ## 工具規格
 

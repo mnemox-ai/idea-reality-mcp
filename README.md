@@ -3,9 +3,9 @@ English | [繁體中文](README.zh-TW.md)
 
 # idea-reality-mcp
 
-**We search. They guess.**
+**Your AI agent checks before it builds. Automatically.**
 
-The only idea validator that searches real data. 5 sources. Quantified signal. Zero hallucination.
+The only MCP tool that searches 5 real databases before your agent writes a single line of code. No manual search. No forgotten step. Just facts.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -15,20 +15,10 @@ The only idea validator that searches real data. 5 sources. Quantified signal. Z
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
 
 <p align="center">
-  <img src="assets/demo_flow.gif" alt="idea-reality-mcp demo" width="600" />
+  <a href="https://mnemox.ai/check"><strong>👉 Try it in your browser — no install</strong></a>
 </p>
 
-## The problem
-
-Every developer has wasted days building something that already exists with 5,000 stars on GitHub.
-
-You ask ChatGPT: *"Is there already a tool that does X?"*
-
-ChatGPT says: *"That's a great idea! There are some similar tools, but you can definitely build something better!"*
-
-**That's not validation. That's cheerleading.**
-
-## What we do instead
+## What it does
 
 ```
 You: "AI code review tool"
@@ -42,81 +32,78 @@ idea-reality-mcp:
 └── Verdict: HIGH — consider pivoting to a niche
 ```
 
-One gives you encouragement. The other gives you facts.
+One number. Five real sources. Your agent decides what to do next.
 
-**Which one do you trust your next 3 months on?**
+## The problem
 
-## Try it now (30 seconds)
+Every developer has wasted days building something that already exists with 5,000 stars on GitHub.
+
+You ask ChatGPT: *"Is there already a tool that does X?"*
+
+ChatGPT says: *"That's a great idea! There are some similar tools, but you can definitely build something better!"*
+
+**That's not validation. That's cheerleading.**
+
+## "Why not just Google it?"
+
+This is the most common question we get. Here's the honest answer:
+
+**Google works — if you remember to use it.** The problem isn't search quality. The problem is that your AI agent never Googles anything before it starts building.
+
+idea-reality-mcp runs **inside** your agent. It triggers automatically. The search happens whether you remember or not.
+
+| | Google | ChatGPT / SaaS validators | idea-reality-mcp |
+|---|---|---|---|
+| **Who runs it** | You, manually | You, manually | Your agent, automatically |
+| **Input** | You craft the query | Natural language | Natural language |
+| **Output** | 10 blue links — you interpret | "Sounds promising!" | Score 0-100 + evidence + competitors |
+| **Sources** | Web pages | None (LLM generation) | GitHub + HN + npm + PyPI + PH |
+| **Cross-platform** | Search each site separately | N/A | 5 sources in parallel, one call |
+| **Workflow** | Copy-paste between tabs | Separate app | MCP / CLI / API / CI |
+| **Verifiable** | Yes (manual) | No | Yes (every number has a source) |
+| **Price** | Free | Free trial → paywall | Free, open-source, forever |
+
+**TL;DR — You don't use it. Your agent does. That's the point.**
+
+## Try it (30 seconds)
 
 ```bash
 uvx idea-reality-mcp
 ```
 
-Or [try it in your browser](https://mnemox.ai/check) — no install required.
+Or [try it in your browser](https://mnemox.ai/check) — no install, instant results.
 
-## Why not just ask ChatGPT?
+## Install
 
-| | idea-reality-mcp | ChatGPT / ValidatorAI / IdeaProof |
-|---|---|---|
-| **Data source** | GitHub + HN + npm + PyPI + Product Hunt (real-time) | LLM generation (no real source searched) |
-| **Output** | Score 0-100 + real projects with star counts | Text opinion ("Sounds promising!") |
-| **Verifiable** | Every number has a source | Not verifiable |
-| **Integration** | MCP / CLI / API / Web | Web-only |
-| **Price** | Free, open-source, forever | Free trial → paywall |
-| **Audience** | Developers (before writing code) | Non-technical founders (before writing pitch decks) |
-
-**TL;DR — We search 5 real databases. They generate opinions.**
-
-## New: AI-powered search intelligence
-
-**Claude Haiku 4.5** now generates optimal search queries from your idea description — in any language — with automatic fallback to our battle-tested dictionary pipeline.
-
-| | Before | Now |
-|---|---|---|
-| English ideas | ✅ Good | ✅ Good |
-| Chinese / non-English ideas | ⚠️ Dictionary lookup (150+ terms) | ✅ Native understanding |
-| Ambiguous descriptions | ⚠️ Keyword matching | ✅ Semantic extraction |
-| Reliability | 100% (no external API) | 100% (graceful fallback to dictionary) |
-
-The LLM understands your idea. The dictionary is your safety net. **You always get results.**
-
-## Install (5 minutes)
-
-### Claude Desktop
-
-Paste into `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-
-```json
-{
-  "mcpServers": {
-    "idea-reality": {
-      "command": "uvx",
-      "args": ["idea-reality-mcp"]
-    }
-  }
-}
-```
-
-### Cursor
-
-Paste into `.cursor/mcp.json` in your project root:
-
-```json
-{
-  "mcpServers": {
-    "idea-reality": {
-      "command": "uvx",
-      "args": ["idea-reality-mcp"]
-    }
-  }
-}
-```
-
-### Claude Code (CLI)
+### Claude Code (CLI) — fastest
 
 ```bash
 claude mcp add idea-reality -- uvx idea-reality-mcp
 ```
+
+### Claude Desktop / Cursor
+
+Paste into your MCP config (`claude_desktop_config.json` or `.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "idea-reality": {
+      "command": "uvx",
+      "args": ["idea-reality-mcp"]
+    }
+  }
+}
+```
+
+<details>
+<summary>Config file locations</summary>
+
+- **Claude Desktop (macOS):** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Claude Desktop (Windows):** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Cursor:** `.cursor/mcp.json` in project root
+
+</details>
 
 ### Smithery (Remote)
 
@@ -133,13 +120,13 @@ export PRODUCTHUNT_TOKEN=your_...  # Enable Product Hunt (deep mode)
 
 ### Optional: Agent auto-trigger
 
-The MCP tool description already tells your agent what `idea_check` does. To make it run **proactively** (before every new project), add a one-line hint:
+The MCP tool description already tells your agent what `idea_check` does. To make it run **proactively** (before every new project), add one line to your `CLAUDE.md`, `.cursorrules`, or `.github/copilot-instructions.md`:
 
 ```
 When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
 ```
 
-> Add to your `CLAUDE.md`, `.cursorrules`, `.windsurfrules`, or `.github/copilot-instructions.md`. See [templates/](templates/) for all platforms.
+> See [templates/](templates/) for all platforms.
 
 ## Usage
 
@@ -170,6 +157,19 @@ Run a reality check first.
 ```
 
 If the signal comes back at 85+ with mature open-source alternatives, you just saved your team 2 weeks.
+
+## New: AI-powered search intelligence
+
+**Claude Haiku 4.5** generates optimal search queries from your idea description — in any language — with automatic fallback to our dictionary pipeline.
+
+| | Before | Now |
+|---|---|---|
+| English ideas | ✅ Good | ✅ Good |
+| Chinese / non-English ideas | ⚠️ Dictionary lookup (150+ terms) | ✅ Native understanding |
+| Ambiguous descriptions | ⚠️ Keyword matching | ✅ Semantic extraction |
+| Reliability | 100% (no external API) | 100% (graceful fallback to dictionary) |
+
+The LLM understands your idea. The dictionary is your safety net. **You always get results.**
 
 ## Tool schema
 
