@@ -1,0 +1,2012 @@
+[
+  {
+    "idea_num": 1,
+    "idea_text": "AI-powered code review automation tool",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "Sfedfcv/redesigned-pancake",
+        "stars": 212,
+        "description": "Skip to content github / docs Code Issues 80 Pull requests 35 Discussions Actions Projects 2 Securit"
+      },
+      {
+        "name": "analysis-tools-dev/static-analysis",
+        "stars": 14402,
+        "description": "⚙️ A curated list of static analysis (SAST) tools and linters for all programming languages, config "
+      },
+      {
+        "name": "semgrep/semgrep",
+        "stars": 14290,
+        "description": "Lightweight static analysis for many languages. Find bug variants with patterns that look like sourc"
+      },
+      {
+        "name": "phpstan/phpstan",
+        "stars": 13838,
+        "description": "PHP Static Analysis Tool - discover bugs in your code without running it!"
+      },
+      {
+        "name": "reviewdog/reviewdog",
+        "stars": 9107,
+        "description": "🐶 Automated code review tool integrated with any code analysis tools regardless of programming langu"
+      }
+    ],
+    "pivot_hints": [
+      "Focus on real-time architectural smell detection for monorepos and microservices—Semgrep (14,290 stars) excels at pattern matching but lacks distributed dependency analysis, a gap evidenced by 75 HN posts on pull request review but minimal discussion of cross-service impact analysis.",
+      "Build AI code review specifically for legacy system modernization by training on diff patterns that identify technical debt migration opportunities—the 39,766 GitHub repos show saturated static analysis, but the analysis-tools-dev/static-analysis (14,402 stars) list has zero entries for refactoring-guided review, despite 44 HN posts on code review automation.",
+      "Target security-focused code review for compliance frameworks (SOC2, HIPAA, PCI-DSS) with automated evidence collection—while 77 HN posts discuss static code analysis, Semgrep and static-analysis tools treat compliance as a secondary use case rather than first-class citizens with audit trail generation."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "code review automation",
+        "count": 39766,
+        "detail": "39766 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "code review automation",
+        "count": 14402,
+        "detail": "Top repo has 14402 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "code review automation",
+        "count": 44,
+        "detail": "44 HN posts in last 12 months for 'code review automation'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "automated code analysis",
+        "count": 59,
+        "detail": "59 HN posts in last 12 months for 'automated code analysis'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "pull request review",
+        "count": 75,
+        "detail": "75 HN posts in last 12 months for 'pull request review'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "static code analysis",
+        "count": 77,
+        "detail": "77 HN posts in last 12 months for 'static code analysis'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "code quality checker",
+        "count": 123,
+        "detail": "123 HN posts in last 12 months for 'code quality checker'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "linting automation",
+        "count": 89,
+        "detail": "89 HN posts in last 12 months for 'linting automation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "code review automation",
+        "count": 1592236,
+        "detail": "1592236 npm packages found for 'code review automation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "automated code analysis",
+        "count": 1590057,
+        "detail": "1590057 npm packages found for 'automated code analysis'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "pull request review",
+        "count": 157509,
+        "detail": "157509 npm packages found for 'pull request review'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "static code analysis",
+        "count": 1600440,
+        "detail": "1600440 npm packages found for 'static code analysis'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "code quality checker",
+        "count": 1590004,
+        "detail": "1590004 npm packages found for 'code quality checker'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "linting automation",
+        "count": 37798,
+        "detail": "37798 npm packages found for 'linting automation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "code review automation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'code review automation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "automated code analysis",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'automated code analysis'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "pull request review",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'pull request review'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "static code analysis",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'static code analysis'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "code quality checker",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'code quality checker'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "linting automation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'linting automation'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:50:48.363962+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 2,
+    "idea_text": "open source feature flag service",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "Unleash/unleash",
+        "stars": 13230,
+        "description": "Open-source feature management platform"
+      },
+      {
+        "name": "thomaspoignant/go-feature-flag",
+        "stars": 1947,
+        "description": "GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution 100% Open So"
+      },
+      {
+        "name": "npm:@harnessio/ff-nodejs-server-sdk",
+        "stars": 0,
+        "description": "Feature flags SDK for NodeJS environments"
+      },
+      {
+        "name": "npm:@lovart-open/flags",
+        "stars": 0,
+        "description": "Feature flag management with multi-layer priority system (client-side)"
+      },
+      {
+        "name": "npm:@d11/flagship-rn-sdk",
+        "stars": 0,
+        "description": "Feature Flag Management"
+      }
+    ],
+    "pivot_hints": [
+      "Build a feature flag service optimized for edge/serverless environments with sub-100ms evaluation latency, targeting the gap between Unleash (13230 stars, focused on self-hosted traditional deployments) and the SDK-heavy ecosystem—market 6 HN posts on 'flag evaluation engine' suggesting underserved demand for performance-critical use cases.",
+      "Create a minimal, embedded feature flag library for Go that outcompetes go-feature-flag (1947 stars) by supporting native SQLite persistence and zero external dependencies, directly addressing the lightweight self-hosted segment that searches for 'LaunchDarkly alternative' (0 HN posts = untapped discovery opportunity).",
+      "Develop a feature flag platform specifically for mobile/client-side SDKs with built-in A/B testing and analytics, since the evidence shows 31 HN posts for 'feature flags SDK' but Unleash and go-feature-flag remain primarily backend-focused—this directly addresses the SDK ecosystem's fragmentation without competing head-to-head with the established 13K-star players."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "feature flag management",
+        "count": 775,
+        "detail": "775 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "feature flag management",
+        "count": 13230,
+        "detail": "Top repo has 13230 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "feature flag management",
+        "count": 17,
+        "detail": "17 HN posts in last 12 months for 'feature flag management'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "feature toggles open source",
+        "count": 15,
+        "detail": "15 HN posts in last 12 months for 'feature toggles open source'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "flag service server",
+        "count": 12,
+        "detail": "12 HN posts in last 12 months for 'flag service server'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "feature flags SDK",
+        "count": 31,
+        "detail": "31 HN posts in last 12 months for 'feature flags SDK'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "LaunchDarkly alternative",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'LaunchDarkly alternative'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "flag evaluation engine",
+        "count": 6,
+        "detail": "6 HN posts in last 12 months for 'flag evaluation engine'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "feature flag management",
+        "count": 172388,
+        "detail": "172388 npm packages found for 'feature flag management'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "feature toggles open source",
+        "count": 1487715,
+        "detail": "1487715 npm packages found for 'feature toggles open source'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "flag service server",
+        "count": 388826,
+        "detail": "388826 npm packages found for 'flag service server'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "feature flags SDK",
+        "count": 185287,
+        "detail": "185287 npm packages found for 'feature flags SDK'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "LaunchDarkly alternative",
+        "count": 15963,
+        "detail": "15963 npm packages found for 'LaunchDarkly alternative'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "flag evaluation engine",
+        "count": 66733,
+        "detail": "66733 npm packages found for 'flag evaluation engine'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "feature flag management",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'feature flag management'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "feature toggles open source",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'feature toggles open source'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "flag service server",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'flag service server'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "feature flags SDK",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'feature flags SDK'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "LaunchDarkly alternative",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'LaunchDarkly alternative'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "flag evaluation engine",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'flag evaluation engine'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:51:09.282910+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 3,
+    "idea_text": "AI chatbot customer support open source",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "wppconnect-team/wppconnect",
+        "stars": 3144,
+        "description": "WPPConnect is an open source project developed by the JavaScript community with the aim of exporting"
+      },
+      {
+        "name": "RasaHQ/rasa",
+        "stars": 21070,
+        "description": "💬   Open source machine learning framework to automate text- and voice-based conversations: NLU, dia"
+      },
+      {
+        "name": "taoshihan1991/goflylivechat",
+        "stars": 2500,
+        "description": "开源在线客服系统GO语言开发GO-FLY,免费在线客服系统/GOFLY LIVE CHAT: open source self-hosted private cloud customer suppor"
+      },
+      {
+        "name": "nlkitai/nlux",
+        "stars": 1362,
+        "description": "The 𝗣𝗼𝘄𝗲𝗿𝗳𝘂𝗹 Conversational AI JavaScript Library 💬 — UI for any LLM, supporting LangChain / Hugging"
+      },
+      {
+        "name": "waylaidwanderer/PandoraAI",
+        "stars": 861,
+        "description": "PandoraAI is a web chat client powered by node-chatgpt-api, allowing users to easily chat with multi"
+      }
+    ],
+    "pivot_hints": [
+      "Focus on support ticket automation and routing instead of conversational AI—only 7 HN posts in 12 months vs 50 for generic customer service bots, indicating an underserved workflow automation niche where you can integrate with existing ticketing systems like Jira/Linear rather than competing with Rasa's 21070-star NLU dominance.",
+      "Build a self-hosted live chat alternative to GoFlyLiveChat (2500 stars) with built-in AI triage for support teams, targeting companies already using open source infrastructure who need omnichannel routing—the gap exists between WPPConnect's WhatsApp focus and Rasa's conversational models.",
+      "Create an intent recognition and help desk automation tool (only 1 HN post in 12 months) that works as a lightweight middleware for existing customer support platforms, avoiding direct competition with Rasa by targeting teams that don't want full NLU/dialogue management complexity and just need ticket prioritization and auto-response logic."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "chatbot customer support",
+        "count": 6427,
+        "detail": "6427 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "chatbot customer support",
+        "count": 21070,
+        "detail": "Top repo has 21070 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "chatbot customer support",
+        "count": 19,
+        "detail": "19 HN posts in last 12 months for 'chatbot customer support'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "conversational AI support",
+        "count": 37,
+        "detail": "37 HN posts in last 12 months for 'conversational AI support'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "help desk automation",
+        "count": 1,
+        "detail": "1 HN posts in last 12 months for 'help desk automation'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "customer service bot",
+        "count": 50,
+        "detail": "50 HN posts in last 12 months for 'customer service bot'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "support ticket automation",
+        "count": 7,
+        "detail": "7 HN posts in last 12 months for 'support ticket automation'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "dialogue management framework",
+        "count": 2,
+        "detail": "2 HN posts in last 12 months for 'dialogue management framework'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "chatbot customer support",
+        "count": 385383,
+        "detail": "385383 npm packages found for 'chatbot customer support'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "conversational AI support",
+        "count": 414388,
+        "detail": "414388 npm packages found for 'conversational AI support'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "help desk automation",
+        "count": 192201,
+        "detail": "192201 npm packages found for 'help desk automation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "customer service bot",
+        "count": 154989,
+        "detail": "154989 npm packages found for 'customer service bot'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "support ticket automation",
+        "count": 393985,
+        "detail": "393985 npm packages found for 'support ticket automation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "dialogue management framework",
+        "count": 188032,
+        "detail": "188032 npm packages found for 'dialogue management framework'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "chatbot customer support",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'chatbot customer support'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "conversational AI support",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'conversational AI support'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "help desk automation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'help desk automation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "customer service bot",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'customer service bot'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "support ticket automation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'support ticket automation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "dialogue management framework",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'dialogue management framework'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:51:28.911957+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 4,
+    "idea_text": "markdown note taking app AI search",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "sheshbabu/zen",
+        "stars": 1053,
+        "description": "Selfhosted notes app. Single golang binary, notes stored as markdown within SQLite, full-text search"
+      },
+      {
+        "name": "thesephist/revery",
+        "stars": 299,
+        "description": "A personal semantic search engine capable of surfacing relevant bookmarks, journal entries, notes, b"
+      },
+      {
+        "name": "xwmx/nb",
+        "stars": 8028,
+        "description": "CLI and local web plain text note‑taking, bookmarking, and archiving with linking, tagging, filterin"
+      },
+      {
+        "name": "alibaba/AliSQL",
+        "stars": 5739,
+        "description": "AliSQL is a MySQL branch originated from Alibaba Group. Fetch document from Release Notes at bottom."
+      },
+      {
+        "name": "tjmlabs/ColiVara",
+        "stars": 1452,
+        "description": "Colivara is a suite of services that allows you to store, search, and retrieve documents based on th"
+      }
+    ],
+    "pivot_hints": [
+      "Build a specialized AI search layer for existing markdown vaults (Obsidian, Logseq, Dendron) rather than competing as a standalone app—the 8028-star xwmx/nb and 1053-star zen show users already have preferred note storage, but HN data shows 74 posts on embedding search vs only 8 on note-taking retrieval, indicating demand is specifically for better search, not storage.",
+      "Target the 40 HN posts on semantic search for notes by focusing on multi-modal retrieval (images + text + code snippets + audio transcripts) within markdown—competitors like thesephist/revery (299 stars) only handle text-based embeddings, leaving a gap for technical users who store screenshots and code blocks alongside notes.",
+      "Pivot to markdown-based team knowledge bases with real-time collaborative AI search, since all three competitors (xwmx/nb, zen, revery) are single-user or personal tools—the 2134 GitHub repos and sustained HN interest suggest demand exists but no dominant multi-user solution has emerged with the simplicity of CLI note apps."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "markdown note search",
+        "count": 2134,
+        "detail": "2134 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "markdown note search",
+        "count": 8028,
+        "detail": "Top repo has 8028 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "markdown note search",
+        "count": 43,
+        "detail": "43 HN posts in last 12 months for 'markdown note search'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "semantic search notes",
+        "count": 40,
+        "detail": "40 HN posts in last 12 months for 'semantic search notes'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "full text search markdown",
+        "count": 17,
+        "detail": "17 HN posts in last 12 months for 'full text search markdown'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "note taking retrieval",
+        "count": 8,
+        "detail": "8 HN posts in last 12 months for 'note taking retrieval'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "embedding search documents",
+        "count": 74,
+        "detail": "74 HN posts in last 12 months for 'embedding search documents'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "vector database notes",
+        "count": 12,
+        "detail": "12 HN posts in last 12 months for 'vector database notes'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "markdown note search",
+        "count": 1964672,
+        "detail": "1964672 npm packages found for 'markdown note search'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "semantic search notes",
+        "count": 110620,
+        "detail": "110620 npm packages found for 'semantic search notes'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "full text search markdown",
+        "count": 2018768,
+        "detail": "2018768 npm packages found for 'full text search markdown'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "note taking retrieval",
+        "count": 192812,
+        "detail": "192812 npm packages found for 'note taking retrieval'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "embedding search documents",
+        "count": 94509,
+        "detail": "94509 npm packages found for 'embedding search documents'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "vector database notes",
+        "count": 94315,
+        "detail": "94315 npm packages found for 'vector database notes'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "markdown note search",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'markdown note search'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "semantic search notes",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'semantic search notes'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "full text search markdown",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'full text search markdown'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "note taking retrieval",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'note taking retrieval'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "embedding search documents",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'embedding search documents'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "vector database notes",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'vector database notes'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:51:49.593683+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 5,
+    "idea_text": "LLM API gateway proxy router",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "coaidev/coai",
+        "stars": 8952,
+        "description": "🚀 Next Generation Multi-tenant AI One-Stop Solution. Builtin Admin & Billing System. Enterprise-Grad"
+      },
+      {
+        "name": "BerriAI/litellm",
+        "stars": 37289,
+        "description": "Python SDK, Proxy Server (AI Gateway) to call 100+ LLM APIs in OpenAI (or native) format, with cost "
+      },
+      {
+        "name": "QuantumNous/new-api",
+        "stars": 18627,
+        "description": "A unified AI model hub for aggregation & distribution. It supports cross-converting various LLMs int"
+      },
+      {
+        "name": "Portkey-AI/gateway",
+        "stars": 10743,
+        "description": "A blazing fast AI Gateway with integrated guardrails. Route to 200+ LLMs, 50+ AI Guardrails with 1 f"
+      },
+      {
+        "name": "spring-cloud/spring-cloud-gateway",
+        "stars": 4829,
+        "description": "An API Gateway built on Spring Framework and Spring Boot providing routing and more."
+      }
+    ],
+    "pivot_hints": [
+      "Build a specialized LLM gateway for real-time model fallback and automatic failover across providers—litellm (37k stars) and coai (8.9k) focus on cost tracking and multi-tenancy, but neither emphasizes sub-100ms automatic provider switching when one endpoint fails or degrades, which is critical for production systems handling concurrent requests.",
+      "Create an edge-deployable LLM router optimized for latency-sensitive applications (gaming, real-time chat, voice AI) that pre-routes requests to geographically closest provider endpoints—existing solutions like new-api (18.6k stars) target centralized hubs for enterprise billing, leaving a gap for distributed edge inference with local caching and response streaming.",
+      "Develop a LLM gateway focused on token-level cost optimization and partial request caching across 35+ providers, charging customers per-token-saved rather than per-request—litellm tracks costs post-request but doesn't optimize spend during routing; the zero HN posts on 'endpoint multiplexer' signals developers are unaware this pricing model exists."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "LLM API gateway",
+        "count": 1061,
+        "detail": "1061 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "LLM API gateway",
+        "count": 37289,
+        "detail": "Top repo has 37289 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "LLM API gateway",
+        "count": 38,
+        "detail": "38 HN posts in last 12 months for 'LLM API gateway'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "API routing proxy",
+        "count": 18,
+        "detail": "18 HN posts in last 12 months for 'API routing proxy'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "LLM request router",
+        "count": 24,
+        "detail": "24 HN posts in last 12 months for 'LLM request router'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "model gateway load balancing",
+        "count": 2,
+        "detail": "2 HN posts in last 12 months for 'model gateway load balancing'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "API proxy middleware",
+        "count": 8,
+        "detail": "8 HN posts in last 12 months for 'API proxy middleware'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "LLM endpoint multiplexer",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'LLM endpoint multiplexer'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "LLM API gateway",
+        "count": 533831,
+        "detail": "533831 npm packages found for 'LLM API gateway'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "API routing proxy",
+        "count": 549665,
+        "detail": "549665 npm packages found for 'API routing proxy'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "LLM request router",
+        "count": 152776,
+        "detail": "152776 npm packages found for 'LLM request router'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "model gateway load balancing",
+        "count": 196241,
+        "detail": "196241 npm packages found for 'model gateway load balancing'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "API proxy middleware",
+        "count": 564964,
+        "detail": "564964 npm packages found for 'API proxy middleware'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "LLM endpoint multiplexer",
+        "count": 38706,
+        "detail": "38706 npm packages found for 'LLM endpoint multiplexer'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "LLM API gateway",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'LLM API gateway'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "API routing proxy",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'API routing proxy'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "LLM request router",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'LLM request router'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "model gateway load balancing",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'model gateway load balancing'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "API proxy middleware",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'API proxy middleware'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "LLM endpoint multiplexer",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'LLM endpoint multiplexer'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:52:09.995887+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 6,
+    "idea_text": "AI agent memory layer persistent context",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "deepset-ai/haystack",
+        "stars": 24348,
+        "description": "Open-source AI orchestration framework for building context-engineered, production-ready LLM applica"
+      },
+      {
+        "name": "apostrophecms/apostrophe",
+        "stars": 4529,
+        "description": "A full-featured, open-source content management framework built with Node.js that empowers organizat"
+      },
+      {
+        "name": "FalkorDB/FalkorDB",
+        "stars": 3577,
+        "description": "A super fast Graph Database uses GraphBLAS under the hood for its sparse adjacency matrix graph repr"
+      },
+      {
+        "name": "totogo/awesome-knowledge-graph",
+        "stars": 1805,
+        "description": "A curated list of Knowledge Graph related learning materials, databases, tools and other resources"
+      },
+      {
+        "name": "nix-community/impermanence",
+        "stars": 1700,
+        "description": "Modules to help you handle persistent state on systems with ephemeral root storage [maintainer=@taly"
+      }
+    ],
+    "pivot_hints": [
+      "Build a specialized memory indexing layer optimized for multi-turn agent conversations with sub-100ms retrieval, targeting the gap between Haystack's general pipeline framework (24348 stars) and conversation-specific tools—HN data shows 51 posts on agent conversation history but no dominant specialized player.",
+      "Create a lightweight persistent context SDK for edge-deployed agents that doesn't require full orchestration frameworks like Haystack, focusing on local-first memory with optional cloud sync for teams running distributed agent swarms on devices.",
+      "Develop a unified memory abstraction layer that bridges FalkorDB's knowledge graph approach (3577 stars) with temporal conversation contexts, enabling agents to distinguish between structural knowledge and ephemeral interaction history—addressing the 74 HN posts on semantic memory systems lacking temporal reasoning."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "agent memory persistence",
+        "count": 1578,
+        "detail": "1578 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "agent memory persistence",
+        "count": 24348,
+        "detail": "Top repo has 24348 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "agent memory persistence",
+        "count": 29,
+        "detail": "29 HN posts in last 12 months for 'agent memory persistence'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "context management framework",
+        "count": 35,
+        "detail": "35 HN posts in last 12 months for 'context management framework'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "persistent state storage",
+        "count": 18,
+        "detail": "18 HN posts in last 12 months for 'persistent state storage'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "agent conversation history",
+        "count": 51,
+        "detail": "51 HN posts in last 12 months for 'agent conversation history'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "knowledge graph database",
+        "count": 32,
+        "detail": "32 HN posts in last 12 months for 'knowledge graph database'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "semantic memory system",
+        "count": 74,
+        "detail": "74 HN posts in last 12 months for 'semantic memory system'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "agent memory persistence",
+        "count": 65213,
+        "detail": "65213 npm packages found for 'agent memory persistence'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "context management framework",
+        "count": 246944,
+        "detail": "246944 npm packages found for 'context management framework'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "persistent state storage",
+        "count": 237690,
+        "detail": "237690 npm packages found for 'persistent state storage'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "agent conversation history",
+        "count": 58881,
+        "detail": "58881 npm packages found for 'agent conversation history'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "knowledge graph database",
+        "count": 103348,
+        "detail": "103348 npm packages found for 'knowledge graph database'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "semantic memory system",
+        "count": 167851,
+        "detail": "167851 npm packages found for 'semantic memory system'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "agent memory persistence",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'agent memory persistence'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "context management framework",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'context management framework'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "persistent state storage",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'persistent state storage'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "agent conversation history",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'agent conversation history'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "knowledge graph database",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'knowledge graph database'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "semantic memory system",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'semantic memory system'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:52:30.540881+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 7,
+    "idea_text": "MCP server database query natural language",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "go-jet/jet",
+        "stars": 3585,
+        "description": "Type safe SQL builder with code generation and automatic query result data mapping"
+      },
+      {
+        "name": "salesforce/WikiSQL",
+        "stars": 1799,
+        "description": "A large annotated semantic parsing corpus for developing natural language interfaces."
+      },
+      {
+        "name": "GongRzhe/Gmail-MCP-Server",
+        "stars": 1037,
+        "description": "A Model Context Protocol (MCP) server for Gmail integration in Claude Desktop with auto authenticati"
+      },
+      {
+        "name": "JacobLinCool/d1-manager",
+        "stars": 609,
+        "description": "D1 Manager is a web UI and API for Cloudflare D1, a serverless SQL database. It provides a web inter"
+      },
+      {
+        "name": "subnetmarco/pgmcp",
+        "stars": 524,
+        "description": "An MCP server to query any Postgres database in natural language."
+      }
+    ],
+    "pivot_hints": [
+      "Build a specialized MCP server for NoSQL databases (MongoDB, DynamoDB, Firestore) instead of SQL—go-jet dominates SQL generation with 3585 stars, but zero HN posts exist for text-to-SQL servers, indicating fragmentation; target the underserved document/time-series query translation segment.",
+      "Create an MCP server that combines natural language queries with real-time schema introspection and query cost estimation for cloud databases—Gmail-MCP-Server (1037 stars) shows MCP adoption for specific integrations, but no competitor addresses cost-aware query optimization for enterprises managing expensive database operations.",
+      "Focus on multi-database query federation through a single natural language interface (querying across PostgreSQL, Snowflake, BigQuery simultaneously)—WikiSQL's 1799 stars represents semantic parsing research without deployment, and 65 HN posts on MCP servers show demand, but no production tool handles cross-database orchestration."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "MCP server natural language",
+        "count": 1926,
+        "detail": "1926 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "MCP server natural language",
+        "count": 3585,
+        "detail": "Top repo has 3585 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "MCP server natural language",
+        "count": 65,
+        "detail": "65 HN posts in last 12 months for 'MCP server natural language'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "database query generation",
+        "count": 30,
+        "detail": "30 HN posts in last 12 months for 'database query generation'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "SQL natural language interface",
+        "count": 10,
+        "detail": "10 HN posts in last 12 months for 'SQL natural language interface'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "LLM database adapter",
+        "count": 16,
+        "detail": "16 HN posts in last 12 months for 'LLM database adapter'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "semantic query translation",
+        "count": 5,
+        "detail": "5 HN posts in last 12 months for 'semantic query translation'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "text-to-SQL server",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'text-to-SQL server'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "MCP server natural language",
+        "count": 359259,
+        "detail": "359259 npm packages found for 'MCP server natural language'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "database query generation",
+        "count": 156434,
+        "detail": "156434 npm packages found for 'database query generation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "SQL natural language interface",
+        "count": 229302,
+        "detail": "229302 npm packages found for 'SQL natural language interface'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "LLM database adapter",
+        "count": 85005,
+        "detail": "85005 npm packages found for 'LLM database adapter'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "semantic query translation",
+        "count": 112055,
+        "detail": "112055 npm packages found for 'semantic query translation'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "text-to-SQL server",
+        "count": 1631201,
+        "detail": "1631201 npm packages found for 'text-to-SQL server'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "MCP server natural language",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'MCP server natural language'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "database query generation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'database query generation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "SQL natural language interface",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'SQL natural language interface'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "LLM database adapter",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'LLM database adapter'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "semantic query translation",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'semantic query translation'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "text-to-SQL server",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'text-to-SQL server'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:52:49.622574+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 8,
+    "idea_text": "AI changelog generator git commits",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "tj/git-extras",
+        "stars": 17990,
+        "description": "GIT utilities -- repo summary, repl, changelog population, author commit percentages and more"
+      },
+      {
+        "name": "orhun/git-cliff",
+        "stars": 11440,
+        "description": "A highly customizable Changelog Generator that follows Conventional Commit specifications ⛰️ "
+      },
+      {
+        "name": "jnsahaj/lumen",
+        "stars": 1914,
+        "description": "Beautiful git diff viewer, generate commits with AI, get summary of changes, all from the CLI"
+      },
+      {
+        "name": "qoomon/git-conventional-commits",
+        "stars": 589,
+        "description": "Git Conventional Commits Util to generate Semantic Version and Markdown Change Log and Validate Comm"
+      },
+      {
+        "name": "npm:@semantic-release/release-notes-generator",
+        "stars": 0,
+        "description": "semantic-release plugin to generate changelog content with conventional-changelog"
+      }
+    ],
+    "pivot_hints": [
+      "Focus on real-time CI/CD integration for automated release notes: git-cliff (11440 stars) and git-extras (17990 stars) lack native GitHub Actions/GitLab CI templates, but HN shows 42 posts on 'git commit summary' — build pre-configured workflows that generate and post changelogs directly to releases/PRs without manual steps.",
+      "Target multi-repo monorepo changelog generation: current solutions handle single repos; build for teams managing 5+ interconnected repos (common in startups) that need unified, cross-repo changelogs with dependency tracking — lumen (1914 stars) doesn't address this despite 643 total repos showing market fragmentation.",
+      "Build AI-powered commit message quality scoring and suggestion engine rather than just summarization: HN data shows 15 posts on 'automated changelog from git' but only 3 on 'semantic commit parser' — create a linter that analyzes commit hygiene, suggests conventional commit fixes, and rewards developers with contribution scoring."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "changelog generator commits",
+        "count": 643,
+        "detail": "643 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "changelog generator commits",
+        "count": 17990,
+        "detail": "Top repo has 17990 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "changelog generator commits",
+        "count": 3,
+        "detail": "3 HN posts in last 12 months for 'changelog generator commits'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "git commit summary",
+        "count": 42,
+        "detail": "42 HN posts in last 12 months for 'git commit summary'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "automated changelog from git",
+        "count": 15,
+        "detail": "15 HN posts in last 12 months for 'automated changelog from git'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "commit message analyzer",
+        "count": 10,
+        "detail": "10 HN posts in last 12 months for 'commit message analyzer'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "release notes generator",
+        "count": 4,
+        "detail": "4 HN posts in last 12 months for 'release notes generator'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "semantic commit parser",
+        "count": 3,
+        "detail": "3 HN posts in last 12 months for 'semantic commit parser'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "changelog generator commits",
+        "count": 118342,
+        "detail": "118342 npm packages found for 'changelog generator commits'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "git commit summary",
+        "count": 188132,
+        "detail": "188132 npm packages found for 'git commit summary'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "automated changelog from git",
+        "count": 1124416,
+        "detail": "1124416 npm packages found for 'automated changelog from git'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "commit message analyzer",
+        "count": 134853,
+        "detail": "134853 npm packages found for 'commit message analyzer'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "release notes generator",
+        "count": 181805,
+        "detail": "181805 npm packages found for 'release notes generator'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "semantic commit parser",
+        "count": 108588,
+        "detail": "108588 npm packages found for 'semantic commit parser'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "changelog generator commits",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'changelog generator commits'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "git commit summary",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'git commit summary'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "automated changelog from git",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'automated changelog from git'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "commit message analyzer",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'commit message analyzer'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "release notes generator",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'release notes generator'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "semantic commit parser",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'semantic commit parser'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:53:09.789275+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 9,
+    "idea_text": "MCP server CI CD pipeline debugging",
+    "signal": 74,
+    "likelihood": "high",
+    "top_similars": [
+      {
+        "name": "Coding-Solo/godot-mcp",
+        "stars": 2001,
+        "description": "MCP server for interfacing with Godot game engine. Provides tools for launching the editor, running "
+      },
+      {
+        "name": "MCPJam/inspector",
+        "stars": 1774,
+        "description": "Test & Debug MCP servers, ChatGPT apps, and MCP Apps (ext-apps)"
+      },
+      {
+        "name": "npm:@percy/env",
+        "stars": 0,
+        "description": "This package provides various CI/CD support for Percy by coalescing different environment variables "
+      },
+      {
+        "name": "npm:chrome-trace-event",
+        "stars": 0,
+        "description": "A library to create a trace of your node app per Google's Trace Event format."
+      },
+      {
+        "name": "cirosantilli/china-dictatorship",
+        "stars": 2866,
+        "description": "反中共政治宣传库。Anti Chinese government propaganda. 住在中国真名用户的网友请别给星星，不然你要被警察请喝茶。常见问答集，新闻集和饭店和音乐建议。卐习万岁卐。冠状病"
+      }
+    ],
+    "pivot_hints": [
+      "Build a specialized MCP server debugger for async task execution and resource leak detection in CI/CD pipelines, targeting the gap between MCPJam/inspector's general testing (1774 stars) and the zero HN posts on 'continuous integration inspector' - focus on pipeline-specific bottleneck visualization rather than generic MCP server testing.",
+      "Create an MCP server that integrates with existing CI/CD platforms (GitHub Actions, GitLab CI, CircleCI) to auto-capture and replay failed pipeline states, directly addressing the 6 HN posts on 'CI/CD pipeline monitoring' versus 53 on general MCP debugging - position as the production debugging tool missing from the inspector-only landscape.",
+      "Develop a trace analysis tool specifically for MCP protocol server communication in CI/CD contexts, leveraging the 13 HN posts on 'pipeline trace analysis' and the 28 on 'protocol server testing' to fill the niche between generic protocol debugging and pipeline-specific insights that neither Godot-MCP (2001 stars) nor inspector address."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "MCP server debugging",
+        "count": 2701,
+        "detail": "2701 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "MCP server debugging",
+        "count": 2866,
+        "detail": "Top repo has 2866 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "MCP server debugging",
+        "count": 53,
+        "detail": "53 HN posts in last 12 months for 'MCP server debugging'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "CI/CD pipeline monitoring",
+        "count": 6,
+        "detail": "6 HN posts in last 12 months for 'CI/CD pipeline monitoring'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "protocol server testing",
+        "count": 28,
+        "detail": "28 HN posts in last 12 months for 'protocol server testing'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "pipeline trace analysis",
+        "count": 13,
+        "detail": "13 HN posts in last 12 months for 'pipeline trace analysis'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "MCP debugging tools",
+        "count": 59,
+        "detail": "59 HN posts in last 12 months for 'MCP debugging tools'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "continuous integration inspector",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'continuous integration inspector'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "MCP server debugging",
+        "count": 285707,
+        "detail": "285707 npm packages found for 'MCP server debugging'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "CI/CD pipeline monitoring",
+        "count": 202478,
+        "detail": "202478 npm packages found for 'CI/CD pipeline monitoring'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "protocol server testing",
+        "count": 368955,
+        "detail": "368955 npm packages found for 'protocol server testing'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "pipeline trace analysis",
+        "count": 44056,
+        "detail": "44056 npm packages found for 'pipeline trace analysis'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "MCP debugging tools",
+        "count": 139377,
+        "detail": "139377 npm packages found for 'MCP debugging tools'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "continuous integration inspector",
+        "count": 97693,
+        "detail": "97693 npm packages found for 'continuous integration inspector'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "MCP server debugging",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'MCP server debugging'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "CI/CD pipeline monitoring",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'CI/CD pipeline monitoring'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "protocol server testing",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'protocol server testing'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "pipeline trace analysis",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'pipeline trace analysis'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "MCP debugging tools",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'MCP debugging tools'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "continuous integration inspector",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'continuous integration inspector'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:53:30.324453+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  },
+  {
+    "idea_num": 10,
+    "idea_text": "bluetooth pet collar firmware ESP32",
+    "signal": 51,
+    "likelihood": "medium",
+    "top_similars": [
+      {
+        "name": "acpayers-alt/raising-hell-cardputer",
+        "stars": 29,
+        "description": "Open-source virtual pet firmware for the M5Stack Cardputer."
+      },
+      {
+        "name": "This-Is-Captain-Code/monagotchi",
+        "stars": 15,
+        "description": "OpenClaw skills that connect a physical ESP32 Tamagotchi (LCD + buttons) to a memecoin on nad.fun (M"
+      },
+      {
+        "name": "Tripleace1/Health-Tracka",
+        "stars": 5,
+        "description": "A wearable health monitor using ESP32-S3 with a 1.69\" touch screen. Tracks SpO2, heart rate, tempera"
+      },
+      {
+        "name": "isurusasangaetam/Hand-Tracking-Glove",
+        "stars": 4,
+        "description": "A wearable hand tracking glove built with ESP32, MPU IMUs, and an I2C multiplexer for precise real-t"
+      },
+      {
+        "name": "MatheusCavini/Meaw-PetFeeder-Firmware",
+        "stars": 4,
+        "description": "Firmware for a programable pet food dispenser device. Check also: https://github.com/MatheusCavini/M"
+      }
+    ],
+    "pivot_hints": [
+      "Pivot to multi-pet household management: The top competitors (raising-hell-cardputer at 29 stars, monagotchi at 15 stars) focus on single pet engagement or health tracking for humans. Build an ESP32 collar firmware that syncs multiple pets to a shared household dashboard with role-based access (owner vs. family members), filling the gap where 0 HN posts exist for 'ESP32 bluetooth collar' despite 9 posts for broader 'BLE pet collar' topics.",
+      "Target the escape-detection and geofencing niche: Health-Tracka (5 stars) covers vital signs but no competitor in the results addresses real-time pet location alerts or fence breach notifications. Develop an ESP32 BLE collar with geofencing and lost-pet SOS features that pairs with a mobile app, leveraging the 9 HN posts on 'BLE pet collar' as proof of audience interest while keeping firmware-specific competition minimal.",
+      "Create a dog sports/activity performance tracker: Existing projects (raising-hell-cardputer, monagotchi) are novelty/engagement-focused rather than athletic. Build an ESP32 collar that measures sprint speed, jump height, and training intensity for agility/working dog owners, then open-source just the firmware layer—the 6 HN posts on 'ESP32 firmware pet' and 0 posts on 'ESP32 wearable tracker' suggest the athletic angle is completely unexplored."
+    ],
+    "evidence": [
+      {
+        "source": "github",
+        "type": "repo_count",
+        "query": "ESP32 bluetooth collar",
+        "count": 74,
+        "detail": "74 repos found across queries"
+      },
+      {
+        "source": "github",
+        "type": "max_stars",
+        "query": "ESP32 bluetooth collar",
+        "count": 29,
+        "detail": "Top repo has 29 stars"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "ESP32 bluetooth collar",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'ESP32 bluetooth collar'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "pet tracking firmware ESP32",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'pet tracking firmware ESP32'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "BLE pet collar",
+        "count": 9,
+        "detail": "9 HN posts in last 12 months for 'BLE pet collar'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "ESP32 wearable tracker",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'ESP32 wearable tracker'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "bluetooth pet device",
+        "count": 0,
+        "detail": "0 HN posts in last 12 months for 'bluetooth pet device'"
+      },
+      {
+        "source": "hackernews",
+        "type": "mention_count",
+        "query": "ESP32 firmware pet",
+        "count": 6,
+        "detail": "6 HN posts in last 12 months for 'ESP32 firmware pet'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "ESP32 bluetooth collar",
+        "count": 2804,
+        "detail": "2804 npm packages found for 'ESP32 bluetooth collar'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "pet tracking firmware ESP32",
+        "count": 24856,
+        "detail": "24856 npm packages found for 'pet tracking firmware ESP32'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "BLE pet collar",
+        "count": 2431,
+        "detail": "2431 npm packages found for 'BLE pet collar'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "ESP32 wearable tracker",
+        "count": 7792,
+        "detail": "7792 npm packages found for 'ESP32 wearable tracker'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "bluetooth pet device",
+        "count": 31174,
+        "detail": "31174 npm packages found for 'bluetooth pet device'"
+      },
+      {
+        "source": "npm",
+        "type": "package_count",
+        "query": "ESP32 firmware pet",
+        "count": 2340,
+        "detail": "2340 npm packages found for 'ESP32 firmware pet'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "ESP32 bluetooth collar",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'ESP32 bluetooth collar'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "pet tracking firmware ESP32",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'pet tracking firmware ESP32'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "BLE pet collar",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'BLE pet collar'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "ESP32 wearable tracker",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'ESP32 wearable tracker'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "bluetooth pet device",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'bluetooth pet device'"
+      },
+      {
+        "source": "pypi",
+        "type": "package_count",
+        "query": "ESP32 firmware pet",
+        "count": 0,
+        "detail": "0 PyPI packages found for 'ESP32 firmware pet'"
+      },
+      {
+        "source": "producthunt",
+        "type": "skipped",
+        "query": "",
+        "count": 0,
+        "detail": "Product Hunt search skipped (PRODUCTHUNT_TOKEN not set)"
+      }
+    ],
+    "meta": {
+      "checked_at": "2026-02-28T20:53:49.409549+00:00",
+      "sources_used": [
+        "github",
+        "hackernews",
+        "npm",
+        "pypi"
+      ],
+      "depth": "deep",
+      "version": "0.4.0",
+      "keyword_source": "llm",
+      "lang": "en",
+      "pivot_source": "llm"
+    }
+  }
+]

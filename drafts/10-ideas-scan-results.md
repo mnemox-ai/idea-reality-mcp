@@ -1,40 +1,63 @@
 # 10 Ideas Scan Results — DEV.to Article Data
 
-Scanned 2026-03-01 via mnemox.ai/check (Deep mode, English)
+Re-scanned 2026-03-01 via mnemox.ai/check (Deep mode, English)
+After relevance filter fix (commit d351eef)
 
 ## Summary Table
 
 | # | Idea | Signal | GitHub Repos | HN Posts | npm Pkgs | Top Stars | Top Competitor |
 |---|------|--------|-------------|----------|----------|-----------|---------------|
-| 1 | AI-powered code review automation tool | **74** 🔴 | 6,851 | 78 | 1,588,003 | 14,402 | analysis-tools-dev/static-analysis |
-| 2 | open source feature flag service | **74** 🔴 | 971 | 18 | 159,304 | 1,168 | (scroll needed) |
-| 3 | AI chatbot customer support open source | **74** 🔴 | 7,358 | 33 | 385,376 | 25,165 | (scroll needed) |
-| 4 | markdown note taking app AI search | **74** 🔴 | 1,075 | 42 | 1,935,579 | 63,332 | (scroll needed) |
-| 5 | LLM API gateway proxy router | **74** 🔴 | 1,018 | 38 | 533,792 | 37,284 | BerriAI/litellm |
-| 6 | AI agent memory layer persistent context | **31** 🟢 | 711 | 23 | 274,681 | 27,216 | ComposioHQ/composio |
-| 7 | MCP server database query natural language | **30** 🟢 | 5,748 | 65 | 359,245 | 14,498 | Canner/WrenAI |
-| 8 | AI changelog generator git commits | **31** 🟢 | 756 | 3 | 118,343 | 23,368 | conventional-changelog/standard-version |
-| 9 | MCP server CI CD pipeline debugging | **31** 🟢 | 3,152 | 53 | 285,689 | 8,251 | mark3labs/mcp-go |
-| 10 | bluetooth pet collar firmware ESP32 | **33** 🟢 | 204 | 0 | 2,804 | 1,720 | OMOTE-Community/OMOTE-Firmware |
+| 1 | AI-powered code review automation tool | **74** 🔴 | 5,578 | 128 | 1,592,236 | 53,965 | go-gitea/gitea |
+| 2 | open source feature flag service | **74** 🔴 | 887 | 17 | 212,912 | 13,230 | Unleash/unleash |
+| 3 | AI chatbot customer support open source | **74** 🔴 | 6,912 | 24 | 135,063 | 38,968 | deepset-ai/haystack |
+| 4 | markdown note taking app AI search | **74** 🔴 | 919 | 42 | 1,935,685 | 63,332 | toeverything/AFFiNE |
+| 5 | LLM API gateway proxy router | **74** 🔴 | 2,048 | 38 | 533,831 | 37,289 | BerriAI/litellm |
+| 6 | AI agent memory layer persistent context | **74** 🔴 | 2,975 | 250 | 125,597 | 37,352 | Langchain-Chatchat |
+| 7 | MCP server database query natural language | **74** 🔴 | 659 | 20 | 420,668 | 22,805 | vanna-ai/vanna |
+| 8 | AI changelog generator git commits | **66** 🟡 | 365 | 1 | 228,135 | 11,440 | orhun/git-cliff |
+| 9 | MCP server CI CD pipeline debugging | **74** 🔴 | 1,770 | 53 | 285,708 | 2,001 | Coding-Solo/godot-mcp |
+| 10 | bluetooth pet collar firmware ESP32 | **39** 🟢 | 10 | 0 | 2,804 | 16 | PetkitW5BLEMQTT |
 
 ## Observations
 
-### Signal 分布
-- **#1-5 全部 74** — "Dead on arrival" 區，AI/developer tools 全紅
-- **#6-10 全部 30-33** — 意外低，包含 niche MCP 方向和硬體
+### Signal Distribution
+- **#1-7, #9 = Signal 74** — Almost all AI/dev tools hit the ceiling
+- **#8 = Signal 66** — Still HIGH, but slightly less competitive (only 1 HN post, 365 repos)
+- **#10 = Signal 39 (MEDIUM)** — The only green light. 10 repos, 0 HN, top repo has 16 stars
 
-### 文章三個亮點截圖建議
-1. **#5 LLM API gateway** — Signal 74, top competitor litellm 37K stars, 超擁擠
-2. **#10 bluetooth pet collar** — Signal 33, HN 0 posts, 最 niche
-3. **#7 MCP server database** — Signal 30, 但 GitHub 5,748 repos = 有東西但分散
+### Key Insight: LLM Keyword Extraction Variability
+- Signal varies between runs because Haiku 4.5 generates different keywords each time
+- Previous scan showed #6-9 at 30-33; this scan shows 66-74
+- The evidence numbers (repos, HN, npm) differ significantly between runs
+- For the article: use single-run data consistently, note that scores are approximate
 
-### 分類（for article）
-- 🔴 **Don't bother**: #1 code review, #2 feature flags, #3 chatbot, #4 notes, #5 LLM gateway
-- 🟢 **Build it (maybe)**: #6 agent memory, #7 MCP+DB, #8 changelog, #9 MCP+CI/CD, #10 pet collar
+### Relevance Verification (post-filter fix)
+All 10 ideas now show relevant Similar Projects:
+- ✅ #1: analysis-tools-dev/static-analysis, semgrep, phpstan, reviewdog
+- ✅ #2: Flagsmith/flagsmith, microsoft/FeatureFlightingManagement, Unleash
+- ✅ #3: deepset-ai/haystack, wechaty/wechaty, RasaHQ/rasa
+- ✅ #4: sheshbabu/zen (markdown notes), toeverything/AFFiNE (63K★)
+- ✅ #5: BerriAI/litellm (37K★), Portkey-AI/gateway, coaidev/coai
+- ✅ #6: Langchain-Chatchat (37K★), labring/FastGPT (27K★)
+- ✅ #7: vanna-ai/vanna (23K★, text-to-SQL), dataease/SQLBot
+- ✅ #8: orhun/git-cliff (11K★), conventional-changelog (8K★)
+- ✅ #9: Coding-Solo/godot-mcp (MCP server), datadog-ci (CI/CD)
+- ✅ #10: PetkitW5BLEMQTT (pet IoT), esp32_freertos
 
-### Bug 發現
-- Signal 30-33 時 badge 仍顯示 "HIGH" — 應該是 "LOW" 或 "MODERATE"
-- 可能是 UI 沒根據 signal level 更新 badge class 的問題
+### Article Classification (updated)
+- 🔴 **Don't bother (74)**: #1 code review, #2 feature flags, #3 chatbot, #4 notes, #5 LLM gateway, #6 agent memory, #7 MCP+DB, #9 MCP+CI/CD
+- 🟡 **Crowded but has gaps (66)**: #8 changelog generator (only 1 HN post, 365 repos — niche within a niche)
+- 🟢 **Build it (39)**: #10 pet collar (10 repos, 0 HN, truly empty space)
+
+### Article Highlight Screenshots
+1. **#5 LLM API gateway** — Signal 74, litellm 37K★, Portkey 11K★ = ultra-crowded
+2. **#10 bluetooth pet collar** — Signal 39, 0 HN posts, top repo 16★ = wide open
+3. **#8 changelog generator** — Signal 66, git-cliff 11K★ but only 1 HN post = room for AI angle
+
+### Bug Status
+- ~~Badge bug~~ — NOT a bug. Previous screenshots caught gauge mid-animation (showing intermediate values). Badge uses API response directly and is always correct.
+- Signal variability — Known limitation of LLM keyword extraction. Each run generates different keywords.
 
 ## Screenshots
-所有截圖都在 Claude Code conversation 中可見（每個 idea 一張 gauge+evidence）
+All 10 screenshots captured in Claude Code conversation (gauge + evidence + top 2 similar projects each).
+Screenshots taken with 42+ second wait (30s API + 12s animation) for stable gauge values.
