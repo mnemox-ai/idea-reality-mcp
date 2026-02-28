@@ -96,15 +96,22 @@ drafts/
 - ✅ Core MCP server (stdio + Streamable HTTP)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ 3-stage keyword extraction + LLM extraction (Render)
-- ✅ 138/138 tests passing
+- ✅ 148/148 tests passing
+- ✅ LLM pivot hints (Haiku 4.5, real competitor data, fallback to template)
+- ✅ `[PIVOT]` diagnostic logging for Render logs
 - ✅ Score History (SQLite, /api/history endpoint)
 - ✅ Email gate + subscribe endpoint (POST /api/subscribe, GET /api/subscribers/count)
+- ✅ Language param (en/zh) in API + LLM pivot hints
+- ✅ Language-change banner (3s auto-dismiss when toggling with results visible)
 - ✅ Agent templates — simplified to one-line hints (community feedback)
 - ✅ idea-check-action GitHub Action (mnemox-ai/idea-check-action)
 - ✅ Published: PyPI + GitHub Release + MCP Registry + Smithery + 10+ directories
-- ✅ Live demo: mnemox.ai/check (with email gate)
+- ✅ Live demo: mnemox.ai/check (with email gate + SEO + JSON-LD)
 - ✅ Full bilingual docs (EN + zh-TW)
-- ✅ DEV.to article drafts (v0.3.4 + agent instructions)
+- ✅ SEO: sitemap.xml, robots.txt, OG/Twitter/JSON-LD for both pages
+- ✅ Cursor Marketplace plugin submitted (awaiting review)
+- ✅ Render env: ANTHROPIC_API_KEY + GITHUB_TOKEN configured
+- ✅ README rewrite: automation-first value prop + "Why not Google?" section
 
 ### idea-check-action (v1)
 - GitHub: mnemox-ai/idea-check-action (public)
@@ -131,6 +138,7 @@ drafts/
 - **Decision Tracking**: decision buttons (build/pivot/kill), linked to email + idea_hash
 
 ### Priority 2: Distribution (ongoing)
+- Cursor Marketplace review pending (submitted 2026-03-01, contact: dev@mnemox.ai)
 - Monitor Show HN + Dev.to comments
 - Post DEV.to agent instructions article (draft ready)
 - Follow up: Glama, PR #2346 (pinged), ClaudeMCP #45, mcp-get #176, Fleur #37
@@ -149,6 +157,17 @@ drafts/
 - **反饋**：Agent instruction templates 過度工程化。MCP tool description 本身已告訴 agent 何時 call，不需要把 instruction 塞進 CLAUDE.md/.cursorrules 浪費 context window token。
 - **修正**：templates/ 全部精簡為一行 hint，README 把 MCP 安裝設為主要，agent instruction 設為可選。
 - **學到的**：MCP 設計哲學 = tool description 即文件。Threshold 邏輯（>80 STOP）是 tool 的責任，不該寫在 agent config 裡。開發者社群對 over-engineering 很敏感。
+
+### 2026-03-01 「Why not Google?」 — 社群最常問的問題
+- **回答框架**：差異不在搜尋品質，在觸發機制。Google 需要 human intent，idea-reality-mcp 靠 agent 自動觸發
+- **一句話版本**：「不是你在用它，是你的 Agent 在用。這才是重點。」
+- **README 改動**：副標題從 accuracy（We search. They guess.）改為 automation（Your AI agent checks before it builds. Automatically.）
+- **新增 3 欄比較表**：Google vs ChatGPT/SaaS vs idea-reality-mcp
+
+### 2026-03-01 UX 審查發現
+- **Email gate 放在結果尾巴**：使用者已看到 signal + evidence + competitors，hints 是最不值錢的部分。Gate 最不值錢的部分 = 低轉換率
+- **冷啟動 timeout 15s 太短**：Render free tier 30-50s，第一次用的人 100% 遇到 timeout error
+- **README 沒有在前 10 秒回答「跟 Google 差在哪」**：第一次來的人會直接離開
 
 ### Release 後同步更新 Checklist
 每次 release 後必須逐一檢查：
