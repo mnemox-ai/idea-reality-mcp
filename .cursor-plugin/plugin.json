@@ -1,23 +1,22 @@
 {
   "name": "idea-reality-mcp",
-  "version": "0.4.0",
-  "description": "Pre-build reality check — scans GitHub, HN, npm, PyPI & Product Hunt before you build. Returns a 0-100 signal with real competitor data.",
+  "version": "0.1.0",
+  "description": "Pre-build reality check — scans GitHub, HN, npm, PyPI & Product Hunt before you build. Returns a 0-100 competition signal with real data.",
   "author": {
     "name": "Mnemox AI",
     "email": "dev@mnemox.ai"
   },
-  "homepage": "https://mnemox.ai/check",
+  "homepage": "https://github.com/mnemox-ai/idea-reality-mcp",
   "repository": "https://github.com/mnemox-ai/idea-reality-mcp",
   "license": "MIT",
   "keywords": [
     "idea-validation",
     "competitor-analysis",
     "market-research",
-    "pre-build-check",
     "mcp",
     "developer-tool"
   ],
-  "logo": "assets/logo.svg",
+  "logo": "assets/logo-cursor.svg",
   "mcpServers": ".mcp.json",
   "rules": "rules/",
   "skills": "skills/"
