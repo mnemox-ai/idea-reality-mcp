@@ -473,6 +473,52 @@ def _ph_score(count: int) -> int:
     return 90
 
 
+def _filter_relevant_similars(
+    similars: list[dict], idea_text: str, keywords: list[str]
+) -> list[dict]:
+    """Filter out similar projects that don't match any idea keyword.
+
+    Prevents high-star repos from broad keyword matches (e.g. 'natural language')
+    from appearing as "similar" when they have nothing to do with the idea.
+    """
+    if not similars:
+        return similars
+
+    # Build a set of check-words from idea text + keywords (lowercased, 3+ chars)
+    idea_words = set()
+    for word in idea_text.lower().split():
+        if len(word) >= 3:
+            idea_words.add(word)
+    for kw in keywords:
+        for word in kw.lower().split():
+            if len(word) >= 3:
+                idea_words.add(word)
+
+    # Remove very generic words that match everything
+    generic = {
+        "the", "and", "for", "with", "that", "this", "from", "your", "tool",
+        "app", "based", "using", "open", "source", "project", "system",
+        "new", "use", "can", "get", "all", "how", "what", "build",
+    }
+    idea_words -= generic
+
+    if not idea_words:
+        return similars
+
+    relevant = []
+    fallback = []
+    for s in similars:
+        text = (s.get("name", "") + " " + s.get("description", "")).lower()
+        # Check if at least 1 idea-specific word appears in name+description
+        if any(w in text for w in idea_words):
+            relevant.append(s)
+        else:
+            fallback.append(s)
+
+    # Return relevant first, then fallback (so we always have something)
+    return relevant + fallback
+
+
 def _duplicate_likelihood(signal: int) -> Literal["low", "medium", "high"]:
     if signal < 30:
         return "low"
@@ -674,6 +720,9 @@ def compute_signal(
                 "updated": prod.get("created_at", ""),
                 "description": prod.get("tagline", ""),
             })
+
+    # Filter similars for relevance — prevent broad keyword matches
+    top_similars = _filter_relevant_similars(top_similars, idea_text, keywords)
 
     return {
         "reality_signal": signal,
