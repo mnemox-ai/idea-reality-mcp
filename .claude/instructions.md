@@ -1,7 +1,7 @@
 # IDEA-REALITY-MCP — Project Context
 
 ## What This Is
-Mnemox Idea Reality MCP Server v0.3.4 — a workflow-native pre-build reality check for AI coding agents.
+Mnemox Idea Reality MCP Server v0.4.0 — a workflow-native pre-build reality check for AI coding agents.
 MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you build, returns reality_signal (0-100).
 
 ## Org
@@ -14,7 +14,7 @@ MCP tool `idea_check` scans GitHub, HN, npm, PyPI, and Product Hunt before you b
 - Python 3.11+, FastMCP 3.x, httpx (async), uv
 - Sources: GitHub Search API, HN Algolia API, npm Registry, PyPI (HTML scraping), Product Hunt GraphQL (optional)
 - Entry: `python -m idea_reality_mcp` or `uv run python -m idea_reality_mcp`
-- Tests: `uv run pytest tests/ -v` (127 tests)
+- Tests: `uv run pytest tests/ -v` (148 tests)
 
 ---
 
