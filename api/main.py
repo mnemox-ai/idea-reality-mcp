@@ -48,12 +48,13 @@ mcp_http = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http
 app = FastAPI(
     title="idea-reality-mcp API",
     description="Pre-build reality check for AI coding agents.",
-    version="0.3.4",
+    version="0.4.0",
     lifespan=mcp_http.lifespan,
 )
 
-# Initialize score history DB (idempotent — CREATE TABLE IF NOT EXISTS)
+# Initialize DB tables (idempotent — CREATE TABLE IF NOT EXISTS)
 score_db.init_db()
+score_db.init_subscribers_table()
 
 # CORS — allow GitHub Pages and local dev
 ALLOWED_ORIGINS = [
@@ -84,6 +85,11 @@ class CheckRequest(BaseModel):
 
 class ExtractKeywordsRequest(BaseModel):
     idea_text: str
+
+
+class SubscribeRequest(BaseModel):
+    email: str
+    idea_hash: str
 
 
 # ---------------------------------------------------------------------------
@@ -269,9 +275,11 @@ async def check(req: CheckRequest):
 
     result["meta"]["keyword_source"] = keyword_source
 
+    # Always include idea_hash (needed for subscribe flow)
+    result["idea_hash"] = score_db.idea_hash(idea_text)
+
     # Save to score history
     try:
-        result_hash = score_db.idea_hash(idea_text)
         score_db.save_score(
             idea_text=idea_text,
             score=result["reality_signal"],
@@ -280,7 +288,6 @@ async def check(req: CheckRequest):
             depth=req.depth,
             keyword_source=keyword_source,
         )
-        result["idea_hash"] = result_hash
     except Exception:
         logger.exception("Failed to save score history")
         # Non-fatal — still return the result
@@ -295,6 +302,40 @@ async def get_history(idea_hash: str):
     if not records:
         raise HTTPException(status_code=404, detail="No history found for this idea")
     return {"idea_hash": idea_hash, "records": records}
+
+
+@app.post("/api/subscribe")
+async def subscribe(req: SubscribeRequest, request: Request):
+    """Save email for pivot hints unlock. No email validation (MVP).
+
+    Body: { "email": "user@example.com", "idea_hash": "sha256..." }
+    Returns: { "unlocked": true }
+    """
+    if not req.email or not req.email.strip() or "@" not in req.email:
+        raise HTTPException(status_code=422, detail="Invalid email")
+
+    # Rate limit (shared with extract-keywords: 50/IP/day)
+    client_ip = request.client.host if request.client else "unknown"
+    if not _check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+    try:
+        score_db.save_subscriber(req.email.strip(), req.idea_hash)
+    except Exception:
+        logger.exception("Failed to save subscriber")
+        raise HTTPException(status_code=500, detail="Subscribe failed")
+
+    return {"unlocked": True}
+
+
+@app.get("/api/subscribers/count")
+async def subscribers_count():
+    """Return total subscriber count (for internal monitoring)."""
+    try:
+        count = score_db.get_subscriber_count()
+    except Exception:
+        count = 0
+    return {"count": count}
 
 
 # ---------------------------------------------------------------------------

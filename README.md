@@ -80,19 +80,6 @@ Or [try it in your browser](https://mnemox.ai/check) — no install required.
 
 The LLM understands your idea. The dictionary is your safety net. **You always get results.**
 
-## Make your AI agent check automatically
-
-Add this to your `.claude/instructions.md` or `CLAUDE.md`:
-
-```
-Before building any new tool, feature, or project,
-always run idea_check first to verify the idea hasn't been built already.
-```
-
-**This is the highest-ROI setup.** Your AI agent will validate ideas before writing a single line of code. Install once, protect every project.
-
-> **More templates:** [Claude Code](templates/CLAUDE.md) · [Cursor](templates/cursorrules.md) · [Windsurf](templates/windsurf-rules.md) · [Copilot](templates/copilot-instructions.md) — copy-paste snippets for every AI coding tool.
-
 ## Install (5 minutes)
 
 ### Claude Desktop
@@ -143,6 +130,16 @@ npx -y @smithery/cli install idea-reality-mcp --client claude
 export GITHUB_TOKEN=ghp_...        # Higher GitHub API rate limits
 export PRODUCTHUNT_TOKEN=your_...  # Enable Product Hunt (deep mode)
 ```
+
+### Optional: Agent auto-trigger
+
+The MCP tool description already tells your agent what `idea_check` does. To make it run **proactively** (before every new project), add a one-line hint:
+
+```
+When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
+```
+
+> Add to your `CLAUDE.md`, `.cursorrules`, `.windsurfrules`, or `.github/copilot-instructions.md`. See [templates/](templates/) for all platforms.
 
 ## Usage
 
@@ -212,7 +209,7 @@ If the signal comes back at 85+ with mature open-source alternatives, you just s
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "keyword_source": "llm",
     "depth": "deep",
-    "version": "0.3.2"
+    "version": "0.4.0"
   }
 }
 ```
@@ -230,54 +227,23 @@ If Product Hunt is unavailable (no token), its weight is redistributed automatic
 
 ## CI: Auto-check on Pull Requests
 
-Add `.github/workflows/idea-check.yml` to run reality checks when PRs propose new features:
+Use [idea-check-action](https://github.com/mnemox-ai/idea-check-action) to validate new feature proposals:
 
 ```yaml
 name: Idea Reality Check
 on:
-  pull_request:
-    paths: ['docs/proposals/**', 'RFC/**']
+  issues:
+    types: [opened]
 
 jobs:
   check:
+    if: contains(github.event.issue.labels.*.name, 'proposal')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: mnemox-ai/idea-check-action@v1
         with:
-          python-version: '3.11'
-      - run: pip install idea-reality-mcp httpx
-      - name: Run idea check
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -c "
-          import asyncio, json
-          from idea_reality_mcp.sources.github import search_github_repos
-          from idea_reality_mcp.sources.hn import search_hn
-          from idea_reality_mcp.scoring.engine import compute_signal, extract_keywords
-
-          async def main():
-              idea = open('docs/proposals/latest.md').read()[:500]
-              kw = extract_keywords(idea)
-              gh = await search_github_repos(kw)
-              hn = await search_hn(kw)
-              report = compute_signal(gh, hn)
-              print(json.dumps(report, indent=2))
-
-          asyncio.run(main())
-          "
-      - name: Comment on PR
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '## Idea Reality Check\nSee workflow run for full report.'
-            })
+          idea: ${{ github.event.issue.title }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Roadmap
@@ -285,7 +251,8 @@ jobs:
 - [x] **v0.1** — GitHub + HN search, basic scoring
 - [x] **v0.2** — Deep mode (npm, PyPI, Product Hunt), improved keyword extraction
 - [x] **v0.3** — 3-stage keyword pipeline, 150+ Chinese term mappings, synonym expansion, LLM-powered search (Render API)
-- [ ] **v0.4** — Trend detection and timing analysis
+- [x] **v0.4** — Email gate, Score History, Agent Templates, GitHub Action
+- [ ] **v0.5** — Temporal signals (trend detection and timing analysis)
 - [ ] **v1.0** — Idea Memory Dataset (opt-in anonymous logging)
 
 ## Found a blind spot?

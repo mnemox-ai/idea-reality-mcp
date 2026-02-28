@@ -1,101 +1,52 @@
-# Recommended: Add idea-reality-mcp to your AI agent instructions
+# Agent Instructions — Optional One-Line Hints
 
-Copy-paste one of these snippets into your project to make your AI agent automatically validate ideas before building.
+Once idea-reality-mcp is installed as an MCP server, the tool description tells your agent everything it needs. These optional hints just make the check **proactive** — the agent runs it automatically when you start a new project.
 
 ## Claude Code — `CLAUDE.md`
 
-Add to your project's `CLAUDE.md`:
-
-```markdown
-## Before building anything new
-
-Before starting any new tool, feature, library, or project, always run `idea_check` first
-to verify the idea hasn't already been built. If reality_signal > 80, discuss alternatives
-with the user before proceeding.
+```
+When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
 ```
 
-## Claude Desktop / Cursor — System prompt
-
-Add to your Claude Desktop system prompt or `.cursor/rules`:
+## Cursor — `.cursorrules`
 
 ```
-When the user describes a new project idea or asks you to build something from scratch:
-1. Run idea_check(idea_text=<summarize the idea>, depth="deep") first
-2. If reality_signal > 80: warn the user and show top competitors
-3. If reality_signal > 60: mention similar projects but proceed if user confirms
-4. If reality_signal < 40: proceed — the space is relatively open
+When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
+```
+
+## Windsurf — `.windsurfrules`
+
+```
+When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
+```
+
+## GitHub Copilot — `.github/copilot-instructions.md`
+
+```
+When starting a new project, use the idea_check MCP tool to check if similar projects already exist.
 ```
 
 ## GitHub Actions — Auto-check proposals
 
-Add `.github/workflows/idea-check.yml` to automatically validate new feature proposals:
+Use [idea-check-action](https://github.com/mnemox-ai/idea-check-action) to validate new feature proposals in CI:
 
 ```yaml
 name: Idea Reality Check
 on:
-  pull_request:
-    paths: ['docs/proposals/**', 'RFC/**']
   issues:
     types: [opened]
 
 jobs:
   check:
-    if: contains(github.event.issue.labels.*.name, 'proposal') || github.event_name == 'pull_request'
+    if: contains(github.event.issue.labels.*.name, 'proposal')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: mnemox-ai/idea-check-action@v1
         with:
-          python-version: '3.11'
-      - run: pip install idea-reality-mcp httpx
-      - name: Run idea check
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -c "
-          import asyncio, json
-          from idea_reality_mcp.sources.github import search_github_repos
-          from idea_reality_mcp.sources.hn import search_hn
-          from idea_reality_mcp.scoring.engine import compute_signal, extract_keywords
-
-          async def main():
-              idea = open('docs/proposals/latest.md').read()[:500]
-              kw = extract_keywords(idea)
-              gh = await search_github_repos(kw)
-              hn = await search_hn(kw)
-              report = compute_signal(gh, hn)
-              print(json.dumps(report, indent=2))
-
-          asyncio.run(main())
-          "
-```
-
-## Windsurf — `.windsurfrules`
-
-Add to your `.windsurfrules`:
-
-```
-## Pre-build Reality Check
-
-Before creating any new project, feature, or tool, use the idea_check MCP tool with a one-line description.
-- If reality_signal > 80: STOP. Warn the user about high competition before proceeding.
-- If reality_signal > 60: Proceed with caution. Suggest how to differentiate.
-- If reality_signal < 40: Green light. Proceed normally.
-```
-
-## GitHub Copilot — `.github/copilot-instructions.md`
-
-Add to your `.github/copilot-instructions.md`:
-
-```
-## Pre-build Reality Check
-
-Before creating any new project, feature, or tool, use the idea_check MCP tool with a one-line description.
-- If reality_signal > 80: STOP. Warn the user about high competition before proceeding.
-- If reality_signal > 60: Proceed with caution. Suggest how to differentiate.
-- If reality_signal < 40: Green light. Proceed normally.
+          idea: ${{ github.event.issue.title }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Why add this?
 
-Without this instruction, your AI agent will happily spend hours building something that already exists with 5,000 stars on GitHub. Adding a single line to your instructions file prevents this — automatically, every time.
+Without the hint, your agent only runs `idea_check` when you explicitly ask. With it, the agent checks proactively before building — preventing wasted effort on ideas that already have 5,000-star implementations on GitHub.

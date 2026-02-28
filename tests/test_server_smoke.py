@@ -20,4 +20,4 @@ def test_server_importable():
     """Verify the package is importable and has version."""
     import idea_reality_mcp
 
-    assert idea_reality_mcp.__version__ == "0.3.4"
+    assert idea_reality_mcp.__version__ == "0.4.0"

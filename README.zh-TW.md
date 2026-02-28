@@ -79,19 +79,6 @@ uvx idea-reality-mcp
 
 LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
 
-## 讓你的 AI agent 自動檢查
-
-在你的 `.claude/instructions.md` 或 `CLAUDE.md` 加入：
-
-```
-在開發任何新工具、功能或專案之前，
-先用 idea_check 確認這個東西是不是已經有人做過了。
-```
-
-**這是最高 ROI 的設定。** 你的 AI agent 會在寫任何一行 code 之前先驗證 idea。設定一次，保護每個專案。
-
-> **更多範本：** [Claude Code](templates/CLAUDE.md) · [Cursor](templates/cursorrules.md) · [Windsurf](templates/windsurf-rules.md) · [Copilot](templates/copilot-instructions.md) — 各 AI 工具的一鍵設定片段。
-
 ## 安裝（5 分鐘）
 
 ### Claude Desktop
@@ -142,6 +129,16 @@ npx -y @smithery/cli install idea-reality-mcp --client claude
 export GITHUB_TOKEN=ghp_...        # 提升 GitHub API 速率限制
 export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
 ```
+
+### 可選：Agent 自動觸發
+
+MCP tool 描述已經告訴你的 agent `idea_check` 做什麼。如果想讓它**主動執行**（每個新專案自動檢查），加一行提示：
+
+```
+開始新專案時，用 idea_check MCP tool 檢查是否已有類似專案存在。
+```
+
+> 加入你的 `CLAUDE.md`、`.cursorrules`、`.windsurfrules` 或 `.github/copilot-instructions.md`。完整範本見 [templates/](templates/)。
 
 ## 使用方式
 
@@ -211,7 +208,7 @@ Deep mode 平行掃描全部 5 個來源 — GitHub repos、HN 討論、npm 套�
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "keyword_source": "llm",
     "depth": "deep",
-    "version": "0.3.2"
+    "version": "0.4.0"
   }
 }
 ```
@@ -229,54 +226,23 @@ Product Hunt 不可用時（未設 token），權重自動重新分配。
 
 ## CI：PR 開啟時自動檢查
 
-在 `.github/workflows/idea-check.yml` 加入，當 PR 觸及提案文件時自動跑現實檢查：
+用 [idea-check-action](https://github.com/mnemox-ai/idea-check-action) 驗證新功能提案：
 
 ```yaml
 name: Idea Reality Check
 on:
-  pull_request:
-    paths: ['docs/proposals/**', 'RFC/**']
+  issues:
+    types: [opened]
 
 jobs:
   check:
+    if: contains(github.event.issue.labels.*.name, 'proposal')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: mnemox-ai/idea-check-action@v1
         with:
-          python-version: '3.11'
-      - run: pip install idea-reality-mcp httpx
-      - name: Run idea check
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -c "
-          import asyncio, json
-          from idea_reality_mcp.sources.github import search_github_repos
-          from idea_reality_mcp.sources.hn import search_hn
-          from idea_reality_mcp.scoring.engine import compute_signal, extract_keywords
-
-          async def main():
-              idea = open('docs/proposals/latest.md').read()[:500]
-              kw = extract_keywords(idea)
-              gh = await search_github_repos(kw)
-              hn = await search_hn(kw)
-              report = compute_signal(gh, hn)
-              print(json.dumps(report, indent=2))
-
-          asyncio.run(main())
-          "
-      - name: Comment on PR
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '## Idea Reality Check\nSee workflow run for full report.'
-            })
+          idea: ${{ github.event.issue.title }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Roadmap
@@ -284,7 +250,8 @@ jobs:
 - [x] **v0.1** — GitHub + HN 搜尋，基本評分
 - [x] **v0.2** — Deep mode（npm、PyPI、Product Hunt），改進關鍵字萃取
 - [x] **v0.3** — 三段式關鍵字 Pipeline，150+ 中文詞彙對照，同義詞展開，LLM 搜尋智能（Render API）
-- [ ] **v0.4** — 趨勢偵測和時機分析
+- [x] **v0.4** — Email gate、Score History、Agent Templates、GitHub Action
+- [ ] **v0.5** — 時序信號（趨勢偵測和時機分析）
 - [ ] **v1.0** — Idea Memory Dataset（匿名使用紀錄）
 
 ## 結果不準？

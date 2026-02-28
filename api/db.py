@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import sqlite3
+from datetime import datetime, timezone
 from typing import Any
 
 DB_PATH = os.environ.get("SCORE_DB_PATH", "./score_history.db")
@@ -86,3 +87,58 @@ def get_history(hash_val: str) -> list[dict[str, Any]]:
     ).fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+
+# ---------------------------------------------------------------------------
+# Subscribers — email collection for report unlock (v0.4.0)
+# ---------------------------------------------------------------------------
+
+def init_subscribers_table() -> None:
+    """Create subscribers table if it doesn't exist."""
+    conn = _get_conn()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            idea_hash TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sub_email ON subscribers(email)"
+    )
+    conn.commit()
+    conn.close()
+
+
+def save_subscriber(email: str, idea_hash_val: str) -> int:
+    """Insert a subscriber record and return the row id.
+
+    Also logs to stdout as a backup (Render keeps logs ~7 days).
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    now = datetime.now(timezone.utc).isoformat()
+
+    conn = _get_conn()
+    cur = conn.execute(
+        "INSERT INTO subscribers (email, idea_hash, created_at) VALUES (?, ?, ?)",
+        (email, idea_hash_val, now),
+    )
+    conn.commit()
+    row_id = cur.lastrowid
+    conn.close()
+
+    # Dual-write: stdout log as backup for Render redeploys
+    logger.info("[SUBSCRIBE] %s | %s | %s", email, idea_hash_val, now)
+
+    return row_id
+
+
+def get_subscriber_count() -> int:
+    """Return total number of subscribers."""
+    conn = _get_conn()
+    count = conn.execute("SELECT COUNT(*) FROM subscribers").fetchone()[0]
+    conn.close()
+    return count

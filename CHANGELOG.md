@@ -4,6 +4,22 @@ English | [繁體中文](CHANGELOG.zh-TW.md)
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-03-01
+
+### Added
+- **Email gate on mnemox.ai/check** — unlock pivot suggestions with email input
+- `POST /api/subscribe` endpoint for email collection (SQLite + stdout dual-write)
+- `GET /api/subscribers/count` endpoint for internal monitoring
+- `idea_hash` field in `/api/check` response (SHA256, reuses existing `db.idea_hash()`)
+- **Score History**: SQLite-based historical tracking (`GET /api/history/{idea_hash}`)
+- **Agent Templates**: CLAUDE.md, Cursor, Copilot, Windsurf instruction snippets (`templates/`)
+- **idea-check-action v1.0.0**: GitHub Action for CI/CD idea validation (`mnemox-ai/idea-check-action`)
+- 11 new subscriber tests (138 total, up from 127)
+
+### Changed
+- `/api/check` response now includes `idea_hash` for tracking and subscribe flow
+- DB initialization creates both `score_history` and `subscribers` tables on startup
+
 ## [0.3.4] - 2026-02-27
 
 ### Added

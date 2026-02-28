@@ -1,28 +1,22 @@
 # Agent Instruction Templates
 
-Copy-paste snippets to make your AI coding agent run `idea_check` before building anything new.
+Optional one-line hints to remind your AI agent to run `idea_check` before building.
+
+> **Note:** The MCP tool description already tells agents what `idea_check` does. These hints just make the check proactive — the agent runs it automatically when you start a new project.
 
 ## How to Use
 
-1. Pick the template for your AI tool
-2. Copy the snippet into your project's instruction file
-3. Done — your agent will now check ideas before coding
-
-## Threshold Guide
-
-| Signal | Action | Meaning |
-|--------|--------|---------|
-| > 80 | STOP | High competition. Warn the user before proceeding. |
-| > 60 | CAUTION | Moderate competition. Suggest differentiation. |
-| < 40 | GREEN LIGHT | Low competition. Proceed normally. |
+1. Install idea-reality-mcp as an MCP server (this is the important part)
+2. Optionally, copy the one-line hint into your agent's instruction file
+3. Done — your agent will check ideas before coding
 
 ## Templates
 
-- [Claude Code](./CLAUDE.md) → `.claude/instructions.md` or `CLAUDE.md`
+- [Claude Code](./CLAUDE.md) → `CLAUDE.md` or `.claude/instructions.md`
 - [Cursor](./cursorrules.md) → `.cursorrules`
 - [Windsurf](./windsurf-rules.md) → `.windsurfrules`
 - [GitHub Copilot](./copilot-instructions.md) → `.github/copilot-instructions.md`
 
 ## More Examples
 
-See [examples/agent-instructions.md](../examples/agent-instructions.md) for GitHub Actions integration and advanced setups.
+See [examples/agent-instructions.md](../examples/agent-instructions.md) for GitHub Actions integration.

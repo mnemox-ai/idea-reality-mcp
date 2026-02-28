@@ -4,6 +4,22 @@
 
 本專案所有重要變更都會記錄在此檔案。
 
+## [0.4.0] - 2026-03-01
+
+### 新增
+- **mnemox.ai/check Email Gate** — 輸入 email 解鎖轉向建議（pivot hints）
+- `POST /api/subscribe` 端點 — email 收集（SQLite + stdout 雙寫備份）
+- `GET /api/subscribers/count` 端點 — 內部監控用
+- `/api/check` 回應新增 `idea_hash` 欄位（SHA256，共用 `db.idea_hash()`）
+- **Score History**：SQLite 歷史追蹤（`GET /api/history/{idea_hash}`）
+- **Agent Templates**：Claude/Cursor/Copilot/Windsurf 指令範本（`templates/`）
+- **idea-check-action v1.0.0**：GitHub Action CI/CD idea 驗證（`mnemox-ai/idea-check-action`）
+- 11 個新測試（共 138 個，原 127 個）
+
+### 變更
+- `/api/check` 回應現在包含 `idea_hash`，用於追蹤和 subscribe 流程
+- DB 初始化同時建立 `score_history` 和 `subscribers` 兩個 table
+
 ## [0.3.2] - 2026-02-27
 
 ### 新增
