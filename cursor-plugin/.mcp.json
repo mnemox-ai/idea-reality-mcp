@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "idea-reality": {
+      "command": "uvx",
+      "args": ["idea-reality-mcp"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

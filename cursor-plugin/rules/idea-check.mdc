@@ -1,0 +1,6 @@
+---
+description: Run idea_check before starting any new project or feature to find existing competitors
+alwaysApply: false
+---
+
+When starting a new project or feature, use the idea_check MCP tool to check if similar projects already exist. Review the reality_signal score and top competitors before writing code.
