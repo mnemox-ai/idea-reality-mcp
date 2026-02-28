@@ -143,6 +143,27 @@ drafts/
 
 ---
 
+## Community Feedback Log（持續累積）
+
+### 2026-03-01 Reddit r/ClaudeAI
+- **反饋**：Agent instruction templates 過度工程化。MCP tool description 本身已告訴 agent 何時 call，不需要把 instruction 塞進 CLAUDE.md/.cursorrules 浪費 context window token。
+- **修正**：templates/ 全部精簡為一行 hint，README 把 MCP 安裝設為主要，agent instruction 設為可選。
+- **學到的**：MCP 設計哲學 = tool description 即文件。Threshold 邏輯（>80 STOP）是 tool 的責任，不該寫在 agent config 裡。開發者社群對 over-engineering 很敏感。
+
+### Release 後同步更新 Checklist
+每次 release 後必須逐一檢查：
+1. pyproject.toml + __init__.py + engine.py（版號）
+2. api/main.py（FastAPI title）
+3. server.json（MCP Registry ×2）
+4. tests/test_scoring.py + test_server_smoke.py
+5. CHANGELOG.md + CHANGELOG.zh-TW.md
+6. .claude/instructions.md（此檔 Current Status）
+7. mnemox-ai.github.io/index.html（project stat）
+8. mnemox-github-profile/profile/README.md
+9. Git tag + GitHub Release + 確認 PyPI CI
+
+---
+
 ## Communication Style
 - Sean prefers 繁體中文 for discussion, English for code/docs
 - Direct, no-BS, honest feedback over optimistic reassurance
@@ -155,3 +176,4 @@ drafts/
 4. README is marketing — keep it sharp and technical
 5. Every new source goes in sources/ as its own adapter file
 6. Follow existing patterns: dataclass for results, async with httpx, evidence list
+7. Post-release: run the sync checklist above, don't rely on memory

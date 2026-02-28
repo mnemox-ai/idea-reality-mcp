@@ -81,6 +81,7 @@ app.add_middleware(
 class CheckRequest(BaseModel):
     idea_text: str
     depth: Literal["quick", "deep"] = "quick"
+    lang: Literal["en", "zh"] = "en"
 
 
 class ExtractKeywordsRequest(BaseModel):
@@ -172,6 +173,93 @@ async def _extract_keywords_via_haiku(idea_text: str) -> list[str] | None:
 
     except Exception:
         logger.exception("Haiku keyword extraction failed")
+        return None
+
+
+# ---------------------------------------------------------------------------
+# LLM pivot hints (replaces template hints with data-driven suggestions)
+# ---------------------------------------------------------------------------
+
+_PIVOT_SYSTEM_PROMPT = """You are a startup advisor analyzing real market competition data.
+Given an idea and actual search results from GitHub/HN/npm/PyPI, generate 3 specific,
+actionable pivot suggestions.
+
+Rules:
+- Reference actual competitor names and their star counts from the data provided
+- Suggest specific gaps or underserved niches based on the evidence
+- Be concrete, not generic. NEVER say "consider differentiating" or "explore niche opportunities"
+- Each suggestion should be 1-2 sentences, actionable, and reference real data
+- If lang=zh, respond entirely in Traditional Chinese (繁體中文)
+- Output ONLY a JSON array of exactly 3 strings. No markdown, no explanation, no code fences."""
+
+
+async def _generate_pivot_hints_llm(
+    idea_text: str,
+    reality_signal: int,
+    top_similars: list[dict],
+    evidence: list[dict],
+    lang: str = "en",
+) -> list[str] | None:
+    """Generate pivot hints via Claude Haiku using real search data.
+
+    Returns a list of 3 hint strings, or *None* on any failure.
+    """
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None
+
+    # Build competitor summary (top 3)
+    competitors = []
+    for s in top_similars[:3]:
+        stars = f", {s['stars']} stars" if s.get("stars") else ""
+        desc = f" — {s['description']}" if s.get("description") else ""
+        competitors.append(f"- {s['name']}{stars}{desc}")
+    competitors_text = "\n".join(competitors) if competitors else "(none found)"
+
+    # Build evidence summary
+    ev_lines = []
+    for e in evidence:
+        ev_lines.append(f"- [{e.get('source', '?')}] {e.get('detail', e.get('type', ''))}")
+    evidence_text = "\n".join(ev_lines[:8]) if ev_lines else "(no evidence)"
+
+    user_prompt = f"""Idea: {idea_text}
+Reality Signal: {reality_signal}/100 (higher = more competition)
+Lang: {lang}
+
+Top Competitors:
+{competitors_text}
+
+Evidence:
+{evidence_text}"""
+
+    try:
+        import anthropic
+
+        client = anthropic.AsyncAnthropic(api_key=api_key)
+        message = await client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=500,
+            system=_PIVOT_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+
+        raw = message.content[0].text.strip()
+
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            lines = raw.split("\n")
+            lines = [ln for ln in lines if not ln.strip().startswith("```")]
+            raw = "\n".join(lines).strip()
+
+        hints = json.loads(raw)
+
+        if not isinstance(hints, list) or len(hints) < 2:
+            return None
+
+        return [str(h).strip() for h in hints[:3]]
+
+    except Exception:
+        logger.exception("Haiku pivot hints generation failed")
         return None
 
 
@@ -274,6 +362,21 @@ async def check(req: CheckRequest):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     result["meta"]["keyword_source"] = keyword_source
+    result["meta"]["lang"] = req.lang
+
+    # LLM pivot hints — replace template hints with data-driven suggestions
+    pivot_source = "template"
+    llm_hints = await _generate_pivot_hints_llm(
+        idea_text=idea_text,
+        reality_signal=result["reality_signal"],
+        top_similars=result.get("top_similars", []),
+        evidence=result.get("evidence", []),
+        lang=req.lang,
+    )
+    if llm_hints:
+        result["pivot_hints"] = llm_hints
+        pivot_source = "llm"
+    result["meta"]["pivot_source"] = pivot_source
 
     # Always include idea_hash (needed for subscribe flow)
     result["idea_hash"] = score_db.idea_hash(idea_text)
