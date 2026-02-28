@@ -64,6 +64,8 @@ drafts/
 - `POST /api/check` — body: `{idea_text, depth}` → full report + idea_hash + score saved to history
 - `POST /api/extract-keywords` — LLM extraction (Haiku 4.5, rate-limited 50/IP/day)
 - `GET  /api/history/{idea_hash}` — score history for an idea
+- `POST /api/subscribe` — body: `{email, idea_hash}` → email collection (dual-write: SQLite + stdout)
+- `GET  /api/subscribers/count` — subscriber metrics
 - `ANY  /mcp` — MCP Streamable HTTP transport
 
 ### Score History (api/db.py)
@@ -90,27 +92,27 @@ drafts/
 
 ## Current Status (會變動)
 
-### v0.3.4 (current, stable)
+### v0.4.0 (current, stable)
 - ✅ Core MCP server (stdio + Streamable HTTP)
 - ✅ 5 sources: GitHub, HN, npm, PyPI, Product Hunt
 - ✅ 3-stage keyword extraction + LLM extraction (Render)
-- ✅ 127/127 tests passing
+- ✅ 138/138 tests passing
 - ✅ Score History (SQLite, /api/history endpoint)
-- ✅ Agent templates (Claude/Cursor/Windsurf/Copilot)
+- ✅ Email gate + subscribe endpoint (POST /api/subscribe, GET /api/subscribers/count)
+- ✅ Agent templates — simplified to one-line hints (community feedback)
 - ✅ idea-check-action GitHub Action (mnemox-ai/idea-check-action)
 - ✅ Published: PyPI + GitHub Release + MCP Registry + Smithery + 10+ directories
-- ✅ Live demo: mnemox.ai/check
+- ✅ Live demo: mnemox.ai/check (with email gate)
 - ✅ Full bilingual docs (EN + zh-TW)
 - ✅ DEV.to article drafts (v0.3.4 + agent instructions)
 
-### idea-check-action (v1, just created)
+### idea-check-action (v1)
 - GitHub: mnemox-ai/idea-check-action (public)
 - Composite action: `pip install idea-reality-mcp` → `entrypoint.py`
 - Inputs: idea, depth, github-token, threshold
 - Outputs: score, report (JSON), top-competitor
 - Graceful failure: never breaks CI (::warning:: on error)
 - Self-test workflow (.github/workflows/test.yml)
-- Dockerfile available
 
 ---
 
@@ -124,12 +126,11 @@ drafts/
 
 ## Priorities (會變動)
 
-### Priority 1: v0.4 (plan approved, coding starts 3/3)
-- **Feature A — Temporal Signals**: recent_created_ratio + recently_active_ratio, top 3 competitor activity
-- **Feature B — Email Collection + Decision Tracking**: Supabase, decision buttons, email subscribe
-- **Timeline**: v0.3.4 stays live until 3/14+
+### Priority 1: v0.5 (next)
+- **Temporal Signals**: recent_created_ratio + recently_active_ratio, top 3 competitor activity
+- **Decision Tracking**: decision buttons (build/pivot/kill), linked to email + idea_hash
 
-### Priority 2: Distribution (2/27 – 3/2, no code)
+### Priority 2: Distribution (ongoing)
 - Monitor Show HN + Dev.to comments
 - Post DEV.to agent instructions article (draft ready)
 - Follow up: Glama, PR #2346 (pinged), ClaudeMCP #45, mcp-get #176, Fleur #37
