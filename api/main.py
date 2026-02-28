@@ -206,7 +206,10 @@ async def _generate_pivot_hints_llm(
     """
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
+        logger.info("[PIVOT] skipped — no ANTHROPIC_API_KEY")
         return None
+
+    logger.info("[PIVOT] LLM attempt for: %s (signal=%d, lang=%s)", idea_text[:60], reality_signal, lang)
 
     # Build competitor summary (top 3)
     competitors = []
@@ -254,12 +257,18 @@ Evidence:
         hints = json.loads(raw)
 
         if not isinstance(hints, list) or len(hints) < 2:
+            logger.warning("[PIVOT] LLM returned invalid list (len=%d): %s", len(hints) if isinstance(hints, list) else -1, raw[:100])
             return None
 
-        return [str(h).strip() for h in hints[:3]]
+        result_hints = [str(h).strip() for h in hints[:3]]
+        logger.info("[PIVOT] LLM success — %d hints generated", len(result_hints))
+        return result_hints
 
+    except json.JSONDecodeError:
+        logger.warning("[PIVOT] LLM returned non-JSON: %s", raw[:200])
+        return None
     except Exception:
-        logger.exception("Haiku pivot hints generation failed")
+        logger.exception("[PIVOT] LLM call failed")
         return None
 
 
