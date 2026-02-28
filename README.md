@@ -91,6 +91,8 @@ always run idea_check first to verify the idea hasn't been built already.
 
 **This is the highest-ROI setup.** Your AI agent will validate ideas before writing a single line of code. Install once, protect every project.
 
+> **More templates:** [Claude Code](templates/CLAUDE.md) · [Cursor](templates/cursorrules.md) · [Windsurf](templates/windsurf-rules.md) · [Copilot](templates/copilot-instructions.md) — copy-paste snippets for every AI coding tool.
+
 ## Install (5 minutes)
 
 ### Claude Desktop

@@ -90,6 +90,8 @@ LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
 
 **這是最高 ROI 的設定。** 你的 AI agent 會在寫任何一行 code 之前先驗證 idea。設定一次，保護每個專案。
 
+> **更多範本：** [Claude Code](templates/CLAUDE.md) · [Cursor](templates/cursorrules.md) · [Windsurf](templates/windsurf-rules.md) · [Copilot](templates/copilot-instructions.md) — 各 AI 工具的一鍵設定片段。
+
 ## 安裝（5 分鐘）
 
 ### Claude Desktop

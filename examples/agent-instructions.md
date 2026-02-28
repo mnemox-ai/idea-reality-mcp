@@ -70,6 +70,32 @@ jobs:
           "
 ```
 
+## Windsurf — `.windsurfrules`
+
+Add to your `.windsurfrules`:
+
+```
+## Pre-build Reality Check
+
+Before creating any new project, feature, or tool, use the idea_check MCP tool with a one-line description.
+- If reality_signal > 80: STOP. Warn the user about high competition before proceeding.
+- If reality_signal > 60: Proceed with caution. Suggest how to differentiate.
+- If reality_signal < 40: Green light. Proceed normally.
+```
+
+## GitHub Copilot — `.github/copilot-instructions.md`
+
+Add to your `.github/copilot-instructions.md`:
+
+```
+## Pre-build Reality Check
+
+Before creating any new project, feature, or tool, use the idea_check MCP tool with a one-line description.
+- If reality_signal > 80: STOP. Warn the user about high competition before proceeding.
+- If reality_signal > 60: Proceed with caution. Suggest how to differentiate.
+- If reality_signal < 40: Green light. Proceed normally.
+```
+
 ## Why add this?
 
 Without this instruction, your AI agent will happily spend hours building something that already exists with 5,000 stars on GitHub. Adding a single line to your instructions file prevents this — automatically, every time.
