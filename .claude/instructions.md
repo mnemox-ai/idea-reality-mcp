@@ -70,6 +70,50 @@ src/idea_reality_mcp/
 - Graceful degradation — partial results if any source fails
 - Chinese support via dictionary (150+ terms) for MCP stdio; LLM (Haiku 4.5) for Render API
 
+## Planning Rules
+
+1. **Every new feature field must have an "implementation cost" estimate.**
+   - Don't propose a JSON schema field unless you can name the exact API endpoint or data source.
+   - If it requires a new API, LLM call, or custom calculation, say so explicitly with time estimate.
+
+2. **No architecture design for features beyond the next 2 versions.**
+   - v0.4 and v0.5: full implementation detail allowed.
+   - v1.0+: one-line description only. No code snippets, no JSON schemas, no architecture diagrams.
+   - Reason: designs for v2.0 will be obsolete by the time we get there.
+
+3. **"Cool but not now" filter.**
+   - Before proposing any feature, ask: "Does Sean have enough users/data to benefit from this today?"
+   - If the answer is no, move it to a "Future Ideas" section and stop elaborating.
+   - Examples of "not now": privacy/Tor/decoy queries, local LLM, differential privacy, decoy queries.
+
+4. **Data claims need math.**
+   - Don't say "100 data points is enough to start modeling" without specifying the statistical method.
+   - Don't propose "backfill historical data" without confirming the API supports it.
+
+5. **One solo developer = max 2 priorities at a time.**
+   - Never propose 3+ parallel workstreams. Sean is one person + AI agents.
+   - Every plan must have a strict sequential order, not a parallel one.
+
+## Priorities
+
+### Priority 1: v0.4 (plan approved, coding starts 3/3)
+- **Feature A — Temporal Signals**: dual-dimension (recent_created_ratio + recently_active_ratio), top 3 competitor activity
+- **Feature B — Email Collection + Decision Tracking**: Supabase, decision buttons (5s delay), email subscribe w/ rate limit
+- **Timeline**: v0.3.4 stays live until 3/14+. No version bump until both features ready + content push planned.
+- **Full plan**: `.claude/plans/dazzling-toasting-umbrella.md`
+
+### Priority 2: Distribution (2/27 – 3/2, no code)
+- Monitor Show HN + Dev.to comments, reply immediately
+- Self-comment on own Dev.to article (first comment)
+- Engage in related article comments
+- Follow up: Glama, PR #2346, ClaudeMCP #45, mcp-get #176, Fleur #37
+
+### Future Ideas (do NOT elaborate)
+- Privacy mode / local LLM / Tor / decoy queries → v2.0+
+- Decision Framework full version → after ground truth data exists
+- Agent session memory / follow-up → v1.0+
+- competitor_health detailed (bus_factor, PR frequency) → v0.5
+
 ## Communication Style
 - Sean prefers 繁體中文 for discussion, English for code/docs
 - Direct, no-BS, honest feedback over optimistic reassurance

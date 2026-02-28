@@ -29,6 +29,10 @@ from idea_reality_mcp.sources.npm import search_npm
 from idea_reality_mcp.sources.producthunt import search_producthunt
 from idea_reality_mcp.sources.pypi import search_pypi
 
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+import db as score_db
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -47,6 +51,9 @@ app = FastAPI(
     version="0.3.4",
     lifespan=mcp_http.lifespan,
 )
+
+# Initialize score history DB (idempotent — CREATE TABLE IF NOT EXISTS)
+score_db.init_db()
 
 # CORS — allow GitHub Pages and local dev
 ALLOWED_ORIGINS = [
@@ -261,7 +268,33 @@ async def check(req: CheckRequest):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     result["meta"]["keyword_source"] = keyword_source
+
+    # Save to score history
+    try:
+        result_hash = score_db.idea_hash(idea_text)
+        score_db.save_score(
+            idea_text=idea_text,
+            score=result["reality_signal"],
+            breakdown=json.dumps(result),
+            keywords=json.dumps(keywords),
+            depth=req.depth,
+            keyword_source=keyword_source,
+        )
+        result["idea_hash"] = result_hash
+    except Exception:
+        logger.exception("Failed to save score history")
+        # Non-fatal — still return the result
+
     return result
+
+
+@app.get("/api/history/{idea_hash}")
+async def get_history(idea_hash: str):
+    """Get score history for an idea by its hash."""
+    records = score_db.get_history(idea_hash)
+    if not records:
+        raise HTTPException(status_code=404, detail="No history found for this idea")
+    return {"idea_hash": idea_hash, "records": records}
 
 
 # ---------------------------------------------------------------------------
