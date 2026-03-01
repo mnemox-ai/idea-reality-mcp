@@ -67,51 +67,24 @@ verdict: Very crowded. Strong incumbents with active development.
 
 Signal 85. The agent stops and says: "This space has 312 repos and multiple well-funded projects. I'd recommend either targeting a specific niche or contributing to an existing library."
 
-## Setup: one snippet per platform
+## Setup: one line per platform
 
-The most effective pattern is adding a pre-build check directly to your agent's instruction file. The agent reads these instructions at the start of every session and follows them automatically.
+The MCP tool description already tells your agent when and how to call `idea_check`. You just need a one-line hint in your agent's instruction file:
 
-### Claude Code -- `CLAUDE.md`
-
-```markdown
-## Pre-build Reality Check
-Before creating any new project, feature, or tool, run idea_check.
-- reality_signal > 80: STOP. Warn the user about existing competition.
-- reality_signal > 60: Caution. Show competitors and suggest differentiation.
-- reality_signal < 40: Green light. Proceed with implementation.
+```
+Before starting any new project, run idea_check first.
 ```
 
-### Cursor -- `.cursorrules`
+Drop this into the right file for your platform:
 
-```markdown
-## Pre-build Reality Check
-Before creating any new project, feature, or tool, run idea_check.
-- reality_signal > 80: STOP. Warn the user about existing competition.
-- reality_signal > 60: Caution. Show competitors and suggest differentiation.
-- reality_signal < 40: Green light. Proceed with implementation.
-```
+| Platform | File |
+|----------|------|
+| Claude Code | `CLAUDE.md` |
+| Cursor | `.cursorrules` |
+| Windsurf | `.windsurfrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
 
-### Windsurf -- `.windsurfrules`
-
-```markdown
-## Pre-build Reality Check
-Before creating any new project, feature, or tool, run idea_check.
-- reality_signal > 80: STOP. Warn the user about existing competition.
-- reality_signal > 60: Caution. Show competitors and suggest differentiation.
-- reality_signal < 40: Green light. Proceed with implementation.
-```
-
-### GitHub Copilot -- `.github/copilot-instructions.md`
-
-```markdown
-## Pre-build Reality Check
-Before creating any new project, feature, or tool, run idea_check.
-- reality_signal > 80: STOP. Warn the user about existing competition.
-- reality_signal > 60: Caution. Show competitors and suggest differentiation.
-- reality_signal < 40: Green light. Proceed with implementation.
-```
-
-The snippet is identical across platforms. Drop it into the right file and your agent gains market awareness permanently.
+That is it. The tool handles scoring thresholds, competitor analysis, and pivot suggestions on its own. You do not need to spell out the logic in your instruction file -- that is the MCP server's job.
 
 ## How it works under the hood
 
@@ -149,4 +122,4 @@ Your agent does not need to guess. Make it search.
 
 ---
 
-*Built by [Sean](https://github.com/mnemox-ai) at Mnemox. 120 tests passing. MIT licensed.*
+*Built by [Sean](https://github.com/mnemox-ai) at Mnemox. 148 tests passing. MIT licensed.*
