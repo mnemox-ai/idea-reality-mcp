@@ -1,0 +1,33 @@
+# Idea Reality Check (idea-reality-mcp)
+
+> MCP tool that scans GitHub, Hacker News, npm, PyPI, and Product Hunt before you build. Returns a 0-100 reality signal with evidence of existing competitors.
+
+idea-reality-mcp is a Model Context Protocol (MCP) server that helps AI coding agents validate ideas before building. It searches 5 real databases and returns structured data: a 0-100 reality signal, a list of similar projects with stars/downloads, and pivot suggestions.
+
+Key features:
+- Quick mode: GitHub + Hacker News (2 sources, fast)
+- Deep mode: All 5 sources in parallel (GitHub, HN, npm, PyPI, Product Hunt)
+- Keyword extraction: Dictionary-based (150+ terms, Chinese supported) or LLM-powered (Claude Haiku)
+- Scoring: Weighted formula, explainable, not ML-based
+- Graceful degradation: Partial results if any source fails
+
+## Documentation
+
+- [README](https://github.com/mnemox-ai/idea-reality-mcp#readme): Full documentation with install instructions and examples.
+- [PyPI](https://pypi.org/project/idea-reality-mcp/): Install via `pip install idea-reality-mcp`.
+- [Web Demo](https://mnemox.ai/check): Try it in your browser, no installation needed.
+- [REST API](https://idea-reality-mcp.onrender.com): POST /api/check with {idea_text, depth} for programmatic access.
+- [GitHub Action](https://github.com/mnemox-ai/idea-check-action): CI/CD integration, runs on every PR.
+
+## API Reference
+
+- POST /api/check — Body: {"idea_text": "your idea", "depth": "quick|deep"} → Returns {reality_signal, top_similars, evidence, pivot_hints, idea_hash}
+- POST /api/extract-keywords — Body: {"text": "your idea"} → Returns extracted keywords via LLM
+- GET /api/history/{idea_hash} — Returns score history for a given idea
+- GET /health — Liveness probe
+
+## Optional
+
+- [CHANGELOG](https://github.com/mnemox-ai/idea-reality-mcp/blob/main/CHANGELOG.md): Version history.
+- [Agent Templates](https://github.com/mnemox-ai/idea-reality-mcp/tree/main/templates): One-line hints for Claude Code, Cursor, Windsurf, GitHub Copilot.
+- [Sample Prompts](https://github.com/mnemox-ai/idea-reality-mcp/blob/main/examples/sample_prompts.md): Example ideas to test with.

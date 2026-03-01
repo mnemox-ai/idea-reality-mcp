@@ -261,6 +261,23 @@ jobs:
 1. [開一個 Issue](https://github.com/mnemox-ai/idea-reality-mcp/issues/new?template=inaccurate-result.yml)，附上你的 idea text 和輸出
 2. 我們會改進該領域的關鍵字萃取
 
+## 常見問題
+
+**這跟直接 Google 有什麼不同？**
+Google 需要你手動搜尋和解讀結果。idea-reality-mcp 在你的 AI coding agent 裡自動執行 — 不需要人為觸發。它搜尋 5 個結構化資料庫（不是網頁），回傳 0-100 分數和證據。
+
+**它搜尋哪些資料庫？**
+GitHub repositories、Hacker News 文章、npm 套件、PyPI 套件、Product Hunt 產品。Quick 模式搜 GitHub + HN。Deep 模式平行搜尋全部五個。
+
+**免費嗎？**
+是的。MIT 授權，完全開源。MCP server 在本地執行。[mnemox.ai/check](https://mnemox.ai/check) 網頁展示和 REST API 也都免費。
+
+**支援非英文的 idea 嗎？**
+支援。關鍵字抽取內建中文支援（150+ 詞彙對照），任何語言輸入都能處理。雲端 API 使用 LLM 抽取（Claude Haiku），多語言效果更好。
+
+**0-100 分數怎麼算的？**
+reality signal 綜合各來源的加權分數 — repo 數量、star 數、討論量、套件下載量。分數越高代表競爭越多。計分公式刻意設計為簡單可解釋，不使用機器學習。
+
 ## 授權
 
 MIT — 見 [LICENSE](LICENSE)

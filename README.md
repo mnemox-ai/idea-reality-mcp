@@ -262,6 +262,23 @@ If the tool missed obvious competitors or returned irrelevant results:
 1. [Open an issue](https://github.com/mnemox-ai/idea-reality-mcp/issues/new?template=inaccurate-result.yml) with your idea text and the output
 2. We'll improve the keyword extraction for your domain
 
+## FAQ
+
+**How is this different from just Googling?**
+Google requires you to manually search and interpret results. idea-reality-mcp runs automatically inside your AI coding agent — no human intent needed. It searches 5 structured databases (not web pages) and returns a scored 0-100 signal with evidence.
+
+**What databases does it scan?**
+GitHub repositories, Hacker News posts, npm packages, PyPI packages, and Product Hunt launches. Quick mode scans GitHub + HN. Deep mode scans all five in parallel.
+
+**Is it free?**
+Yes. MIT license, fully open source. The MCP server runs locally. The web demo at [mnemox.ai/check](https://mnemox.ai/check) and the REST API are also free.
+
+**Does it work for non-English ideas?**
+Yes. The keyword extraction supports Chinese (150+ term mappings) and works with any language input. The cloud API uses LLM extraction (Claude Haiku) for better multilingual support.
+
+**How does the 0-100 scoring work?**
+The reality signal combines weighted scores from each source — repository count, star count, discussion volume, package downloads. Higher means more existing competition. The formula is intentionally simple and explainable, not ML-based.
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
