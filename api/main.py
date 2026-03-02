@@ -52,7 +52,7 @@ async def _notify_discord(
     top_similar: str | None = None,
 ) -> None:
     """Fire-and-forget Discord webhook notification. Never raises."""
-    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL")
+    webhook_url = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
     if not webhook_url:
         logger.info("[DISCORD] skipped — no DISCORD_WEBHOOK_URL")
         return
