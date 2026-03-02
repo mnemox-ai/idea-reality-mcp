@@ -99,6 +99,31 @@ class TestSearchGitHubReposEmpty:
         assert result.top_repos == []
 
 
+class TestSearchGitHubReposMissingName:
+    @pytest.mark.asyncio
+    async def test_search_github_repos_missing_name(self):
+        """Ignore items without a full_name to avoid empty repo entries."""
+        items = [
+            _github_repo_item("owner/repo-a", stars=500, description="Alpha"),
+            {"full_name": "", "stargazers_count": 999, "html_url": "", "updated_at": ""},
+        ]
+        api_response = {"total_count": 2, "items": items}
+
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = _mock_response(api_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.github.httpx.AsyncClient", return_value=mock_client):
+            result = await search_github_repos(["test query"])
+
+        assert isinstance(result, GitHubResults)
+        assert result.total_repo_count == 2
+        assert result.max_stars == 500
+        assert len(result.top_repos) == 1
+        assert result.top_repos[0]["name"] == "owner/repo-a"
+
+
 class TestSearchGitHubReposApiError:
     @pytest.mark.asyncio
     async def test_search_github_repos_api_error(self):
