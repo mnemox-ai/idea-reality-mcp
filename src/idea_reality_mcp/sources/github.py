@@ -56,10 +56,12 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                 total_count += data.get("total_count", 0)
 
                 for item in data.get("items", []):
+                    name = item.get("full_name", "")
+                    if not name:
+                        continue
                     stars = item.get("stargazers_count", 0)
                     if stars > max_stars:
                         max_stars = stars
-                    name = item.get("full_name", "")
                     repo_query_hits[name] = repo_query_hits.get(name, 0) + 1
                     all_repos.append({
                         "name": name,
