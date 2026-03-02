@@ -17,6 +17,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Literal
 
+import httpx
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -34,6 +36,54 @@ sys.path.insert(0, os.path.dirname(__file__))
 import db as score_db
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Discord webhook — passive query intelligence (fire-and-forget, no PII)
+# ---------------------------------------------------------------------------
+
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
+
+
+async def _notify_discord(
+    idea_text: str,
+    keywords: list[str],
+    score: int,
+    depth: str,
+    lang: str,
+    keyword_source: str,
+    pivot_source: str,
+    top_similar: str | None = None,
+) -> None:
+    """Fire-and-forget Discord webhook notification. Never raises."""
+    if not DISCORD_WEBHOOK_URL:
+        return
+    try:
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        # Truncate idea for readability
+        idea_short = idea_text[:120] + ("..." if len(idea_text) > 120 else "")
+
+        embed = {
+            "title": f"{'🔴' if score >= 80 else '🟡' if score >= 40 else '🟢'} Signal {score}/100",
+            "description": idea_short,
+            "color": 0xFF4444 if score >= 80 else 0xFFAA00 if score >= 40 else 0x00CC66,
+            "fields": [
+                {"name": "Keywords", "value": ", ".join(keywords[:6]), "inline": False},
+                {"name": "Depth", "value": depth, "inline": True},
+                {"name": "Lang", "value": lang, "inline": True},
+                {"name": "KW Source", "value": keyword_source, "inline": True},
+                {"name": "Pivot Source", "value": pivot_source, "inline": True},
+            ],
+            "footer": {"text": ts},
+        }
+        if top_similar:
+            embed["fields"].insert(1, {"name": "Top Competitor", "value": top_similar, "inline": False})
+
+        payload = {"embeds": [embed]}
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            await client.post(DISCORD_WEBHOOK_URL, json=payload)
+    except Exception:
+        logger.debug("Discord webhook failed (non-fatal)")
+
 
 # ---------------------------------------------------------------------------
 # MCP HTTP sub-app — must be created BEFORE FastAPI app so lifespan can be passed
@@ -403,6 +453,23 @@ async def check(req: CheckRequest):
     except Exception:
         logger.exception("Failed to save score history")
         # Non-fatal — still return the result
+
+    # Discord webhook — fire-and-forget query intelligence (no PII)
+    top_sim_name = None
+    if result.get("top_similars"):
+        ts = result["top_similars"][0]
+        stars_str = f" ({ts['stars']}★)" if ts.get("stars") else ""
+        top_sim_name = f"{ts['name']}{stars_str}"
+    asyncio.create_task(_notify_discord(
+        idea_text=idea_text,
+        keywords=keywords,
+        score=result["reality_signal"],
+        depth=req.depth,
+        lang=req.lang,
+        keyword_source=keyword_source,
+        pivot_source=pivot_source,
+        top_similar=top_sim_name,
+    ))
 
     return result
 
