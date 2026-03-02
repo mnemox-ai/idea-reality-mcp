@@ -517,9 +517,6 @@ async def subscribers_count():
     return {"count": count}
 
 
-EXPORT_KEY = os.environ.get("EXPORT_KEY", "")
-
-
 @app.get("/api/export")
 async def export_scores(key: str = ""):
     """Export all score history as JSON (requires secret key).
@@ -529,7 +526,8 @@ async def export_scores(key: str = ""):
 
     Set EXPORT_KEY env var on Render. No key = endpoint disabled.
     """
-    if not EXPORT_KEY or key != EXPORT_KEY:
+    export_key = (os.environ.get("EXPORT_KEY") or "").strip()
+    if not export_key or key != export_key:
         raise HTTPException(status_code=403, detail="Invalid or missing export key")
     try:
         records = score_db.get_all_scores()
