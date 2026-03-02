@@ -41,9 +41,6 @@ logger = logging.getLogger(__name__)
 # Discord webhook — passive query intelligence (fire-and-forget, no PII)
 # ---------------------------------------------------------------------------
 
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
-
-
 async def _notify_discord(
     idea_text: str,
     keywords: list[str],
@@ -55,7 +52,8 @@ async def _notify_discord(
     top_similar: str | None = None,
 ) -> None:
     """Fire-and-forget Discord webhook notification. Never raises."""
-    if not DISCORD_WEBHOOK_URL:
+    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not webhook_url:
         logger.info("[DISCORD] skipped — no DISCORD_WEBHOOK_URL")
         return
     try:
@@ -81,7 +79,7 @@ async def _notify_discord(
 
         payload = {"embeds": [embed]}
         async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.post(DISCORD_WEBHOOK_URL, json=payload)
+            resp = await client.post(webhook_url, json=payload)
             logger.info("[DISCORD] sent — status %d, idea: %s", resp.status_code, idea_short[:50])
     except Exception:
         logger.warning("[DISCORD] webhook failed (non-fatal)", exc_info=True)
