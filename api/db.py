@@ -89,6 +89,20 @@ def get_history(hash_val: str) -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
+def get_all_scores() -> list[dict[str, Any]]:
+    """Return all score records (for export), newest first.
+
+    Excludes 'breakdown' column to keep payload small.
+    """
+    conn = _get_conn()
+    rows = conn.execute(
+        "SELECT id, idea_hash, idea_text, score, keywords, depth, lang, "
+        "keyword_source, created_at FROM score_history ORDER BY created_at DESC"
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
 # ---------------------------------------------------------------------------
 # Subscribers — email collection for report unlock (v0.4.0)
 # ---------------------------------------------------------------------------

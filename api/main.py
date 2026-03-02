@@ -517,6 +517,28 @@ async def subscribers_count():
     return {"count": count}
 
 
+EXPORT_KEY = os.environ.get("EXPORT_KEY", "")
+
+
+@app.get("/api/export")
+async def export_scores(key: str = ""):
+    """Export all score history as JSON (requires secret key).
+
+    Usage: GET /api/export?key=YOUR_SECRET
+    Returns: { "count": N, "records": [...] }
+
+    Set EXPORT_KEY env var on Render. No key = endpoint disabled.
+    """
+    if not EXPORT_KEY or key != EXPORT_KEY:
+        raise HTTPException(status_code=403, detail="Invalid or missing export key")
+    try:
+        records = score_db.get_all_scores()
+    except Exception:
+        logger.exception("Export failed")
+        raise HTTPException(status_code=500, detail="Export failed")
+    return {"count": len(records), "records": records}
+
+
 # ---------------------------------------------------------------------------
 # Mount MCP Streamable HTTP at /mcp
 # Enables Smithery and MCP HTTP clients to connect via:
