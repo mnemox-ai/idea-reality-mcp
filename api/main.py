@@ -56,6 +56,7 @@ async def _notify_discord(
 ) -> None:
     """Fire-and-forget Discord webhook notification. Never raises."""
     if not DISCORD_WEBHOOK_URL:
+        logger.info("[DISCORD] skipped — no DISCORD_WEBHOOK_URL")
         return
     try:
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -80,9 +81,10 @@ async def _notify_discord(
 
         payload = {"embeds": [embed]}
         async with httpx.AsyncClient(timeout=5.0) as client:
-            await client.post(DISCORD_WEBHOOK_URL, json=payload)
+            resp = await client.post(DISCORD_WEBHOOK_URL, json=payload)
+            logger.info("[DISCORD] sent — status %d, idea: %s", resp.status_code, idea_short[:50])
     except Exception:
-        logger.debug("Discord webhook failed (non-fatal)")
+        logger.warning("[DISCORD] webhook failed (non-fatal)", exc_info=True)
 
 
 # ---------------------------------------------------------------------------
@@ -454,13 +456,13 @@ async def check(req: CheckRequest):
         logger.exception("Failed to save score history")
         # Non-fatal — still return the result
 
-    # Discord webhook — fire-and-forget query intelligence (no PII)
+    # Discord webhook — query intelligence (no PII, 5s timeout, non-fatal)
     top_sim_name = None
     if result.get("top_similars"):
         ts = result["top_similars"][0]
         stars_str = f" ({ts['stars']}★)" if ts.get("stars") else ""
         top_sim_name = f"{ts['name']}{stars_str}"
-    asyncio.create_task(_notify_discord(
+    await _notify_discord(
         idea_text=idea_text,
         keywords=keywords,
         score=result["reality_signal"],
@@ -469,7 +471,7 @@ async def check(req: CheckRequest):
         keyword_source=keyword_source,
         pivot_source=pivot_source,
         top_similar=top_sim_name,
-    ))
+    )
 
     return result
 
