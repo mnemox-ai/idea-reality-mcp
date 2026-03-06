@@ -344,6 +344,7 @@
 
   <div style="text-align:center;margin-top:24px">
     <a href="/static/report.html" class="new-search-btn">New Search</a>
+    <a id="download-btn" class="new-search-btn" style="display:none;background:#00cc66;color:#000;border-color:#00cc66;margin-left:8px" href="#">Download Report</a>
   </div>
 </div>
 
@@ -557,17 +558,20 @@
     btn.textContent = 'Redirecting...';
 
     // Save to localStorage for post-payment recovery
+    const depth = $('#depth-select').value;
     try { localStorage.setItem('ir_idea_hash', currentIdeaHash); } catch(e) {}
     try { localStorage.setItem('ir_idea_text', currentIdeaText); } catch(e) {}
+    try { localStorage.setItem('ir_depth', depth); } catch(e) {}
 
     try {
-      const successUrl = window.location.origin + '/static/report.html?paid=1&idea_hash=' + encodeURIComponent(currentIdeaHash);
+      const successUrl = window.location.origin + '/static/report.html?paid=1&idea_hash=' + encodeURIComponent(currentIdeaHash) + '&depth=' + encodeURIComponent(depth);
       const res = await fetch(API + '/api/create-checkout', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           idea_text: currentIdeaText,
           idea_hash: currentIdeaHash,
+          depth: depth,
           success_url: successUrl,
         }),
       });
@@ -608,6 +612,8 @@
     const ideaHash = params.get('idea_hash') || '';
     const storedHash = (() => { try { return localStorage.getItem('ir_idea_hash') || ''; } catch(e) { return ''; } })();
     const storedText = (() => { try { return localStorage.getItem('ir_idea_text') || ''; } catch(e) { return ''; } })();
+    const storedDepth = (() => { try { return localStorage.getItem('ir_depth') || ''; } catch(e) { return ''; } })();
+    const depthParam = params.get('depth') || storedDepth || 'quick';
 
     const lookupHash = ideaHash || storedHash;
 
@@ -622,6 +628,7 @@
             order_id: orderId,
             idea_hash: lookupHash,
             idea_text: storedText,
+            depth: depthParam,
           }),
         });
         if (res.ok) {
@@ -679,6 +686,12 @@
       p.textContent = breakdown.summary;
       sbContent.appendChild(p);
     }
+    if (breakdown.explanation) {
+      const p = document.createElement('p');
+      p.textContent = breakdown.explanation;
+      p.style.color = '#999';
+      sbContent.appendChild(p);
+    }
     if (breakdown.duplicate_likelihood) {
       const p = document.createElement('p');
       p.innerHTML = `Duplicate likelihood: <strong style="color:${
@@ -725,6 +738,7 @@
           </div>
         </div>
         <p>${esc(crowd.message || '')}</p>
+        ${crowd.score_comparison ? `<p style="color:#999;font-size:13px">Your score is <strong>${esc(crowd.score_comparison)}</strong> the average of similar queries.</p>` : ''}
       `;
       // Depth breakdown
       if (crowd.depth_breakdown) {
@@ -762,7 +776,7 @@
             ${c.description ? `<div class="competitor-desc">${esc(c.description)}</div>` : ''}
             <div class="competitor-meta">
               ${activity.label ? esc(activity.label) : ''}
-              ${activity.days_since_update != null ? ' &middot; updated ' + activity.days_since_update + 'd ago' : ''}
+              ${activity.days_since_update != null ? ' &middot; updated ' + (activity.days_since_update === 0 ? 'today' : activity.days_since_update + 'd ago') : ''}
               ${c.language ? ' &middot; ' + esc(c.language) : ''}
             </div>
           </div>
@@ -774,7 +788,21 @@
     // --- Strategic Analysis ---
     const analysisContent = $('#analysis-content');
     const analysis = report.strategic_analysis || '';
-    analysisContent.textContent = analysis;
+    const paragraphs = analysis.split(/\n\n+/).filter(p => p.trim());
+    if (paragraphs.length > 1) {
+      analysisContent.innerHTML = paragraphs.map(p => `<p>${esc(p.trim())}</p>`).join('');
+    } else {
+      analysisContent.textContent = analysis;
+    }
+
+    // Download button
+    const reportId = data.report_id || '';
+    if (reportId) {
+      const dlBtn = $('#download-btn');
+      dlBtn.href = '/report/' + reportId + '/pdf';
+      dlBtn.style.display = 'inline-block';
+      currentReportId = reportId;
+    }
 
     show($('#full-report'));
   }
@@ -783,6 +811,9 @@
   const params = new URLSearchParams(window.location.search);
   if (params.has('paid') || params.has('order_id')) {
     handlePaymentSuccess();
+  } else if (params.has('idea_text')) {
+    const ideaInput = $('#idea-input');
+    if (ideaInput) ideaInput.value = decodeURIComponent(params.get('idea_text'));
   }
 
 })();
