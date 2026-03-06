@@ -1,4 +1,5 @@
 fastapi>=0.100.0
 uvicorn[standard]>=0.24.0
 anthropic>=0.40.0
+libsql-experimental>=0.0.68
 # LemonSqueezy uses httpx (already in core deps) — no extra SDK needed

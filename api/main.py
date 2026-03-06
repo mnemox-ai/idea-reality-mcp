@@ -111,8 +111,7 @@ app = FastAPI(
 )
 
 # Initialize DB tables (idempotent — CREATE TABLE IF NOT EXISTS)
-score_db.init_db()  # also calls init_query_log_table + init_reports_table
-score_db.init_subscribers_table()
+score_db.init_db()  # creates all tables: score_history, query_log, reports, page_views, subscribers
 
 # CORS — allow GitHub Pages and local dev
 ALLOWED_ORIGINS = [

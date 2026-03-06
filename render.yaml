@@ -16,3 +16,7 @@ services:
         sync: false   # set manually in Render dashboard
       - key: LEMONSQUEEZY_WEBHOOK_SECRET
         sync: false   # set manually in Render dashboard
+      - key: TURSO_DATABASE_URL
+        sync: false   # set manually in Render dashboard
+      - key: TURSO_AUTH_TOKEN
+        sync: false   # set manually in Render dashboard
