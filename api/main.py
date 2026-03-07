@@ -669,11 +669,11 @@ def _build_report_html(record: dict, report_id: str) -> str:
     elif score >= 40:
         score_color = "#ff9800"
     else:
-        score_color = "#00cc66"
+        score_color = "#00b4ff"
 
     # Duplicate likelihood styling
     dup = score_breakdown.get("duplicate_likelihood", "unknown")
-    dup_colors = {"high": "#ff4444", "medium": "#ff9800", "low": "#00cc66"}
+    dup_colors = {"high": "#ff4444", "medium": "#ff9800", "low": "#00b4ff"}
     dup_color = dup_colors.get(dup, "#888")
 
     # --- Section: Sub-Dimension Scores bars ---
@@ -851,11 +851,11 @@ body{{
   background:#04060b;color:#e0e0e8;line-height:1.7;
   max-width:800px;margin:0 auto;padding:48px 32px;
 }}
-a{{color:#00ff88;text-decoration:none}}
+a{{color:#00b4ff;text-decoration:none}}
 a:hover{{text-decoration:underline}}
 .brand{{text-align:center;margin-bottom:40px}}
 .brand h1{{font-size:24px;font-weight:700;color:#fff;letter-spacing:2px}}
-.brand h1 span{{color:#00ff88}}
+.brand h1 span{{color:#00b4ff}}
 .brand .rid{{color:#6a6a80;font-size:12px;margin-top:4px}}
 .idea-card{{
   background:#0b1120;border:1px solid #1a1a28;border-radius:8px;
@@ -878,7 +878,7 @@ a:hover{{text-decoration:underline}}
   background:{dup_color}22;color:{dup_color};border:1px solid {dup_color}44;
 }}
 h2{{
-  font-size:16px;font-weight:700;color:#00ff88;
+  font-size:16px;font-weight:700;color:#00b4ff;
   margin:36px 0 16px;padding-bottom:8px;
   border-bottom:1px solid #1a1a28;text-transform:uppercase;letter-spacing:1px;
 }}
@@ -886,7 +886,7 @@ h2{{
 .sub-row{{display:flex;align-items:center;gap:10px;margin:10px 0}}
 .sub-label{{width:160px;font-size:13px;color:#ccc}}
 .sub-track{{flex:1;height:12px;background:#1a1a28;border-radius:6px;overflow:hidden}}
-.sub-fill{{height:100%;border-radius:6px;background:#00ff88}}
+.sub-fill{{height:100%;border-radius:6px;background:#00b4ff}}
 .sub-val{{width:30px;font-size:13px;font-weight:700;color:#fff;text-align:right}}
 .sub-explain{{font-size:11px;color:#6a6a80;min-width:120px}}
 .angles-list{{margin:0;padding-left:24px;font-size:14px;color:#ccc}}
@@ -894,21 +894,21 @@ h2{{
 .comp{{background:#080e1a;border:1px solid #1a1a28;border-radius:8px;padding:14px 16px;margin:10px 0}}
 .comp-header{{display:flex;align-items:center;gap:8px;flex-wrap:wrap}}
 .badge{{font-size:16px}}
-.comp-name{{font-weight:600;color:#00ff88;font-size:14px}}
+.comp-name{{font-weight:600;color:#00b4ff;font-size:14px}}
 .comp-stars{{font-size:12px;color:#6a6a80}}
 .lang-tag{{font-size:11px;color:#aaa;background:#1a1a28;padding:2px 8px;border-radius:10px}}
 .comp-desc{{font-size:13px;color:#999;margin:6px 0 4px;line-height:1.5}}
 .comp-via{{font-size:11px;color:#555;margin:4px 0}}
 .angle-tag{{
-  display:inline-block;background:#00ff8815;color:#00ff88;
+  display:inline-block;background:#00b4ff15;color:#00b4ff;
   padding:1px 8px;border-radius:10px;font-size:10px;margin:0 3px;
-  border:1px solid #00ff8833;
+  border:1px solid #00b4ff33;
 }}
 .comp-meta{{font-size:11px;color:#6a6a80}}
 .strat p{{margin-bottom:16px;font-size:14px;color:#ccc}}
 .crowd-msg{{font-size:14px;color:#ccc}}
 .ev-item{{font-size:13px;color:#999;margin:6px 0;font-family:'JetBrains Mono',monospace}}
-.ev-src{{color:#00ff88;font-weight:600}}
+.ev-src{{color:#00b4ff;font-weight:600}}
 .ev-ts{{margin-top:12px;font-size:12px;color:#6a6a80;font-style:italic}}
 .empty{{color:#6a6a80;font-style:italic}}
 .ai-section{{background:#080e1a;border:1px solid #1a1a28;border-radius:8px;padding:20px;margin-bottom:20px}}
@@ -921,15 +921,15 @@ h2{{
 }}
 .copy-btn{{
   display:inline-block;margin-top:12px;padding:8px 20px;
-  background:#00ff88;color:#04060b;border:none;border-radius:6px;
+  background:#00b4ff;color:#04060b;border:none;border-radius:6px;
   font-size:13px;font-weight:600;cursor:pointer;
 }}
-.copy-btn:hover{{background:#00dd77}}
+.copy-btn:hover{{background:#0099dd}}
 .footer{{
   margin-top:48px;padding-top:20px;border-top:1px solid #1a1a28;
   text-align:center;color:#6a6a80;font-size:11px;
 }}
-.footer a{{color:#00ff88}}
+.footer a{{color:#00b4ff}}
 </style>
 </head>
 <body>
