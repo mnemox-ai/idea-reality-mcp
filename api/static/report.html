@@ -806,7 +806,7 @@
     (breakdown.source_bars || []).forEach(bar => {
       const container = document.createElement('div');
       container.className = 'source-bar-container';
-      const srcClass = (bar.source || 'default').replace(/[^a-z]/g, '');
+      const srcClass = (bar.source || 'default').toLowerCase().replace(/[^a-z]/g, '');
       container.innerHTML = `
         <div class="source-bar-label">
           <span>${esc(bar.source)}</span>

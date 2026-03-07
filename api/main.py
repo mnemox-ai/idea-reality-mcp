@@ -688,11 +688,11 @@ def _build_report_html(record: dict, report_id: str) -> str:
         "community_buzz": "HN + Product Hunt mentions",
         "ecosystem_depth": "npm + PyPI packages",
     }
-    # Compute ecosystem_depth as average of npm/pypi if available
+    # Compute ecosystem_depth as max of npm/pypi if available
     eco_npm = sub_scores.get("ecosystem_depth_npm")
     eco_pypi = sub_scores.get("ecosystem_depth_pypi")
     eco_parts = [v for v in [eco_npm, eco_pypi] if v is not None]
-    ecosystem_depth = round(sum(eco_parts) / len(eco_parts)) if eco_parts else None
+    ecosystem_depth = max(eco_parts) if eco_parts else None
     merged_sub = {
         "competition_density": sub_scores.get("competition_density"),
         "market_maturity": sub_scores.get("market_maturity"),
