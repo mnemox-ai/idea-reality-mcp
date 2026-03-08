@@ -14,6 +14,7 @@ import hashlib
 import json
 import logging
 import os
+import time as _time
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -44,6 +45,33 @@ import report as report_mod
 import lemon_utils
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# GitHub stars — cached fetch (1-hour TTL)
+# ---------------------------------------------------------------------------
+_github_stars_cache = {"value": 290, "fetched_at": 0}
+
+
+async def _get_github_stars():
+    """Fetch GitHub stars with 1-hour cache."""
+    now = _time.time()
+    if now - _github_stars_cache["fetched_at"] < 3600:
+        return _github_stars_cache["value"]
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get(
+                "https://api.github.com/repos/mnemox-ai/idea-reality-mcp",
+                headers={"Accept": "application/vnd.github.v3+json"},
+            )
+            if resp.status_code == 200:
+                _github_stars_cache["value"] = resp.json().get(
+                    "stargazers_count", 290
+                )
+                _github_stars_cache["fetched_at"] = now
+    except Exception:
+        pass
+    return _github_stars_cache["value"]
+
 
 # ---------------------------------------------------------------------------
 # Discord webhook — passive query intelligence (fire-and-forget, no PII)
@@ -644,7 +672,7 @@ async def social_proof():
         logger.exception("Failed to get social proof stats")
     return {
         "total_checks": total_checks,
-        "github_stars": 236,
+        "github_stars": await _get_github_stars(),
         "countries": "30+",
         "last_check_ago": last_check_ago,
     }

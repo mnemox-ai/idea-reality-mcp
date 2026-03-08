@@ -66,9 +66,11 @@ async def idea_check(
             ph_results=ph_results,
         )
     else:
-        # Quick mode: GitHub + HN only
-        github_results = await search_github_repos(keywords)
-        hn_results = await search_hn(keywords)
+        # Quick mode: GitHub + HN in parallel
+        github_results, hn_results = await asyncio.gather(
+            search_github_repos(keywords),
+            search_hn(keywords),
+        )
 
         result = compute_signal(
             idea_text=idea_text,

@@ -3,11 +3,11 @@
 ## What This Is
 Mnemox Idea Reality MCP Server v0.4.0 — pre-build reality check for AI coding agents.
 `idea_check` scans GitHub, HN, npm, PyPI, Product Hunt → returns reality_signal (0-100).
-**Status: 暫停開發中，持續監測流量。** Google SEO 第一大來源，持續有不同國家用戶查詢。236 stars。
+**Status: 暫停開發中，持續監測流量。** Google SEO 第一大來源，持續有不同國家用戶查詢。290+ stars。
 
 ## Quick Ref
 - GitHub: mnemox-ai/idea-reality-mcp | PyPI: idea-reality-mcp
-- Tests: `uv run pytest tests/ -v` (148 tests)
+- Tests: `uv run pytest tests/ -v` (181 tests)
 - Entry: `python -m idea_reality_mcp` or `uv run python -m idea_reality_mcp`
 - Tech: Python 3.11+, FastMCP 3.x, httpx (async), uv
 
