@@ -17,7 +17,11 @@ The only MCP tool that searches 5 real databases before your agent writes a sing
 **Works with:** Claude Desktop · Claude Code · Cursor · Windsurf · any MCP client
 
 <p align="center">
-  <a href="https://mnemox.ai/check"><strong>👉 Try it in your browser — no install</strong></a>
+  <a href="https://mnemox.ai/check"><strong>Try it in your browser — no install</strong></a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshot-hero.png" alt="idea-reality-mcp web UI" width="700">
 </p>
 
 ## What it does
@@ -35,6 +39,10 @@ idea-reality-mcp:
 ```
 
 One number. Five real sources. Your agent decides what to do next.
+
+<p align="center">
+  <img src="docs/screenshot-result.png" alt="idea-reality-mcp scan result" width="700">
+</p>
 
 ## The problem
 
@@ -63,7 +71,7 @@ idea-reality-mcp runs **inside** your agent. It triggers automatically. The sear
 | **Cross-platform** | Search each site separately | N/A | 5 sources in parallel, one call |
 | **Workflow** | Copy-paste between tabs | Separate app | MCP / CLI / API / CI |
 | **Verifiable** | Yes (manual) | No | Yes (every number has a source) |
-| **Price** | Free | Free trial → paywall | Free, open-source, forever |
+| **Price** | Free | Free trial → paywall | Free & open-source (MIT) |
 
 **TL;DR — You don't use it. Your agent does. That's the point.**
 
@@ -251,6 +259,18 @@ The LLM understands your idea. The dictionary is your safety net. **You always g
 | Deep | 25% | 10% | 15% | 20% | 15% | 15% |
 
 If Product Hunt is unavailable (no token), its weight is redistributed automatically.
+
+## REST API
+
+Not using MCP? Call the hosted API directly:
+
+```bash
+curl -X POST https://idea-reality-mcp.onrender.com/api/check \
+  -H "Content-Type: application/json" \
+  -d '{"idea_text": "AI code review tool", "depth": "quick"}'
+```
+
+Returns the same `reality_signal`, evidence, and competitors as the MCP tool. Free, no API key required.
 
 ## CI: Auto-check on Pull Requests
 
