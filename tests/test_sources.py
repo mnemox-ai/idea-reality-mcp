@@ -165,8 +165,8 @@ class TestSearchGitHubReposDeduplication:
             result = await search_github_repos(["code review", "review tool"])
 
         assert isinstance(result, GitHubResults)
-        # total_count is summed across queries
-        assert result.total_repo_count == 18
+        # total_count is max across queries (not summed, to avoid overlap inflation)
+        assert result.total_repo_count == 10
         # Should have 3 unique repos (shared appears once)
         names = [r["name"] for r in result.top_repos]
         assert len(names) == 3
@@ -268,7 +268,7 @@ class TestSearchHNMultipleKeywords:
             result = await search_hn(["kw1", "kw2", "kw3"])
 
         assert isinstance(result, HNResults)
-        assert result.total_mentions == 35
+        assert result.total_mentions == 20  # max across queries, not sum
         assert len(result.evidence) == 3
         assert result.evidence[0]["query"] == "kw1"
         assert result.evidence[0]["count"] == 10

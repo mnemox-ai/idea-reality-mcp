@@ -134,7 +134,7 @@ class TestSearchNpmDeduplication:
         with patch("idea_reality_mcp.sources.npm.httpx.AsyncClient", return_value=mock_client):
             result = await search_npm(["kw1", "kw2"])
 
-        assert result.total_count == 18
+        assert result.total_count == 10  # max across queries, not sum
         names = [p["name"] for p in result.top_packages]
         assert len(names) == 3
         assert len(set(names)) == 3

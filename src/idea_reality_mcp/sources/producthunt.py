@@ -51,7 +51,7 @@ async def search_producthunt(keywords: list[str]) -> ProductHuntResults:
             }],
         )
 
-    total_count = 0
+    max_total_count = 0
     all_products: list[dict] = []
     evidence: list[dict] = []
 
@@ -89,7 +89,8 @@ async def search_producthunt(keywords: list[str]) -> ProductHuntResults:
 
                 posts_data = data.get("data", {}).get("posts", {})
                 count = posts_data.get("totalCount", 0)
-                total_count += count
+                if count > max_total_count:
+                    max_total_count = count
 
                 for edge in posts_data.get("edges", []):
                     node = edge.get("node", {})
@@ -126,7 +127,7 @@ async def search_producthunt(keywords: list[str]) -> ProductHuntResults:
     unique = sorted(seen.values(), key=lambda p: p["votes"], reverse=True)
 
     return ProductHuntResults(
-        total_count=total_count,
+        total_count=max_total_count,
         top_products=unique[:5],
         evidence=evidence,
     )

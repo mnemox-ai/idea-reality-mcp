@@ -107,7 +107,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     Returns:
         Aggregated results with total count, max stars, and top 5 repos.
     """
-    total_count = 0
+    max_total_count = 0
     max_stars = 0
     all_repos: list[dict] = []
 
@@ -124,7 +124,9 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                 )
                 resp.raise_for_status()
                 data = resp.json()
-                total_count += data.get("total_count", 0)
+                query_count = data.get("total_count", 0)
+                if query_count > max_total_count:
+                    max_total_count = query_count
 
                 for item in data.get("items", []):
                     name = item.get("full_name", "")
@@ -168,7 +170,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
             unique_repos.append(repo)
 
     return GitHubResults(
-        total_repo_count=total_count,
+        total_repo_count=max_total_count,
         max_stars=max_stars,
         top_repos=unique_repos[:5],
     )

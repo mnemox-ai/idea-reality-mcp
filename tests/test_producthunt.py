@@ -142,7 +142,7 @@ class TestSearchProductHuntDeduplication:
         ):
             result = await search_producthunt(["kw1", "kw2"])
 
-        assert result.total_count == 8
+        assert result.total_count == 5  # max across queries, not sum
         names = [p["name"] for p in result.top_products]
         assert len(names) == 2
         assert len(set(names)) == 2

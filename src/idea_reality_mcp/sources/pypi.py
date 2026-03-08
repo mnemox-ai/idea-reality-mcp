@@ -43,7 +43,7 @@ async def search_pypi(keywords: list[str]) -> PyPIResults:
     Returns:
         Aggregated results with total count, top packages, and evidence.
     """
-    total_count = 0
+    max_total_count = 0
     all_packages: list[dict] = []
     evidence: list[dict] = []
 
@@ -60,7 +60,8 @@ async def search_pypi(keywords: list[str]) -> PyPIResults:
                 # Extract total result count
                 count_match = _COUNT_PATTERN.search(html)
                 count = int(count_match.group("count").replace(",", "")) if count_match else 0
-                total_count += count
+                if count > max_total_count:
+                    max_total_count = count
 
                 # Extract package snippets
                 for m in _PACKAGE_PATTERN.finditer(html):
@@ -105,7 +106,7 @@ async def search_pypi(keywords: list[str]) -> PyPIResults:
             unique.append(pkg)
 
     return PyPIResults(
-        total_count=total_count,
+        total_count=max_total_count,
         top_packages=unique[:5],
         evidence=evidence,
     )

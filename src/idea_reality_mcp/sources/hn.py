@@ -28,7 +28,7 @@ async def search_hn(keywords: list[str]) -> HNResults:
         Aggregated mention count and evidence items.
     """
     twelve_months_ago = int((datetime.now(timezone.utc) - timedelta(days=365)).timestamp())
-    total_mentions = 0
+    max_mentions = 0
     evidence: list[dict] = []
 
     async with httpx.AsyncClient(timeout=15.0) as client:
@@ -46,7 +46,8 @@ async def search_hn(keywords: list[str]) -> HNResults:
                 resp.raise_for_status()
                 data = resp.json()
                 count = data.get("nbHits", 0)
-                total_mentions += count
+                if count > max_mentions:
+                    max_mentions = count
 
                 evidence.append({
                     "source": "hackernews",
@@ -64,4 +65,4 @@ async def search_hn(keywords: list[str]) -> HNResults:
                     "detail": f"Failed to query HN for '{query}'",
                 })
 
-    return HNResults(total_mentions=total_mentions, evidence=evidence)
+    return HNResults(total_mentions=max_mentions, evidence=evidence)

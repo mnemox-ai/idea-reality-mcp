@@ -136,6 +136,6 @@ class TestSearchPyPIDeduplication:
         with patch("idea_reality_mcp.sources.pypi.httpx.AsyncClient", return_value=mock_client):
             result = await search_pypi(["kw1", "kw2"])
 
-        assert result.total_count == 84  # 42 + 42
+        assert result.total_count == 42  # max across queries, not sum
         names = [p["name"] for p in result.top_packages]
         assert len(set(names)) == len(names)  # no duplicates

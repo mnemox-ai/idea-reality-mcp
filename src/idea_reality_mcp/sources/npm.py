@@ -27,7 +27,7 @@ async def search_npm(keywords: list[str]) -> NpmResults:
     Returns:
         Aggregated results with total count, top packages, and evidence.
     """
-    total_count = 0
+    max_total_count = 0
     all_packages: list[dict] = []
     evidence: list[dict] = []
 
@@ -41,7 +41,8 @@ async def search_npm(keywords: list[str]) -> NpmResults:
                 resp.raise_for_status()
                 data = resp.json()
                 count = data.get("total", 0)
-                total_count += count
+                if count > max_total_count:
+                    max_total_count = count
 
                 for obj in data.get("objects", []):
                     pkg = obj.get("package", {})
@@ -79,7 +80,7 @@ async def search_npm(keywords: list[str]) -> NpmResults:
     unique = sorted(seen.values(), key=lambda p: p["score"], reverse=True)
 
     return NpmResults(
-        total_count=total_count,
+        total_count=max_total_count,
         top_packages=unique[:5],
         evidence=evidence,
     )
