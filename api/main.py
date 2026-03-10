@@ -263,7 +263,7 @@ async def _extract_keywords_via_haiku(idea_text: str) -> list[str] | None:
     try:
         import anthropic
 
-        client = anthropic.AsyncAnthropic(api_key=api_key)
+        client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=200,
@@ -358,7 +358,7 @@ Evidence:
     try:
         import anthropic
 
-        client = anthropic.AsyncAnthropic(api_key=api_key)
+        client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=500,
@@ -607,8 +607,11 @@ async def subscribe(req: SubscribeRequest, request: Request):
 
 
 @app.get("/api/subscribers/count")
-async def subscribers_count():
-    """Return total subscriber count (for internal monitoring)."""
+async def subscribers_count(key: str = ""):
+    """Return total subscriber count (requires EXPORT_KEY)."""
+    export_key = (os.environ.get("EXPORT_KEY") or "").strip()
+    if not export_key or key != export_key:
+        raise HTTPException(status_code=403, detail="Forbidden")
     try:
         count = score_db.get_subscriber_count()
     except Exception:
@@ -617,8 +620,11 @@ async def subscribers_count():
 
 
 @app.get("/api/query-stats")
-async def query_stats():
-    """Return query usage stats (total queries, unique IPs, return rate)."""
+async def query_stats(key: str = ""):
+    """Return query usage stats (requires EXPORT_KEY)."""
+    export_key = (os.environ.get("EXPORT_KEY") or "").strip()
+    if not export_key or key != export_key:
+        raise HTTPException(status_code=403, detail="Forbidden")
     try:
         stats = score_db.get_query_stats()
     except Exception:
@@ -631,16 +637,30 @@ class PageViewRequest(BaseModel):
     page: str
 
 
+_view_limits: dict[str, dict] = defaultdict(lambda: {"count": 0, "reset_date": ""})
+_VIEW_DAILY_LIMIT = 200  # per IP per day — prevents DB flooding
+
+
 @app.post("/api/view")
-async def record_page_view(req: PageViewRequest):
+async def record_page_view(req: PageViewRequest, request: Request):
     """Record a page view.
 
     Body: { "page": "report" }
     """
+    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown").split(",")[0].strip()
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    entry = _view_limits[client_ip]
+    if entry["reset_date"] != today:
+        entry["count"] = 0
+        entry["reset_date"] = today
+    entry["count"] += 1
+    if entry["count"] > _VIEW_DAILY_LIMIT:
+        return {"ok": True}  # silently drop — don't reveal limit
+
     if not req.page or not req.page.strip():
         raise HTTPException(status_code=422, detail="page cannot be empty")
     try:
-        score_db.save_page_view(req.page.strip())
+        score_db.save_page_view(req.page.strip()[:100])  # truncate long page names
     except Exception:
         logger.exception("Failed to save page view")
     return {"ok": True}

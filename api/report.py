@@ -185,7 +185,7 @@ async def _generate_search_angles(idea_text: str) -> list[str]:
     try:
         import anthropic
 
-        client = anthropic.AsyncAnthropic(api_key=api_key)
+        client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=300,
@@ -526,7 +526,7 @@ async def _generate_strategic_analysis(
     try:
         import anthropic
 
-        client = anthropic.AsyncAnthropic(api_key=api_key)
+        client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=1000,

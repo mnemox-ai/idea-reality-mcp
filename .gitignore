@@ -22,3 +22,13 @@ mcp-publisher.exe
 mcp-publisher_*.tar.gz
 *.mcpregistry_*
 .claude/settings.local.json
+.claude/launch.json
+
+# Data exports (may contain user queries)
+discord_*.json
+
+# Auto-claude task files
+tasks*.txt
+
+# Planning docs
+V1_COMPLETION_PLAN.md

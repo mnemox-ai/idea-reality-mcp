@@ -114,9 +114,16 @@ def test_subscribe_endpoint_empty_email(client):
     assert resp.status_code == 422
 
 
-def test_subscribers_count_endpoint(client):
-    """GET /api/subscribers/count should return a count."""
+def test_subscribers_count_endpoint_no_key(client):
+    """GET /api/subscribers/count without key should return 403."""
     resp = client.get("/api/subscribers/count")
+    assert resp.status_code == 403
+
+
+def test_subscribers_count_endpoint_with_key(client, monkeypatch):
+    """GET /api/subscribers/count with valid key should return a count."""
+    monkeypatch.setenv("EXPORT_KEY", "test-key-123")
+    resp = client.get("/api/subscribers/count?key=test-key-123")
     assert resp.status_code == 200
     data = resp.json()
     assert "count" in data
