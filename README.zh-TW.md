@@ -25,15 +25,17 @@
 你：「AI code review 工具」
 
 idea-reality-mcp：
-├── reality_signal: 90/100
-├── GitHub repos: 847 個
+├── reality_signal: 92/100
+├── trend: accelerating ↗（市場加速中）
+├── market_momentum: 73/100
+├── GitHub repos: 847 個（45% 在近 6 個月建立）
 ├── 最大競品: reviewdog (9,094 ⭐)
 ├── npm 套件: 56 個
-├── HN 討論: 254 則
-└── 判定: HIGH — 建議找利基切入
+├── HN 討論: 254 則（趨勢上升）
+└── 判定: HIGH — 市場正在加速，快找利基切入
 ```
 
-一個數字。五個真實來源。Agent 自己決定下一步。
+一個分數。五個來源。趨勢偵測。Agent 自己決定下一步。
 
 ## 問題
 
@@ -235,7 +237,7 @@ LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "keyword_source": "llm",
     "depth": "deep",
-    "version": "0.4.0"
+    "version": "0.5.0"
   }
 }
 ```

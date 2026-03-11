@@ -1,13 +1,13 @@
 # IDEA-REALITY-MCP — Project Context
 
 ## What This Is
-Mnemox Idea Reality MCP Server v0.4.0 — pre-build reality check for AI coding agents.
+Mnemox Idea Reality MCP Server v0.5.0 — pre-build reality check for AI coding agents.
 `idea_check` scans GitHub, HN, npm, PyPI, Product Hunt → returns reality_signal (0-100).
 **Status: 暫停開發中，持續監測流量。** Google SEO 第一大來源，持續有不同國家用戶查詢。290+ stars。
 
 ## Quick Ref
 - GitHub: mnemox-ai/idea-reality-mcp | PyPI: idea-reality-mcp
-- Tests: `uv run pytest tests/ -v` (181 tests)
+- Tests: `uv run pytest tests/ -v` (247 tests)
 - Entry: `python -m idea_reality_mcp` or `uv run python -m idea_reality_mcp`
 - Tech: Python 3.11+, FastMCP 3.x, httpx (async), uv
 
@@ -48,9 +48,14 @@ api/
 - Graceful degradation — partial results if any source fails
 - Discord webhook = 永久查詢資料庫（每次 /api/check 自動推送）
 
-## v0.5 Ideas (when resumed)
-- Temporal Signals: recent_created_ratio + recently_active_ratio
+## v0.5.0 (current)
+- Temporal Signals: GitHub recency ratio, HN trend, PH launch timing
+- Continuous scoring: log-curve replaces threshold-based
+- market_momentum sub-score + trend indicator (accelerating/stable/declining)
+
+## v0.6 Ideas
 - Decision Tracking: build/pivot/kill buttons
+- Temporal Signals v2: npm/PyPI creation dates
 
 ## Community Lessons
 - MCP 設計哲學 = tool description 即文件，不需要塞 instruction 到 agent config

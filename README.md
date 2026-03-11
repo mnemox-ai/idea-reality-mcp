@@ -30,15 +30,17 @@ The only MCP tool that searches 5 real databases before your agent writes a sing
 You: "AI code review tool"
 
 idea-reality-mcp:
-├── reality_signal: 90/100
-├── GitHub repos: 847
+├── reality_signal: 92/100
+├── trend: accelerating ↗
+├── market_momentum: 73/100
+├── GitHub repos: 847 (45% created in last 6 months)
 ├── Top competitor: reviewdog (9,094 ⭐)
 ├── npm packages: 56
-├── HN discussions: 254
-└── Verdict: HIGH — consider pivoting to a niche
+├── HN discussions: 254 (trending up)
+└── Verdict: HIGH — market is accelerating, find a niche fast
 ```
 
-One number. Five real sources. Your agent decides what to do next.
+One score. Five sources. Trend detection. Your agent decides what to do next.
 
 <p align="center">
   <img src="docs/screenshot-result.png" alt="idea-reality-mcp scan result" width="700">
@@ -215,7 +217,7 @@ The LLM understands your idea. The dictionary is your safety net. **You always g
 | `idea_text` | string                    | yes      | Natural-language description of idea |
 | `depth`     | `"quick"` \| `"deep"`     | no       | `"quick"` = GitHub + HN (default). `"deep"` = all 5 sources in parallel |
 
-**Output:** `reality_signal` (0-100), `duplicate_likelihood`, `evidence[]`, `top_similars[]`, `pivot_hints[]`, `meta{}`
+**Output:** `reality_signal` (0-100), `trend` (accelerating/stable/declining), `sub_scores{}` (incl. `market_momentum`), `duplicate_likelihood`, `evidence[]`, `top_similars[]`, `pivot_hints[]`, `meta{}`
 
 <details>
 <summary>Full output example</summary>
@@ -244,7 +246,7 @@ The LLM understands your idea. The dictionary is your safety net. **You always g
     "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
     "keyword_source": "llm",
     "depth": "deep",
-    "version": "0.4.0"
+    "version": "0.5.0"
   }
 }
 ```

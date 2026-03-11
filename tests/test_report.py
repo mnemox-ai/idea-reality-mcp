@@ -63,7 +63,7 @@ SAMPLE_SIGNAL_RESULT = {
         "checked_at": "2026-03-06T00:00:00+00:00",
         "sources_used": ["github", "hackernews"],
         "depth": "quick",
-        "version": "0.4.0",
+        "version": "0.5.0",
     },
 }
 
