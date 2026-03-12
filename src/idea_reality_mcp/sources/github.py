@@ -17,7 +17,7 @@ _GITHUB_AUTO_ADJECTIVES = {
     "legendary", "supreme", "verbose", "miniature", "psychic", "organic",
     "animated", "automatic", "bookish", "curly", "effective", "fantastic",
     "glowing", "humble", "ideal", "jubilant", "laughing", "musical",
-    "obscure", "probable", "probable", "scaling", "special", "upgraded",
+    "obscure", "probable", "scaling", "special", "upgraded",
     "vigilant", "literate", "cautious", "congenial", "didactic", "eloquent",
     "fictional", "improved", "symmetrical", "refactored", "reimagined",
 }
@@ -111,6 +111,10 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     Returns:
         Aggregated results with total count, max stars, and top 5 repos.
     """
+    normalized_keywords = list(dict.fromkeys(k.strip() for k in keywords if k.strip()))
+    if not normalized_keywords:
+        return GitHubResults(total_repo_count=0, max_stars=0, top_repos=[])
+
     max_total_count = 0
     max_stars = 0
     all_repos: list[dict] = []
@@ -123,7 +127,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     repo_query_hits: dict[str, int] = {}
 
     async with httpx.AsyncClient(timeout=15.0) as client:
-        for query in keywords:
+        for query in normalized_keywords:
             try:
                 resp = await client.get(
                     GITHUB_API,
@@ -172,7 +176,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     # Filter noise repos before ranking.
     # Build keyword list from query strings for relevance check.
     kw_set: set[str] = set()
-    for q in keywords:
+    for q in normalized_keywords:
         for w in q.lower().split():
             if len(w) >= 4:
                 kw_set.add(w)

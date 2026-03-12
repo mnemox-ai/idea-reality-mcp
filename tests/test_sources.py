@@ -183,6 +183,29 @@ class TestSearchGitHubReposDeduplication:
         assert stars == sorted(stars, reverse=True)
 
 
+class TestSearchGitHubReposDuplicateKeywords:
+    @pytest.mark.asyncio
+    async def test_search_github_repos_ignores_duplicate_keywords(self):
+        """Do not issue duplicate API requests for repeated query variants."""
+        api_response = {
+            "total_count": 7,
+            "items": [_github_repo_item("owner/repo-a", stars=123)],
+        }
+
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = _mock_response(api_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.github.httpx.AsyncClient", return_value=mock_client):
+            result = await search_github_repos(["same query", "same query", "  same query  "])
+
+        assert isinstance(result, GitHubResults)
+        assert result.total_repo_count == 7
+        # 1 unique keyword -> 2 GitHub API calls (top repos + recent-created query)
+        assert mock_client.get.call_count == 2
+
+
 # ===========================================================================
 # Hacker News tests
 # ===========================================================================
@@ -280,3 +303,21 @@ class TestSearchHNMultipleKeywords:
         assert result.evidence[1]["count"] == 5
         assert result.evidence[2]["query"] == "kw3"
         assert result.evidence[2]["count"] == 20
+
+
+class TestSearchHNDuplicateKeywords:
+    @pytest.mark.asyncio
+    async def test_search_hn_ignores_duplicate_keywords(self):
+        """Do not query HN multiple times for repeated keyword variants."""
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = _mock_response({"nbHits": 11, "hits": []})
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.hn.httpx.AsyncClient", return_value=mock_client):
+            result = await search_hn(["same", "same", " same "])
+
+        assert isinstance(result, HNResults)
+        assert result.total_mentions == 11
+        assert len(result.evidence) == 1
+        assert mock_client.get.call_count == 1
