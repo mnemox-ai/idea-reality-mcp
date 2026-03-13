@@ -11,6 +11,7 @@ from .sources.hn import search_hn
 from .sources.npm import search_npm
 from .sources.pypi import search_pypi
 from .sources.producthunt import search_producthunt
+from .sources.stackoverflow import search_stackoverflow
 from .scoring.engine import compute_signal, extract_keywords
 
 
@@ -48,10 +49,11 @@ async def idea_check(
         npm_task = search_npm(keywords)
         pypi_task = search_pypi(keywords)
         ph_task = search_producthunt(keywords)
+        so_task = search_stackoverflow(keywords)
 
-        github_results, hn_results, npm_results, pypi_results, ph_results = (
+        github_results, hn_results, npm_results, pypi_results, ph_results, so_results = (
             await asyncio.gather(
-                github_task, hn_task, npm_task, pypi_task, ph_task,
+                github_task, hn_task, npm_task, pypi_task, ph_task, so_task,
             )
         )
 
@@ -64,6 +66,7 @@ async def idea_check(
             npm_results=npm_results,
             pypi_results=pypi_results,
             ph_results=ph_results,
+            so_results=so_results,
         )
     else:
         # Quick mode: GitHub + HN in parallel
