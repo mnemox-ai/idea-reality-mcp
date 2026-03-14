@@ -619,10 +619,12 @@
 
       show($('#free-result'));
 
-      // Build preview + paywall
+      // Build preview + paywall (deep mode only)
       buildPreviewCards(data);
       show($('#report-preview'));
-      show($('#paywall'));
+      if (depth === 'deep') {
+        show($('#paywall'));
+      }
 
     } catch (e) {
       const errDiv = $('#error-msg');
