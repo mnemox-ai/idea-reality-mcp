@@ -12,6 +12,7 @@ from ..sources.hn import HNResults
 from ..sources.npm import NpmResults
 from ..sources.pypi import PyPIResults
 from ..sources.producthunt import ProductHuntResults
+from ..sources.stackoverflow import StackOverflowResults
 from .synonyms import INTENT_ANCHORS, SYNONYMS
 
 # ---------------------------------------------------------------------------
@@ -398,6 +399,7 @@ _K_GITHUB_STAR = 95 / math.log(10001)   # ~10.31  | 10→25, 500→64, 1000→71
 _K_HN = 95 / math.log(101)             # ~20.58  | 1→14, 15→57, 30→71, 100→95
 _K_NPM_PYPI = 95 / math.log(501)       # ~15.28  | 1→11, 20→47, 100→71, 500→95
 _K_PH = 95 / math.log(101)             # ~20.58  | 1→14, 10→49, 30→71, 100→95
+_K_SO = 95 / math.log(201)             # ~17.91  | 1→12, 20→54, 50→71, 200→95
 
 
 def _log_score(count: int, k: float) -> int:
@@ -432,6 +434,11 @@ def _pypi_score(count: int) -> int:
 def _ph_score(count: int) -> int:
     """Score Product Hunt product count."""
     return _log_score(count, _K_PH)
+
+
+def _so_score(count: int) -> int:
+    """Score Stack Overflow question count."""
+    return _log_score(count, _K_SO)
 
 
 def _filter_relevant_similars(
@@ -567,12 +574,13 @@ _QUICK_WEIGHTS = {
 }
 
 _DEEP_WEIGHTS = {
-    "github_repo": 0.25,
-    "github_star": 0.10,
-    "hn": 0.15,
-    "npm": 0.20,
-    "pypi": 0.15,
-    "ph": 0.15,
+    "github_repo": 0.22,
+    "github_star": 0.09,
+    "hn": 0.14,
+    "npm": 0.18,
+    "pypi": 0.13,
+    "ph": 0.14,
+    "so": 0.10,
 }
 
 
@@ -586,6 +594,7 @@ def compute_signal(
     npm_results: NpmResults | None = None,
     pypi_results: PyPIResults | None = None,
     ph_results: ProductHuntResults | None = None,
+    so_results: StackOverflowResults | None = None,
 ) -> dict:
     """Compute the full reality check output.
 
@@ -604,6 +613,7 @@ def compute_signal(
         n_score = 0
         p_score = 0
         ph_val = 0
+        so_val = 0
     else:
         # Deep mode
         n_score = _npm_score(npm_results.total_count) if npm_results else 0
@@ -624,20 +634,36 @@ def compute_signal(
         else:
             ph_val = 0
             # Redistribute PH weight proportionally to other deep sources
-            ph_w = weights.pop("ph", 0.15)
+            ph_w = weights.pop("ph", 0.14)
             remaining_keys = list(weights.keys())
             total_remaining = sum(weights[k] for k in remaining_keys)
             if total_remaining > 0:
                 for k in remaining_keys:
                     weights[k] += ph_w * (weights[k] / total_remaining)
 
+        # Stack Overflow — redistribute weight if unavailable
+        so_available = so_results is not None
+        if so_available:
+            so_val = _so_score(so_results.total_count)
+            sources_used.append("stackoverflow")
+        else:
+            so_val = 0
+            # Redistribute SO weight proportionally to other deep sources
+            so_w = weights.pop("so", 0.10)
+            remaining_keys = list(weights.keys())
+            total_remaining = sum(weights[k] for k in remaining_keys)
+            if total_remaining > 0:
+                for k in remaining_keys:
+                    weights[k] += so_w * (weights[k] / total_remaining)
+
         signal = int(
-            g_repo * weights.get("github_repo", 0.25)
-            + g_star * weights.get("github_star", 0.10)
-            + h_score * weights.get("hn", 0.15)
-            + n_score * weights.get("npm", 0.20)
-            + p_score * weights.get("pypi", 0.15)
+            g_repo * weights.get("github_repo", 0.22)
+            + g_star * weights.get("github_star", 0.09)
+            + h_score * weights.get("hn", 0.14)
+            + n_score * weights.get("npm", 0.18)
+            + p_score * weights.get("pypi", 0.13)
             + ph_val * weights.get("ph", 0)
+            + so_val * weights.get("so", 0)
         )
 
     # --- Temporal boost — market momentum from recent activity ratios ---
@@ -648,6 +674,8 @@ def compute_signal(
         temporal_ratios.append(hn_results.recent_mention_ratio)
     if ph_results is not None and not ph_results.skipped and ph_results.total_count > 0:
         temporal_ratios.append(ph_results.recent_launch_ratio)
+    if so_results is not None and so_results.recent_question_ratio is not None:
+        temporal_ratios.append(so_results.recent_question_ratio)
 
     if temporal_ratios:
         market_momentum = sum(temporal_ratios) / len(temporal_ratios)
@@ -692,6 +720,8 @@ def compute_signal(
         evidence.extend(pypi_results.evidence)
     if ph_results:
         evidence.extend(ph_results.evidence)
+    if so_results:
+        evidence.extend(so_results.evidence)
 
     # Temporal evidence
     if github_results.total_repo_count > 0:
@@ -717,6 +747,14 @@ def compute_signal(
             "query": keywords[0],
             "count": round(ph_results.recent_launch_ratio * 100),
             "detail": f"{ph_results.recent_launch_ratio:.0%} of launches in last 6 months",
+        })
+    if so_results is not None and so_results.recent_question_ratio is not None:
+        evidence.append({
+            "source": "stackoverflow",
+            "type": "recent_question_ratio",
+            "query": keywords[0],
+            "count": round(so_results.recent_question_ratio * 100),
+            "detail": f"{so_results.recent_question_ratio:.0%} of questions in last 3 months",
         })
 
     # Cap evidence to prevent response bloat (keep first + last for coverage)
@@ -758,6 +796,15 @@ def compute_signal(
                 "updated": prod.get("created_at", ""),
                 "description": prod.get("tagline", ""),
             })
+    if so_results:
+        for question in so_results.top_questions[:3]:
+            top_similars.append({
+                "name": f"so:{question['title'][:80]}",
+                "url": question["link"],
+                "stars": question.get("score", 0),
+                "updated": "",
+                "description": f"Stack Overflow — {question['answer_count']} answers, {'answered' if question['is_answered'] else 'unanswered'}",
+            })
 
     # Filter similars for relevance — prevent broad keyword matches
     top_similars = _filter_relevant_similars(top_similars, idea_text, keywords)
@@ -772,6 +819,7 @@ def compute_signal(
             "ecosystem_depth_npm": n_score if depth != "quick" else None,
             "ecosystem_depth_pypi": p_score if depth != "quick" else None,
             "product_launches": ph_val if depth != "quick" else None,
+            "developer_interest": so_val if depth != "quick" else None,
             "market_momentum": round(market_momentum * 100),
         },
         "trend": trend,
