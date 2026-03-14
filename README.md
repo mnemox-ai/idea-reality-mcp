@@ -13,6 +13,7 @@ The only MCP tool that searches 5 real databases before your agent writes a sing
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 [![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://idea-reality-mcp--mnemox-ai.run.tools)
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
+[![Downloads](https://static.pepy.tech/badge/idea-reality-mcp)](https://pepy.tech/project/idea-reality-mcp)
 
 **Works with:** Claude Desktop · Claude Code · Cursor · Windsurf · any MCP client
 
@@ -308,7 +309,7 @@ This project includes an [OpenClaw](https://github.com/anthropics/openclaw) skil
 - [x] **v0.2** — Deep mode (npm, PyPI, Product Hunt), improved keyword extraction
 - [x] **v0.3** — 3-stage keyword pipeline, 150+ Chinese term mappings, synonym expansion, LLM-powered search (Render API)
 - [x] **v0.4** — Email gate, Score History, Agent Templates, GitHub Action
-- [ ] **v0.5** — Temporal signals (trend detection and timing analysis)
+- [x] **v0.5** — Temporal signals (trend detection and timing analysis)
 - [ ] **v1.0** — Idea Memory Dataset (opt-in anonymous logging)
 
 ## Found a blind spot?
@@ -327,7 +328,7 @@ Google requires you to manually search. idea-reality-mcp runs automatically insi
 GitHub repositories, Hacker News posts, npm packages, PyPI packages, and Product Hunt launches. Quick mode scans GitHub + HN. Deep mode scans all five.
 
 **Is it free?**
-Yes. MIT license, open source. The MCP server runs locally. The web demo at mnemox.ai/check is also free.
+The MCP tool is free and open source (MIT). Quick scans on mnemox.ai/check are free. Full reports with sub-dimension scores, competitor analysis, and strategic insights are $9.99.
 
 **Does it work for non-English ideas?**
 Yes. The keyword extraction supports Chinese (150+ term mappings) and works with any language input. The Render API uses LLM extraction for better multilingual support.

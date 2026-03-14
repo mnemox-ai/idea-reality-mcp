@@ -583,35 +583,39 @@
       badge.textContent = 'Duplicate likelihood: ' + dup;
       badge.className = 'dup-badge ' + dup;
 
-      // Top competitor
+      // Top competitor (free: name only, no stars/description)
       const similars = data.top_similars || [];
       if (similars.length > 0) {
         const s = similars[0];
         $('#competitor-text').innerHTML =
-          `<a href="${esc(s.url || '#')}" target="_blank" style="color:#00cc66">${esc(s.name)}</a>` +
-          ` (${(s.stars || 0).toLocaleString()} stars)` +
-          (s.description ? `<br><span style="color:#777">${esc(s.description)}</span>` : '');
+          `<a href="${esc(s.url || '#')}" target="_blank" style="color:#00cc66">${esc(s.name)}</a>`;
       } else {
         $('#competitor-text').textContent = 'No direct competitors found.';
       }
 
-      // Evidence
+      // Evidence (free: source summary counts only, not individual items)
       const evidenceList = $('#evidence-list');
       evidenceList.innerHTML = '';
-      (data.evidence || []).forEach(ev => {
+      const evidenceItems = data.evidence || [];
+      const sourceCounts = {};
+      evidenceItems.forEach(ev => {
+        const src = ev.source || 'Unknown';
+        sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+      });
+      Object.entries(sourceCounts).forEach(([src, count]) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span style="color:#888">[${esc(ev.source)}]</span> ${esc(ev.detail)}`;
+        li.innerHTML = `<span style="color:#888">[${esc(src)}]</span> ${count} signal${count > 1 ? 's' : ''} found`;
         evidenceList.appendChild(li);
       });
 
-      // Pivots
+      // Pivots (free: hidden, show upgrade message)
       const pivotList = $('#pivot-list');
       pivotList.innerHTML = '';
-      (data.pivot_hints || []).slice(0, 3).forEach(h => {
-        const li = document.createElement('li');
-        li.textContent = h;
-        pivotList.appendChild(li);
-      });
+      const pivotLi = document.createElement('li');
+      pivotLi.style.color = '#555';
+      pivotLi.style.fontStyle = 'italic';
+      pivotLi.textContent = 'Available in full report';
+      pivotList.appendChild(pivotLi);
 
       show($('#free-result'));
 
@@ -638,7 +642,7 @@
     }
   });
 
-  // --- Unlock (LemonSqueezy checkout) ---
+  // --- Unlock (PayPal checkout) ---
   $('#unlock-btn').addEventListener('click', async () => {
     if (!currentIdeaHash) return;
 
@@ -648,29 +652,27 @@
 
     // Save to localStorage for post-payment recovery
     const depth = $('#depth-select').value;
-    try { localStorage.setItem('ir_idea_hash', currentIdeaHash); } catch(e) {}
-    try { localStorage.setItem('ir_idea_text', currentIdeaText); } catch(e) {}
-    try { localStorage.setItem('ir_depth', depth); } catch(e) {}
+    try { localStorage.setItem('ir_pending_idea', currentIdeaText); } catch(e) {}
+    try { localStorage.setItem('ir_pending_hash', currentIdeaHash); } catch(e) {}
+    try { localStorage.setItem('ir_pending_depth', depth); } catch(e) {}
 
     try {
-      const successUrl = window.location.origin + '/static/report.html?paid=1&idea_hash=' + encodeURIComponent(currentIdeaHash) + '&depth=' + encodeURIComponent(depth);
-      const res = await fetch(API + '/api/create-checkout', {
+      const res = await fetch(API + '/api/create-paypal-order', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           idea_text: currentIdeaText,
           idea_hash: currentIdeaHash,
           depth: depth,
-          success_url: successUrl,
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to create checkout');
+      if (!res.ok) throw new Error('Failed to create PayPal order');
       const data = await res.json();
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url;
+      if (data.approve_url) {
+        window.location.href = data.approve_url;
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('No PayPal approval URL returned');
       }
     } catch (e) {
       btn.disabled = false;
@@ -707,16 +709,54 @@
     }, 4000);
 
     const params = new URLSearchParams(window.location.search);
+
+    // --- PayPal capture flow ---
+    if (params.get('paypal_complete') === '1') {
+      const paypalOrderId = params.get('token') || '';
+      const ideaHash = params.get('idea_hash') || '';
+      const storedHash = (() => { try { return localStorage.getItem('ir_pending_hash') || ''; } catch(e) { return ''; } })();
+      const storedText = (() => { try { return localStorage.getItem('ir_pending_idea') || ''; } catch(e) { return ''; } })();
+      const storedDepth = (() => { try { return localStorage.getItem('ir_pending_depth') || ''; } catch(e) { return ''; } })();
+      const depthParam = params.get('depth') || storedDepth || 'quick';
+      const lookupHash = ideaHash || storedHash;
+      const lookupText = params.get('idea_text') || storedText;
+
+      try {
+        const res = await fetch(API + '/api/capture-paypal-order', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            order_id: paypalOrderId,
+            idea_hash: lookupHash,
+            idea_text: lookupText,
+            depth: depthParam,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'complete' && data.report_data) {
+            const bar = document.getElementById('load-bar');
+            if (bar) bar.style.width = '100%';
+            clearInterval(_stepTimer);
+            const ld = $('#payment-loading');
+            if (ld) ld.remove();
+            renderFullReport(data.report_data);
+            return;
+          }
+        }
+      } catch (e) { /* fall through to legacy polling */ }
+    }
+
+    // --- Legacy: poll checkout-status (1s interval, 30s timeout) ---
     const orderId = params.get('order_id') || '';
     const ideaHash = params.get('idea_hash') || '';
-    const storedHash = (() => { try { return localStorage.getItem('ir_idea_hash') || ''; } catch(e) { return ''; } })();
-    const storedText = (() => { try { return localStorage.getItem('ir_idea_text') || ''; } catch(e) { return ''; } })();
-    const storedDepth = (() => { try { return localStorage.getItem('ir_depth') || ''; } catch(e) { return ''; } })();
+    const storedHash = (() => { try { return localStorage.getItem('ir_pending_hash') || localStorage.getItem('ir_idea_hash') || ''; } catch(e) { return ''; } })();
+    const storedText = (() => { try { return localStorage.getItem('ir_pending_idea') || localStorage.getItem('ir_idea_text') || ''; } catch(e) { return ''; } })();
+    const storedDepth = (() => { try { return localStorage.getItem('ir_pending_depth') || localStorage.getItem('ir_depth') || ''; } catch(e) { return ''; } })();
     const depthParam = params.get('depth') || storedDepth || 'quick';
 
     const lookupHash = ideaHash || storedHash;
 
-    // Poll checkout-status (1s interval, 30s timeout)
     let reportData = null;
     for (let i = 0; i < 30; i++) {
       const bar = document.getElementById('load-bar');
@@ -1021,9 +1061,9 @@
     show($('#full-report'));
   }
 
-  // --- URL detection: paid redirect or direct report access ---
+  // --- URL detection: paid redirect, PayPal return, or direct report access ---
   const params = new URLSearchParams(window.location.search);
-  if (params.has('paid') || params.has('order_id')) {
+  if (params.get('paypal_complete') === '1' || params.has('paid') || params.has('order_id')) {
     handlePaymentSuccess();
   } else if (params.has('idea_text')) {
     const ideaInput = $('#idea-input');

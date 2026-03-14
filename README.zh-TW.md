@@ -283,7 +283,7 @@ jobs:
 - [x] **v0.2** — Deep mode（npm、PyPI、Product Hunt），改進關鍵字萃取
 - [x] **v0.3** — 三段式關鍵字 Pipeline，150+ 中文詞彙對照，同義詞展開，LLM 搜尋智能（Render API）
 - [x] **v0.4** — Email gate、Score History、Agent Templates、GitHub Action
-- [ ] **v0.5** — 時序信號（趨勢偵測和時機分析）
+- [x] **v0.5** — 時序信號（趨勢偵測和時機分析）
 - [ ] **v1.0** — Idea Memory Dataset（匿名使用紀錄）
 
 ## 結果不準？
@@ -302,7 +302,7 @@ Google 需要你手動搜尋和解讀結果。idea-reality-mcp 在你的 AI codi
 GitHub repositories、Hacker News 文章、npm 套件、PyPI 套件、Product Hunt 產品。Quick 模式搜 GitHub + HN。Deep 模式平行搜尋全部五個。
 
 **免費嗎？**
-是的。MIT 授權，完全開源。MCP server 在本地執行。[mnemox.ai/check](https://mnemox.ai/check) 網頁展示和 REST API 也都免費。
+MCP 工具免費且開源（MIT）。mnemox.ai/check 的快速掃描免費。包含子維度分數、競品分析和策略洞察的完整報告為 $9.99。
 
 **支援非英文的 idea 嗎？**
 支援。關鍵字抽取內建中文支援（150+ 詞彙對照），任何語言輸入都能處理。雲端 API 使用 LLM 抽取（Claude Haiku），多語言效果更好。
