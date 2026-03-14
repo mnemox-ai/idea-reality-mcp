@@ -1,0 +1,36 @@
+{
+  "name": "idea-reality",
+  "version": "0.5.0",
+  "description": "Pre-build reality check — scan GitHub, HN, npm, PyPI, Product Hunt to see if your idea already exists.",
+  "author": "mnemox-ai",
+  "homepage": "https://mnemox.ai/check/",
+  "repository": "https://github.com/mnemox-ai/idea-reality-mcp",
+  "license": "MIT",
+  "categories": ["research", "business", "productivity"],
+  "tool": "idea_check",
+  "triggers": [
+    "has anyone built",
+    "does this exist",
+    "check competition",
+    "is this idea original",
+    "reality check",
+    "market validation",
+    "有沒有人做過",
+    "市場上有類似的嗎",
+    "幫我查這個點子"
+  ],
+  "parameters": {
+    "idea_text": {
+      "type": "string",
+      "required": true,
+      "description": "Natural-language description of the idea"
+    },
+    "depth": {
+      "type": "string",
+      "enum": ["quick", "deep"],
+      "default": "quick",
+      "description": "quick = GitHub + HN; deep = all 5 sources in parallel"
+    }
+  },
+  "mcp_server": "idea-reality-mcp"
+}

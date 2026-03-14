@@ -298,6 +298,10 @@ jobs:
 
 [![Star History Chart](https://api.star-history.com/image?repos=mnemox-ai/idea-reality-mcp&type=date&legend=top-left)](https://www.star-history.com/?repos=mnemox-ai%2Fidea-reality-mcp&type=date&legend=top-left)
 
+## OpenClaw Skill
+
+This project includes an [OpenClaw](https://github.com/anthropics/openclaw) skill at [`.skills/idea-reality/skill.md`](.skills/idea-reality/skill.md). Any OpenClaw-compatible agent can install and use `idea_check` directly — no MCP config needed.
+
 ## Roadmap
 
 - [x] **v0.1** — GitHub + HN search, basic scoring
