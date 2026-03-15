@@ -42,6 +42,10 @@ async def search_hn(keywords: list[str]) -> HNResults:
     Returns:
         Aggregated mention count and evidence items.
     """
+    normalized_keywords = list(dict.fromkeys(k.strip() for k in keywords if k.strip()))
+    if not normalized_keywords:
+        return HNResults(total_mentions=0, evidence=[])
+
     now = datetime.now(timezone.utc)
     twelve_months_ago = int((now - timedelta(days=365)).timestamp())
     three_months_ago = int((now - timedelta(days=90)).timestamp())
@@ -50,7 +54,7 @@ async def search_hn(keywords: list[str]) -> HNResults:
     evidence: list[dict] = []
 
     async with httpx.AsyncClient(timeout=15.0) as client:
-        for query in keywords:
+        for query in normalized_keywords:
             try:
                 resp = await client.get(
                     HN_ALGOLIA_API,
