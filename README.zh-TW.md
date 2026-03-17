@@ -2,29 +2,31 @@
 
 # idea-reality-mcp
 
-**你的 AI Agent 在動手前自動檢查。不需要你記。**
+**別再重複造輪子。**
 
-唯一能在 Agent 寫第一行 code 前搜尋 5 個真實資料庫的 MCP 工具。不用手動搜尋。不會忘記。只有事實。
+花了 3 週寫一個工具，上線後才發現有人早就做了——還有 5,000 stars。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
+`idea_check` 在你的 Agent 寫第一行 code 前，掃描 GitHub、Hacker News、npm、PyPI、Product Hunt、Stack Overflow。一次呼叫。六個資料庫。用分數取代猜測。
+
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
-[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://idea-reality-mcp--mnemox-ai.run.tools)
+[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-275%20passing-brightgreen.svg)]()
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
-
-**支援：** Claude Desktop · Claude Code · Cursor · Windsurf · 所有 MCP 客戶端
+[![Downloads](https://static.pepy.tech/badge/idea-reality-mcp)](https://pepy.tech/project/idea-reality-mcp)
 
 <p align="center">
-  <a href="https://mnemox.ai/check"><strong>👉 在瀏覽器直接試用 — 免安裝</strong></a>
+  <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=idea-reality&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22idea-reality-mcp%22%5D%7D">
+    <img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor" height="32">
+  </a>
 </p>
 
-## 它做什麼
+## 你會看到什麼
 
 ```
 你：「AI code review 工具」
 
-idea-reality-mcp：
+idea_check →
 ├── reality_signal: 92/100
 ├── trend: accelerating ↗（市場加速中）
 ├── market_momentum: 73/100
@@ -32,55 +34,28 @@ idea-reality-mcp：
 ├── 最大競品: reviewdog (9,094 ⭐)
 ├── npm 套件: 56 個
 ├── HN 討論: 254 則（趨勢上升）
+├── Stack Overflow: 1,203 個問題
 └── 判定: HIGH — 市場正在加速，快找利基切入
 ```
 
-一個分數。五個來源。趨勢偵測。Agent 自己決定下一步。
+一個分數。六個來源。趨勢偵測。Agent 自己決定下一步。
 
-## 問題
+<p align="center">
+  <a href="https://mnemox.ai/check"><strong>在瀏覽器直接試用 — 免安裝</strong></a>
+</p>
 
-每個開發者都踩過這個坑：花了好幾天做一個 side project，結果 GitHub 一搜發現有人做了，而且有 5,000 stars。
+## 快速開始
 
-你問 ChatGPT：*「有沒有人做過 X？」*
-
-ChatGPT 說：*「這是個很好的點子！市面上有一些類似工具，但你一定可以做得更好！」*
-
-**這不是驗證。這是啦啦隊。**
-
-## 「為什麼不直接 Google？」
-
-這是我們最常被問的問題。老實回答：
-
-**Google 很好用 — 前提是你記得去搜。** 問題不在搜尋品質，而是你的 AI Agent 在開始寫 code 前從來不會 Google。
-
-idea-reality-mcp 跑在你的 Agent **裡面**。自動觸發。不管你記不記得，搜尋都會發生。
-
-| | Google | ChatGPT / SaaS 驗證工具 | idea-reality-mcp |
-|---|---|---|---|
-| **誰來跑** | 你，手動 | 你，手動 | 你的 Agent，自動 |
-| **輸入** | 自己想關鍵字 | 自然語言 | 自然語言 |
-| **輸出** | 10 條藍色連結 — 自己判斷 | 「聽起來不錯！」 | 0-100 分 + 證據 + 競品 |
-| **來源** | 網頁 | 無（LLM 生成） | GitHub + HN + npm + PyPI + PH |
-| **跨平台** | 每個站分開搜 | N/A | 5 個來源平行搜，一次搞定 |
-| **工作流** | Tab 之間複製貼上 | 另一個 App | MCP / CLI / API / CI |
-| **可驗證** | 是（手動） | 否 | 是（每個數字有來源） |
-| **價格** | 免費 | 免費試用 → 付費牆 | 免費、開源、永久 |
-
-**一句話：不是你在用它，是你的 Agent 在用。這才是重點。**
-
-## 試用（30 秒）
+**1. 安裝並執行**
 
 ```bash
 uvx idea-reality-mcp
 ```
 
-或[在瀏覽器直接試用](https://mnemox.ai/check) — 不需安裝，即時結果。
+**2. 加到你的 MCP 客戶端**
 
-## 安裝
-
-### Claude Desktop
-
-加到你的 `claude_desktop_config.json`：
+<details>
+<summary>Claude Desktop — <code>claude_desktop_config.json</code></summary>
 
 ```json
 {
@@ -93,34 +68,23 @@ uvx idea-reality-mcp
 }
 ```
 
-<details>
-<summary>設定檔位置</summary>
-
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+設定檔位置：**macOS** `~/Library/Application Support/Claude/claude_desktop_config.json` · **Windows** `%APPDATA%\Claude\claude_desktop_config.json`
 
 </details>
 
-重啟 Claude Desktop。你會在 🔨 工具選單看到 `idea_check`。試試問 Claude：
-
-- *「幫我查有沒有人做過健身追蹤的 MCP server」*
-- *「AI 發票解析工具有競品嗎？」*
-- *「開始之前先檢查：給小團隊用的開源 Slack 替代品」*
-
-### Claude Code
+<details>
+<summary>Claude Code</summary>
 
 ```bash
 claude mcp add idea-reality -- uvx idea-reality-mcp
 ```
 
-然後問 Claude：
+</details>
 
-- *「查一下這個 idea 有沒有人做過：把 Figma 轉 React 的 CLI 工具」*
-- *「對 AI code review 工具跑一次深度現實檢查」*
+<details>
+<summary>Cursor — <code>.cursor/mcp.json</code></summary>
 
-### Cursor / 其他 MCP 客戶端
-
-加到 `.cursor/mcp.json`（或你的 MCP 客戶端設定檔）：
+或點上方按鈕一鍵安裝。
 
 ```json
 {
@@ -133,34 +97,20 @@ claude mcp add idea-reality -- uvx idea-reality-mcp
 }
 ```
 
-### Smithery（遠端）
+</details>
+
+<details>
+<summary>Smithery（遠端，不需本地安裝）</summary>
 
 ```bash
 npx -y @smithery/cli install idea-reality-mcp --client claude
 ```
 
-### 可選：環境變數
+</details>
 
-```bash
-export GITHUB_TOKEN=ghp_...        # 提升 GitHub API 速率限制
-export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
-```
+**3. 開始使用**
 
-### 可選：Agent 自動觸發
-
-MCP tool 描述已經告訴你的 Agent `idea_check` 做什麼。如果想讓它**主動執行**（每個新專案自動檢查），加一行到你的 `CLAUDE.md`、`.cursorrules` 或 `.github/copilot-instructions.md`：
-
-```
-開始新專案時，用 idea_check MCP tool 檢查是否已有類似專案存在。
-```
-
-> 完整範本見 [templates/](templates/)。
-
-## 使用方式
-
-### 「我有個 side project 點子，該不該做？」
-
-對你的 AI Agent 說：
+對你的 Agent 說：
 
 ```
 在開始之前，幫我查一下有沒有人做過：
@@ -169,35 +119,40 @@ MCP tool 描述已經告訴你的 Agent `idea_check` 做什麼。如果想讓它
 
 Agent 會呼叫 `idea_check`，回傳：reality_signal、競品列表、轉向建議。
 
-### 「找競品和替代方案」
+## 為什麼不直接 Google？
 
-```
-idea_check("open source feature flag service", depth="deep")
-```
+**Google 很好用——前提是你記得去搜。** 問題不在搜尋品質，而是你的 AI Agent 在開始寫 code 前從來不會 Google。
 
-Deep mode 平行掃描全部 5 個來源 — GitHub repos、HN 討論、npm 套件、PyPI 套件、Product Hunt — 回傳排序結果。
+`idea_check` 跑在你的 Agent **裡面**。自動觸發。不管你記不記得，搜尋都會發生。
 
-### 「Sprint 前的 Build-or-Buy 檢查」
+| | Google | ChatGPT / SaaS 驗證工具 | idea-reality-mcp |
+|---|---|---|---|
+| **誰來跑** | 你，手動 | 你，手動 | 你的 Agent，自動 |
+| **輸出** | 10 條藍色連結 | 「聽起來不錯！」 | 0-100 分 + 證據 + 競品 |
+| **來源** | 網頁 | 無（LLM 生成） | GitHub + HN + npm + PyPI + PH + SO |
+| **工作流** | Tab 之間複製貼上 | 另一個 App | MCP / CLI / API / CI |
+| **價格** | 免費 | 免費試用 → 付費牆 | 免費、開源（MIT） |
 
-```
-我們準備花 2 週做內部的 error tracking 工具。
-先跑一次現實檢查。
-```
+## 模式
 
-如果 signal 回來 85+，而且有成熟的開源替代品——你剛省了團隊 2 週。
+| 模式 | 來源 | 用途 |
+|------|------|------|
+| **quick**（預設） | GitHub + HN | 快速 sanity check，< 3 秒 |
+| **deep** | GitHub + HN + npm + PyPI + Product Hunt + Stack Overflow | 完整競爭掃描 |
 
-## 新功能：AI 驅動的搜尋智能
+### 評分權重
 
-**Claude Haiku 4.5** 從你的 idea 描述生成最佳搜尋查詢 — 支援任何語言 — 並自動 fallback 到經過實戰驗證的字典 pipeline。
+| 來源 | Quick | Deep |
+|------|-------|------|
+| GitHub repos | 60% | 22% |
+| GitHub stars | 20% | 9% |
+| Hacker News | 20% | 14% |
+| npm | — | 18% |
+| PyPI | — | 13% |
+| Product Hunt | — | 14% |
+| Stack Overflow | — | 10% |
 
-| | 之前 | 現在 |
-|---|---|---|
-| 英文 idea | ✅ 良好 | ✅ 良好 |
-| 中文 / 非英文 idea | ⚠️ 字典查找（150+ 詞彙） | ✅ 原生理解 |
-| 模糊描述 | ⚠️ 關鍵字比對 | ✅ 語意萃取 |
-| 可靠性 | 100%（不需外部 API） | 100%（自動 fallback 到字典） |
-
-LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
+Product Hunt 或 Stack Overflow 不可用時，權重自動重新分配。
 
 ## 工具規格
 
@@ -206,9 +161,7 @@ LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
 | 參數 | 型別 | 必填 | 說明 |
 |------|------|------|------|
 | `idea_text` | string | 是 | 自然語言描述你的點子 |
-| `depth` | `"quick"` \| `"deep"` | 否 | `"quick"` = GitHub + HN（預設）。`"deep"` = 全部 5 個來源平行查詢 |
-
-**輸出：** `reality_signal`（0-100）、`duplicate_likelihood`、`evidence[]`、`top_similars[]`、`pivot_hints[]`、`meta{}`
+| `depth` | `"quick"` \| `"deep"` | 否 | `"quick"` = GitHub + HN（預設）。`"deep"` = 全部 6 個來源 |
 
 <details>
 <summary>完整輸出範例</summary>
@@ -217,45 +170,44 @@ LLM 理解你的 idea。字典是你的安全網。**永遠有結果。**
 {
   "reality_signal": 72,
   "duplicate_likelihood": "high",
+  "trend": "accelerating",
+  "sub_scores": { "market_momentum": 73 },
   "evidence": [
     {"source": "github", "type": "repo_count", "query": "...", "count": 342},
     {"source": "github", "type": "max_stars", "query": "...", "count": 15000},
     {"source": "hackernews", "type": "mention_count", "query": "...", "count": 18},
     {"source": "npm", "type": "package_count", "query": "...", "count": 56},
     {"source": "pypi", "type": "package_count", "query": "...", "count": 23},
-    {"source": "producthunt", "type": "product_count", "query": "...", "count": 8}
+    {"source": "producthunt", "type": "product_count", "query": "...", "count": 8},
+    {"source": "stackoverflow", "type": "question_count", "query": "...", "count": 120}
   ],
   "top_similars": [
     {"name": "user/repo", "url": "https://github.com/...", "stars": 15000, "description": "..."}
   ],
   "pivot_hints": [
     "競爭激烈。考慮找一個利基差異化方向...",
-    "領先專案可能在某些面向有缺口...",
-    "考慮做整合或外掛，而非從頭造輪子..."
-  ],
-  "meta": {
-    "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
-    "keyword_source": "llm",
-    "depth": "deep",
-    "version": "0.5.0"
-  }
+    "領先專案可能在某些面向有缺口..."
+  ]
 }
 ```
 
 </details>
 
-### 評分權重
+## REST API
 
-| 模式 | GitHub repos | GitHub stars | HN | npm | PyPI | Product Hunt |
-|------|-------------|-------------|-----|-----|------|-------------|
-| Quick | 60% | 20% | 20% | — | — | — |
-| Deep | 25% | 10% | 15% | 20% | 15% | 15% |
+不用 MCP？直接呼叫 API：
 
-Product Hunt 不可用時（未設 token），權重自動重新分配。
+```bash
+curl -X POST https://idea-reality-mcp.onrender.com/api/check \
+  -H "Content-Type: application/json" \
+  -d '{"idea_text": "AI code review tool", "depth": "quick"}'
+```
+
+免費，不需 API key。
 
 ## CI：PR 開啟時自動檢查
 
-用 [idea-check-action](https://github.com/mnemox-ai/idea-check-action) 驗證新功能提案：
+用 [idea-check-action](https://github.com/mnemox-ai/idea-check-action) 驗證功能提案：
 
 ```yaml
 name: Idea Reality Check
@@ -273,47 +225,40 @@ jobs:
           idea: ${{ github.event.issue.title }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
-## Star History
 
-[![Star History Chart](https://api.star-history.com/image?repos=mnemox-ai/idea-reality-mcp&type=date&legend=top-left)](https://www.star-history.com/?repos=mnemox-ai%2Fidea-reality-mcp&type=date&legend=top-left)
+## 可選設定
+
+```bash
+export GITHUB_TOKEN=ghp_...        # 提升 GitHub API 速率限制
+export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
+```
+
+**自動觸發：** 加一行到你的 `CLAUDE.md`、`.cursorrules` 或 `.github/copilot-instructions.md`：
+
+```
+開始新專案時，用 idea_check MCP tool 檢查是否已有類似專案存在。
+```
 
 ## Roadmap
 
 - [x] **v0.1** — GitHub + HN 搜尋，基本評分
-- [x] **v0.2** — Deep mode（npm、PyPI、Product Hunt），改進關鍵字萃取
-- [x] **v0.3** — 三段式關鍵字 Pipeline，150+ 中文詞彙對照，同義詞展開，LLM 搜尋智能（Render API）
-- [x] **v0.4** — Email gate、Score History、Agent Templates、GitHub Action
-- [x] **v0.5** — 時序信號（趨勢偵測和時機分析）
+- [x] **v0.2** — Deep mode（npm、PyPI、Product Hunt），關鍵字萃取
+- [x] **v0.3** — 三段式關鍵字 Pipeline，中文支援，LLM 搜尋智能
+- [x] **v0.4** — Score History、Agent Templates、GitHub Action
+- [x] **v0.5** — 時序信號、趨勢偵測、市場動量
 - [ ] **v1.0** — Idea Memory Dataset（匿名使用紀錄）
 
-## 結果不準？
+## Star History
 
-如果工具漏掉了明顯的競品，或回傳不相關的結果：
+[![Star History Chart](https://api.star-history.com/svg?repos=mnemox-ai/idea-reality-mcp&type=Date)](https://star-history.com/#mnemox-ai/idea-reality-mcp&Date)
+
+## 結果不準？
 
 1. [開一個 Issue](https://github.com/mnemox-ai/idea-reality-mcp/issues/new?template=inaccurate-result.yml)，附上你的 idea text 和輸出
 2. 我們會改進該領域的關鍵字萃取
 
-## 常見問題
-
-**這跟直接 Google 有什麼不同？**
-Google 需要你手動搜尋和解讀結果。idea-reality-mcp 在你的 AI coding agent 裡自動執行 — 不需要人為觸發。它搜尋 5 個結構化資料庫（不是網頁），回傳 0-100 分數和證據。
-
-**它搜尋哪些資料庫？**
-GitHub repositories、Hacker News 文章、npm 套件、PyPI 套件、Product Hunt 產品。Quick 模式搜 GitHub + HN。Deep 模式平行搜尋全部五個。
-
-**免費嗎？**
-MCP 工具免費且開源（MIT）。mnemox.ai/check 的快速掃描免費。包含子維度分數、競品分析和策略洞察的完整報告為 $9.99。
-
-**支援非英文的 idea 嗎？**
-支援。關鍵字抽取內建中文支援（150+ 詞彙對照），任何語言輸入都能處理。雲端 API 使用 LLM 抽取（Claude Haiku），多語言效果更好。
-
-**0-100 分數怎麼算的？**
-reality signal 綜合各來源的加權分數 — repo 數量、star 數、討論量、套件下載量。分數越高代表競爭越多。計分公式刻意設計為簡單可解釋，不使用機器學習。
-
 ## 授權
 
 MIT — 見 [LICENSE](LICENSE)
-
-## 聯絡
 
 由 [Mnemox AI](https://mnemox.ai) 打造 · [dev@mnemox.ai](mailto:dev@mnemox.ai)
