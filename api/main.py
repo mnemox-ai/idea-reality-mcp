@@ -431,6 +431,24 @@ async def get_stats():
     }
 
 
+@app.get("/api/pulse")
+async def get_pulse():
+    """Public trend aggregation endpoint — weekly volume, top keywords, countries, trending ideas."""
+    weekly_volume = score_db.get_weekly_volume()
+    top_keywords = score_db.get_top_keywords()
+    countries = score_db.get_country_distribution()
+    trending_ideas = score_db.get_recent_high_scores()
+    total_ideas = score_db.get_total_checks()
+    return {
+        "weekly_volume": weekly_volume,
+        "top_keywords": top_keywords,
+        "countries": countries,
+        "trending_ideas": trending_ideas,
+        "total_ideas": total_ideas,
+        "total_countries": len(countries),
+    }
+
+
 @app.post("/api/extract-keywords")
 async def extract_keywords_endpoint(req: ExtractKeywordsRequest, request: Request):
     """LLM-powered keyword extraction via Claude Haiku 4.5.

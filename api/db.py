@@ -629,6 +629,71 @@ def get_score_percentile(score: int) -> float:
     return round(lte / total * 100, 1)
 
 
+def get_weekly_volume(weeks: int = 12) -> list[dict[str, Any]]:
+    """Return weekly check counts for the last N weeks."""
+    conn = _get_conn()
+    cur = conn.execute(
+        "SELECT strftime('%Y-W%W', created_at) as week, COUNT(*) as count "
+        "FROM score_history GROUP BY week ORDER BY week"
+    )
+    result = _rows_to_dicts(cur)
+    conn.close()
+    return result[-weeks:] if len(result) > weeks else result
+
+
+def get_top_keywords(limit: int = 20) -> list[dict[str, Any]]:
+    """Parse all keywords JSON from score_history, return top N by frequency."""
+    import json as _json
+
+    conn = _get_conn()
+    cur = conn.execute("SELECT keywords FROM score_history")
+    rows = cur.fetchall()
+    conn.close()
+
+    freq: dict[str, int] = {}
+    for row in rows:
+        raw = row[0] if isinstance(row, (list, tuple)) else list(row)[0]
+        try:
+            kws = _json.loads(raw) if isinstance(raw, str) else []
+            if isinstance(kws, list):
+                for kw in kws:
+                    if isinstance(kw, str) and kw.strip():
+                        freq[kw.strip().lower()] = freq.get(kw.strip().lower(), 0) + 1
+        except Exception:
+            pass
+
+    sorted_kws = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:limit]
+    return [{"keyword": k, "count": c} for k, c in sorted_kws]
+
+
+def get_country_distribution() -> list[dict[str, Any]]:
+    """Return country counts from query_log, sorted by count desc."""
+    conn = _get_conn()
+    cur = conn.execute(
+        "SELECT country, COUNT(*) as count FROM query_log "
+        "WHERE country IS NOT NULL GROUP BY country ORDER BY count DESC"
+    )
+    result = _rows_to_dicts(cur)
+    conn.close()
+    return result
+
+
+def get_recent_high_scores(limit: int = 10, min_score: int = 60) -> list[dict[str, Any]]:
+    """Return recent high-scoring ideas, truncated to 60 chars."""
+    conn = _get_conn()
+    cur = conn.execute(
+        "SELECT idea_text, score, created_at FROM score_history "
+        "WHERE score >= ? ORDER BY created_at DESC LIMIT ?",
+        (min_score, limit),
+    )
+    result = _rows_to_dicts(cur)
+    conn.close()
+    for row in result:
+        if row.get("idea_text") and len(row["idea_text"]) > 60:
+            row["idea_text"] = row["idea_text"][:60] + "..."
+    return result
+
+
 def get_category_distribution(limit: int = 10) -> list[dict[str, Any]]:
     """Parse all keywords JSON from score_history, count frequency, return top N."""
     import json as _json
