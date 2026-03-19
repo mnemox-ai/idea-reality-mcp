@@ -142,12 +142,14 @@ app = FastAPI(
 # Initialize DB tables (idempotent — CREATE TABLE IF NOT EXISTS)
 score_db.init_db()  # creates all tables: score_history, query_log, reports, page_views, subscribers
 
-# CORS — allow GitHub Pages and local dev
+# CORS — allow Vercel production, GitHub Pages (legacy), and local dev
 ALLOWED_ORIGINS = [
     "https://mnemox.ai",
     "https://www.mnemox.ai",
+    "https://mnemox-web.vercel.app",
     "https://mnemox-ai.github.io",
     "http://localhost:3000",
+    "http://localhost:3002",
     "http://localhost:8080",
     "http://127.0.0.1:5500",  # VS Code Live Server
 ]
@@ -675,6 +677,80 @@ async def get_history(idea_hash: str):
     if not records:
         raise HTTPException(status_code=404, detail="No history found for this idea")
     return {"idea_hash": idea_hash, "records": records}
+
+
+# ---------------------------------------------------------------------------
+# Badge data & crowd intel
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/badge-data/{idea_hash}")
+async def badge_data(idea_hash: str):
+    """Return badge-ready summary for an idea."""
+    row = score_db.get_idea_by_hash(idea_hash)
+    if not row:
+        raise HTTPException(status_code=404, detail="Idea not found")
+    score = row["score"]
+    percentile = score_db.get_score_percentile(score)
+    total_ideas = score_db.get_total_checks()
+    if score < 30:
+        gap_status = "blue_ocean"
+    elif score > 60:
+        gap_status = "competitive"
+    else:
+        gap_status = "moderate"
+    idea_text = row.get("idea_text", "")
+    return {
+        "idea_text": idea_text[:80] + ("..." if len(idea_text) > 80 else ""),
+        "score": score,
+        "percentile": percentile,
+        "total_ideas": total_ideas,
+        "gap_status": gap_status,
+        "created_at": row.get("created_at"),
+    }
+
+
+class CrowdIntelRequest(BaseModel):
+    idea_hash: str
+
+
+@app.post("/api/crowd-intel")
+async def crowd_intel(req: CrowdIntelRequest):
+    """Return crowd intelligence for an idea."""
+    row = score_db.get_idea_by_hash(req.idea_hash)
+    if not row:
+        raise HTTPException(status_code=404, detail="Idea not found")
+
+    # Parse keywords from the stored row
+    keywords: list[str] = []
+    try:
+        kw_raw = row.get("keywords", "[]")
+        parsed = json.loads(kw_raw) if isinstance(kw_raw, str) else []
+        if isinstance(parsed, list):
+            keywords = [k for k in parsed if isinstance(k, str)]
+    except Exception:
+        pass
+
+    similar = score_db.search_similar_ideas(
+        keywords, exclude_hash=req.idea_hash, limit=20
+    )
+    similar_count = len(similar)
+    avg_score = (
+        round(sum(s["score"] for s in similar) / similar_count, 1)
+        if similar_count
+        else 0
+    )
+    total = score_db.get_total_checks()
+    competition_density = round(similar_count / total * 100, 1) if total else 0
+    top_categories = score_db.get_category_distribution(limit=5)
+
+    return {
+        "similar_count": similar_count,
+        "avg_score": avg_score,
+        "your_score": row["score"],
+        "competition_density_relative": competition_density,
+        "top_categories": top_categories,
+    }
 
 
 class UnlockRequest(BaseModel):

@@ -598,6 +598,62 @@ def search_similar_ideas(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Badge data & crowd intel helpers
+# ---------------------------------------------------------------------------
+
+
+def get_idea_by_hash(idea_hash: str) -> dict[str, Any] | None:
+    """Return the first score_history row for a given idea_hash, or None."""
+    conn = _get_conn()
+    cur = conn.execute(
+        "SELECT * FROM score_history WHERE idea_hash = ? LIMIT 1",
+        (idea_hash,),
+    )
+    result = _row_to_dict(cur)
+    conn.close()
+    return result
+
+
+def get_score_percentile(score: int) -> float:
+    """Return the percentile rank of a score (0-100)."""
+    conn = _get_conn()
+    total = conn.execute("SELECT COUNT(*) FROM score_history").fetchone()[0]
+    if total == 0:
+        conn.close()
+        return 0.0
+    lte = conn.execute(
+        "SELECT COUNT(*) FROM score_history WHERE score <= ?", (score,)
+    ).fetchone()[0]
+    conn.close()
+    return round(lte / total * 100, 1)
+
+
+def get_category_distribution(limit: int = 10) -> list[dict[str, Any]]:
+    """Parse all keywords JSON from score_history, count frequency, return top N."""
+    import json as _json
+
+    conn = _get_conn()
+    cur = conn.execute("SELECT keywords FROM score_history")
+    rows = cur.fetchall()
+    conn.close()
+
+    freq: dict[str, int] = {}
+    for row in rows:
+        raw = row[0] if isinstance(row, (list, tuple)) else list(row)[0]
+        try:
+            kws = _json.loads(raw) if isinstance(raw, str) else []
+            if isinstance(kws, list):
+                for kw in kws:
+                    if isinstance(kw, str) and kw.strip():
+                        freq[kw.strip().lower()] = freq.get(kw.strip().lower(), 0) + 1
+        except Exception:
+            pass
+
+    sorted_kws = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:limit]
+    return [{"keyword": k, "count": c} for k, c in sorted_kws]
+
+
 def save_funnel_event(
     session_id: str,
     event_name: str,
