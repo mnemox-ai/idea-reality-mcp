@@ -12,13 +12,17 @@ Discord embed format → score_history columns mapping:
 import asyncio
 import hashlib
 import json
+import os
 import re
 import sys
 
 import libsql_client
 
-TURSO_URL = "https://idea-reality-zychenpeng.aws-us-east-1.turso.io"
-TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzI4MTg0MzIsImlkIjoiMDE5Y2M0MzUtM2YwMS03NTMwLThlNDMtZWU0NDYzYjFjZGU2IiwicmlkIjoiNDAxZWNiMzItNmYwZS00Y2I0LWI5YTAtNDk3ZjI4YzI4MjI3In0._8P0xeqxZS2ngtJr806OGmEeqbvsnK0cr6kS3VfMuYrCcZiK2DQc0vrQwF3dMLUu7qvZrR83r1oLBdYj1nxxDw"
+TURSO_URL = os.environ.get("TURSO_DATABASE_URL", "").replace("libsql://", "https://", 1)
+TURSO_TOKEN = os.environ.get("TURSO_AUTH_TOKEN", "")
+
+if not TURSO_URL or not TURSO_TOKEN:
+    raise RuntimeError("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN environment variables.")
 
 DISCORD_JSON = "discord_all_queries.json"
 

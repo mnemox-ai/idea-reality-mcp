@@ -2201,11 +2201,13 @@ async def checkout_status_post(req: CheckoutStatusRequest):
 
 @app.get("/")
 async def root():
+    """Redirect root to the static report page."""
     return RedirectResponse("/static/report.html")
 
 
 @app.get("/report.html")
 async def report_redirect():
+    """Redirect legacy /report.html to the static report page."""
     return RedirectResponse("/static/report.html")
 
 
