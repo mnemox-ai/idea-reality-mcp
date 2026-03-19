@@ -20,6 +20,7 @@ from .scoring.expansion import expand_idea, generate_platform_queries
 async def idea_check(
     idea_text: str,
     depth: Literal["quick", "deep"] = "quick",
+    lang: Literal["en", "zh"] = "en",
 ) -> dict:
     """Check if a product idea already exists before building it.
 
@@ -80,6 +81,7 @@ async def idea_check(
             ph_results=ph_results,
             so_results=so_results,
             expansion=expansion,
+            lang=lang,
         )
     else:
         # Quick mode: GitHub + HN in parallel
@@ -95,6 +97,7 @@ async def idea_check(
             hn_results=hn_results,
             depth=depth,
             expansion=expansion,
+            lang=lang,
         )
 
     result["meta"]["keyword_source"] = keyword_source

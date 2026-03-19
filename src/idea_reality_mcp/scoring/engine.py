@@ -545,50 +545,70 @@ def _generate_pivot_hints(
     github: GitHubResults,
     hn: HNResults,
     keywords: list[str],
+    lang: str = "en",
 ) -> list[str]:
     """Generate 3 actionable pivot hints based on the analysis."""
     hints: list[str] = []
 
-    if signal >= 60:
-        hints.append(
-            "High existing competition detected. Consider a niche differentiator "
-            "or target an underserved audience segment."
-        )
-        if github.top_repos:
-            top = github.top_repos[0]
-            hints.append(
-                f"The leading project ({top['name']}, {top['stars']} stars) may have gaps. "
-                "Check its issues and feature requests for unmet needs."
-            )
-        hints.append(
-            "Consider building an integration or plugin for existing tools "
-            "rather than a standalone replacement."
-        )
-    elif signal >= 30:
-        hints.append(
-            "Moderate competition exists. Focus on a specific use case or workflow "
-            "that current solutions handle poorly."
-        )
-        hints.append(
-            "Validate with potential users before building — the market exists "
-            "but may not need another general solution."
-        )
-        hints.append(
-            "Look at the most recent entries for emerging trends you could lead."
-        )
+    if lang == "zh":
+        if signal >= 60:
+            hints.append("已偵測到高度競爭。考慮利基差異化，或鎖定未被滿足的受眾群體。")
+            if github.top_repos:
+                top = github.top_repos[0]
+                hints.append(
+                    f"領先專案 ({top['name']}, {top['stars']} 星) 可能存在缺口。"
+                    "檢查其 issues 和功能請求，尋找未被滿足的需求。"
+                )
+            hints.append("考慮為現有工具打造整合或插件，而非獨立替代品。")
+        elif signal >= 30:
+            hints.append("存在中度競爭。專注於當前方案處理不佳的特定使用場景。")
+            hints.append("在投入建構前先驗證需求 — 市場存在，但未必需要另一個通用方案。")
+            hints.append("關注最新的進入者，尋找你可以領先的新興趨勢。")
+        else:
+            hints.append("低競爭 — 這可能是藍海機會，或是尚未被開發的利基市場。")
+            hints.append("在大量投入前先驗證需求。低競爭也可能意味著低需求。")
+            hints.append("搜尋相鄰的問題空間 — 這個點子可能以不同的術語存在。")
     else:
-        hints.append(
-            "Low competition — this could be a greenfield opportunity or a niche "
-            "that hasn't gained traction yet."
-        )
-        hints.append(
-            "Validate demand before investing heavily. Low competition can also "
-            "mean low demand."
-        )
-        hints.append(
-            "Search adjacent problem spaces — the idea might exist under different "
-            "terminology."
-        )
+        if signal >= 60:
+            hints.append(
+                "High existing competition detected. Consider a niche differentiator "
+                "or target an underserved audience segment."
+            )
+            if github.top_repos:
+                top = github.top_repos[0]
+                hints.append(
+                    f"The leading project ({top['name']}, {top['stars']} stars) may have gaps. "
+                    "Check its issues and feature requests for unmet needs."
+                )
+            hints.append(
+                "Consider building an integration or plugin for existing tools "
+                "rather than a standalone replacement."
+            )
+        elif signal >= 30:
+            hints.append(
+                "Moderate competition exists. Focus on a specific use case or workflow "
+                "that current solutions handle poorly."
+            )
+            hints.append(
+                "Validate with potential users before building — the market exists "
+                "but may not need another general solution."
+            )
+            hints.append(
+                "Look at the most recent entries for emerging trends you could lead."
+            )
+        else:
+            hints.append(
+                "Low competition — this could be a greenfield opportunity or a niche "
+                "that hasn't gained traction yet."
+            )
+            hints.append(
+                "Validate demand before investing heavily. Low competition can also "
+                "mean low demand."
+            )
+            hints.append(
+                "Search adjacent problem spaces — the idea might exist under different "
+                "terminology."
+            )
 
     return hints[:3]
 
@@ -627,6 +647,7 @@ def compute_signal(
     ph_results: ProductHuntResults | None = None,
     so_results: StackOverflowResults | None = None,
     expansion: dict | None = None,
+    lang: str = "en",
 ) -> dict:
     """Compute the full reality check output.
 
@@ -861,7 +882,7 @@ def compute_signal(
         "trend": trend,
         "evidence": evidence,
         "top_similars": top_similars,
-        "pivot_hints": _generate_pivot_hints(signal, github_results, hn_results, keywords),
+        "pivot_hints": _generate_pivot_hints(signal, github_results, hn_results, keywords, lang=lang),
         "meta": {
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "sources_used": sources_used,

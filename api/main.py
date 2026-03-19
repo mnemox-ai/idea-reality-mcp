@@ -583,6 +583,7 @@ async def check(req: CheckRequest, request: Request):
                 npm_results=npm_results,
                 pypi_results=pypi_results,
                 ph_results=ph_results,
+                lang=req.lang,
             )
         else:
             # Quick mode: GitHub + HN only
@@ -596,6 +597,7 @@ async def check(req: CheckRequest, request: Request):
                 github_results=github_results,
                 hn_results=hn_results,
                 depth=req.depth,
+                lang=req.lang,
             )
     except Exception as exc:
         raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.") from exc
