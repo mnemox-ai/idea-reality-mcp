@@ -12,7 +12,7 @@ You spend 3 weeks coding a tool. Ship it. Then find out someone already built it
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 [![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-275%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-277%20passing-brightgreen.svg)]()
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
 [![Downloads](https://static.pepy.tech/badge/idea-reality-mcp)](https://pepy.tech/project/idea-reality-mcp)
 
@@ -46,16 +46,22 @@ One score. Six sources. Trend detection. Your agent decides what to do next.
 
 ## Quick Start
 
-**1. Install and run**
-
 ```bash
+# 1. Install
 uvx idea-reality-mcp
+
+# 2. Add to your agent
+claude mcp add idea-reality -- uvx idea-reality-mcp   # Claude Code
 ```
 
-**2. Add to your MCP client**
+**3. Ask your agent:** *"Before I start building, check if this already exists: a CLI tool that converts Figma designs to React components"*
+
+That's it. The agent calls `idea_check` and returns: reality_signal, top competitors, and pivot suggestions.
 
 <details>
-<summary>Claude Desktop — <code>claude_desktop_config.json</code></summary>
+<summary>Other MCP clients</summary>
+
+**Claude Desktop / Cursor** — add to config JSON:
 
 ```json
 {
@@ -68,39 +74,9 @@ uvx idea-reality-mcp
 }
 ```
 
-Config location: **macOS** `~/Library/Application Support/Claude/claude_desktop_config.json` · **Windows** `%APPDATA%\Claude\claude_desktop_config.json`
+Config location: **macOS** `~/Library/Application Support/Claude/claude_desktop_config.json` · **Windows** `%APPDATA%\Claude\claude_desktop_config.json` · **Cursor** `.cursor/mcp.json`
 
-</details>
-
-<details>
-<summary>Claude Code</summary>
-
-```bash
-claude mcp add idea-reality -- uvx idea-reality-mcp
-```
-
-</details>
-
-<details>
-<summary>Cursor — <code>.cursor/mcp.json</code></summary>
-
-Or click the button above for one-click install.
-
-```json
-{
-  "mcpServers": {
-    "idea-reality": {
-      "command": "uvx",
-      "args": ["idea-reality-mcp"]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Smithery (remote, no local install)</summary>
+**Smithery** (remote, no local install):
 
 ```bash
 npx -y @smithery/cli install idea-reality-mcp --client claude
@@ -108,30 +84,52 @@ npx -y @smithery/cli install idea-reality-mcp --client claude
 
 </details>
 
-**3. Use it**
+## Usage
 
-Tell your agent:
+**MCP tool call** (any MCP-compatible agent):
 
+```json
+{
+  "tool": "idea_check",
+  "arguments": {
+    "idea_text": "a CLI tool that converts Figma designs to React components",
+    "depth": "deep"
+  }
+}
 ```
-Before I start building, check if this already exists:
-a CLI tool that converts Figma designs to React components
+
+**REST API** (no MCP required):
+
+```bash
+curl -X POST https://idea-reality-mcp.onrender.com/api/check \
+  -H "Content-Type: application/json" \
+  -d '{"idea_text": "AI code review tool", "depth": "quick"}'
 ```
 
-That's it. The agent calls `idea_check` and returns: reality_signal, top competitors, and pivot suggestions.
+**Python**:
+
+```python
+import httpx
+
+resp = httpx.post("https://idea-reality-mcp.onrender.com/api/check", json={
+    "idea_text": "AI code review tool",
+    "depth": "deep"
+})
+print(resp.json()["reality_signal"])  # 0-100
+```
+
+Free. No API key required.
 
 ## Why not just Google it?
 
-**Google works — if you remember to use it.** The problem isn't search quality. It's that your AI agent never Googles anything before it starts building.
+**Your AI agent never Googles anything before it starts building.** `idea_check` runs *inside* your agent — it triggers automatically whether you remember or not.
 
-`idea_check` runs **inside** your agent. It triggers automatically. The search happens whether you remember or not.
-
-| | Google | ChatGPT / SaaS validators | idea-reality-mcp |
+| | Google | ChatGPT | idea-reality-mcp |
 |---|---|---|---|
 | **Who runs it** | You, manually | You, manually | Your agent, automatically |
-| **Output** | 10 blue links | "Sounds promising!" | Score 0-100 + evidence + competitors |
-| **Sources** | Web pages | None (LLM generation) | GitHub + HN + npm + PyPI + PH + SO |
-| **Workflow** | Copy-paste between tabs | Separate app | MCP / CLI / API / CI |
-| **Price** | Free | Free trial → paywall | Free & open-source (MIT) |
+| **Output** | 10 blue links | "Sounds promising!" | Score 0-100 + evidence |
+| **Sources** | Web pages | None (LLM) | GitHub + HN + npm + PyPI + PH + SO |
+| **Price** | Free | Paywall | Free & open-source (MIT) |
 
 ## Modes
 
@@ -140,7 +138,8 @@ That's it. The agent calls `idea_check` and returns: reality_signal, top competi
 | **quick** (default) | GitHub + HN | Fast sanity check, < 3 seconds |
 | **deep** | GitHub + HN + npm + PyPI + Product Hunt + Stack Overflow | Full competitive scan |
 
-### Scoring weights
+<details>
+<summary>Scoring weights</summary>
 
 | Source | Quick | Deep |
 |--------|-------|------|
@@ -152,7 +151,9 @@ That's it. The agent calls `idea_check` and returns: reality_signal, top competi
 | Product Hunt | — | 14% |
 | Stack Overflow | — | 10% |
 
-If Product Hunt or Stack Overflow is unavailable, their weight is redistributed automatically.
+If a source is unavailable, its weight is redistributed automatically.
+
+</details>
 
 ## Tool schema
 
@@ -192,18 +193,6 @@ If Product Hunt or Stack Overflow is unavailable, their weight is redistributed 
 ```
 
 </details>
-
-## REST API
-
-Not using MCP? Call it directly:
-
-```bash
-curl -X POST https://idea-reality-mcp.onrender.com/api/check \
-  -H "Content-Type: application/json" \
-  -d '{"idea_text": "AI code review tool", "depth": "quick"}'
-```
-
-Free. No API key required.
 
 ## CI: Auto-check on Pull Requests
 
@@ -258,6 +247,10 @@ If the tool missed obvious competitors or returned irrelevant results:
 
 1. [Open an issue](https://github.com/mnemox-ai/idea-reality-mcp/issues/new?template=inaccurate-result.yml) with your idea text and the output
 2. We'll improve the keyword extraction for your domain
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) ([繁體中文](docs/zh/CONTRIBUTING.zh-TW.md)).
 
 ## License
 
