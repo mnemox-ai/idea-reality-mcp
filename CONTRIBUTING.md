@@ -1,4 +1,4 @@
-English | [繁體中文](CONTRIBUTING.zh-TW.md)
+English | [繁體中文](docs/zh/CONTRIBUTING.zh-TW.md)
 
 # Contributing to idea-reality-mcp
 

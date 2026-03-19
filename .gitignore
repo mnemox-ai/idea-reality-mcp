@@ -32,3 +32,17 @@ tasks*.txt
 
 # Planning docs
 V1_COMPLETION_PLAN.md
+PLAN-v0.5.md
+
+# Internal / analysis files
+analyze_queries.py
+query_analysis_report.md
+CLAUDE.md
+
+# Binaries
+*.exe
+*.tar.gz
+
+# Claude internal
+.claude/rules/
+.claude/plans/

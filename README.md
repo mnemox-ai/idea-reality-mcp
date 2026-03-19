@@ -1,5 +1,5 @@
 <!-- mcp-name: io.github.mnemox-ai/idea-reality-mcp -->
-English | [繁體中文](README.zh-TW.md)
+English | [繁體中文](docs/zh/README.zh-TW.md)
 
 # idea-reality-mcp
 
