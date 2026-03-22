@@ -2,11 +2,17 @@
 
 # idea-reality-mcp
 
-**別再重複造輪子。**
+**怎麼檢查你的 App 點子有沒有人做過——自動化。**
 
-花了 3 週寫一個工具，上線後才發現有人早就做了——還有 5,000 stars。
+idea-reality-mcp 是一個 MCP server，掃描 GitHub、npm、PyPI、Hacker News、Product Hunt、Stack Overflow，檢查你的創業點子是否已經存在。回傳 0–100 現實分數、證據、趨勢偵測、轉向建議——讓你的 AI agent 在寫任何 code 之前決定要 build、pivot 還是 kill。
 
-`idea_check` 在你的 Agent 寫第一行 code 前，掃描 GitHub、Hacker News、npm、PyPI、Product Hunt、Stack Overflow。一次呼叫。六個資料庫。用分數取代猜測。
+**什麼時候用：** 你準備開始一個新專案，想知道有沒有類似工具、市場競爭程度、以及趨勢是成長還是衰退。
+
+## 運作方式
+
+1. **描述你的點子**——用自然語言，例如「一個把 Figma 設計稿轉成 React 元件的 CLI 工具」
+2. **idea_check 同時掃描 6 個資料庫**（GitHub repos + stars、Hacker News 討論、npm/PyPI 套件、Product Hunt 上架、Stack Overflow 問題）
+3. **取得 0–100 現實分數**，附趨勢方向（加速中/穩定/衰退）、頭號競品、AI 生成的轉向建議
 
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 [![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
