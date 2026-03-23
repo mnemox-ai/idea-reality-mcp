@@ -230,6 +230,27 @@ def _check_rate_limit(client_ip: str) -> bool:
     return entry["count"] <= DAILY_LIMIT
 
 
+_CHECK_DAILY_LIMIT = 100
+_check_limits: dict[str, dict] = defaultdict(lambda: {"count": 0, "reset_date": ""})
+
+
+def _check_rate_limit_check(client_ip: str) -> bool:
+    """Return *True* if the /api/check request is within the daily limit."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    if len(_check_limits) > _MAX_RATE_LIMIT_ENTRIES:
+        stale = [ip for ip, v in _check_limits.items() if v["reset_date"] != today]
+        for ip in stale:
+            del _check_limits[ip]
+
+    entry = _check_limits[client_ip]
+    if entry["reset_date"] != today:
+        entry["count"] = 0
+        entry["reset_date"] = today
+    entry["count"] += 1
+    return entry["count"] <= _CHECK_DAILY_LIMIT
+
+
 # ---------------------------------------------------------------------------
 # Accept-Language country extraction
 # ---------------------------------------------------------------------------
@@ -559,9 +580,19 @@ async def check(req: CheckRequest, request: Request):
     if not req.idea_text or not req.idea_text.strip():
         raise HTTPException(status_code=422, detail="idea_text cannot be empty")
 
+    client_ip = request.client.host if request.client else "unknown"
+    if not _check_rate_limit_check(client_ip):
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "Rate limit exceeded",
+                "detail": "Maximum 100 checks per day per IP",
+            },
+        )
+
     idea_text = req.idea_text.strip()
 
-    # Try LLM keywords first (no rate limit for /api/check — internal usage)
+    # Try LLM keywords first
     keyword_source = "llm"
     keywords = await _extract_keywords_via_haiku(idea_text)
     if keywords is None:
@@ -808,9 +839,7 @@ async def unlock_report(req: UnlockRequest, request: Request):
         raise HTTPException(status_code=422, detail="idea_text cannot be empty")
 
     idea_text = req.idea_text.strip()
-    client_ip = request.headers.get(
-        "x-forwarded-for", request.client.host if request.client else "unknown"
-    ).split(",")[0].strip()
+    client_ip = request.client.host if request.client else "unknown"
 
     # 1. Run deep scan (same as /api/check with depth=deep)
     keywords = await _extract_keywords_via_haiku(idea_text)
