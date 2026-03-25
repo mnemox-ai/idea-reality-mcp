@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "fastmcp>=2.0.0",
     "httpx>=0.27.0",
+    "click>=8.0.0",
 ]
 
 [project.urls]
@@ -33,6 +34,7 @@ Issues = "https://github.com/mnemox-ai/idea-reality-mcp/issues"
 Changelog = "https://github.com/mnemox-ai/idea-reality-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
+idea-reality = "idea_reality_mcp.cli:cli"
 idea-reality-mcp = "idea_reality_mcp:main"
 
 [build-system]

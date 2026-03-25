@@ -1,5 +1,12 @@
 """FastMCP server definition."""
 
+import sys
+from pathlib import Path
+
+# First-run hint (stderr only, does not affect MCP protocol)
+if not (Path.home() / ".idea-reality" / ".setup_done").exists():
+    print("First time? Run: idea-reality setup", file=sys.stderr)
+
 from fastmcp import FastMCP
 
 mcp = FastMCP(

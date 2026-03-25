@@ -417,6 +417,7 @@ name = "idea-reality-mcp"
 version = "0.5.0"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "fastmcp" },
     { name = "httpx" },
 ]
@@ -429,6 +430,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.0.0" },
     { name = "fastmcp", specifier = ">=2.0.0" },
     { name = "httpx", specifier = ">=0.27.0" },
 ]
