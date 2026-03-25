@@ -771,13 +771,14 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     hourly distribution, device breakdown, and computed funnel rates.
     """
     conn = _get_conn()
-    cutoff_sql = f"datetime('now', '-{int(days)} days')"
+    days = int(days)  # ensure integer
+    cutoff_param = f"-{days} days"  # safe: days is always int
 
     # Unique sessions
     sessions = 0
     row = conn.execute(
-        f"SELECT COUNT(DISTINCT session_id) FROM funnel_events "
-        f"WHERE created_at >= {cutoff_sql}"
+        "SELECT COUNT(DISTINCT session_id) FROM funnel_events "
+        "WHERE created_at >= datetime('now', ?)", (cutoff_param,)
     ).fetchone()
     if row:
         sessions = row[0] if isinstance(row, (list, tuple)) else list(row)[0]
@@ -785,8 +786,9 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     # Event counts
     event_counts: dict[str, int] = {}
     cur = conn.execute(
-        f"SELECT event_name, COUNT(*) FROM funnel_events "
-        f"WHERE created_at >= {cutoff_sql} GROUP BY event_name"
+        "SELECT event_name, COUNT(*) FROM funnel_events "
+        "WHERE created_at >= datetime('now', ?) GROUP BY event_name",
+        (cutoff_param,)
     )
     for r in cur.fetchall():
         vals = list(r) if not isinstance(r, (list, tuple)) else r
@@ -796,8 +798,9 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     deep_count = 0
     quick_count = 0
     cur2 = conn.execute(
-        f"SELECT metadata FROM funnel_events "
-        f"WHERE event_name = 'scan_complete' AND created_at >= {cutoff_sql}"
+        "SELECT metadata FROM funnel_events "
+        "WHERE event_name = 'scan_complete' AND created_at >= datetime('now', ?)",
+        (cutoff_param,)
     )
     import json as _json
     for r in cur2.fetchall():
@@ -814,8 +817,9 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     # PayPal click scores
     paypal_scores: list[int] = []
     cur3 = conn.execute(
-        f"SELECT metadata FROM funnel_events "
-        f"WHERE event_name = 'paypal_click' AND created_at >= {cutoff_sql}"
+        "SELECT metadata FROM funnel_events "
+        "WHERE event_name = 'paypal_click' AND created_at >= datetime('now', ?)",
+        (cutoff_param,)
     )
     for r in cur3.fetchall():
         val = list(r)[0] if not isinstance(r, (list, tuple)) else r[0]
@@ -830,9 +834,10 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     # Hourly distribution (scan_start)
     hourly: dict[str, int] = {}
     cur4 = conn.execute(
-        f"SELECT substr(created_at, 12, 2) AS hour, COUNT(*) FROM funnel_events "
-        f"WHERE event_name = 'scan_start' AND created_at >= {cutoff_sql} "
-        f"GROUP BY hour ORDER BY hour"
+        "SELECT substr(created_at, 12, 2) AS hour, COUNT(*) FROM funnel_events "
+        "WHERE event_name = 'scan_start' AND created_at >= datetime('now', ?) "
+        "GROUP BY hour ORDER BY hour",
+        (cutoff_param,)
     )
     for r in cur4.fetchall():
         vals = list(r) if not isinstance(r, (list, tuple)) else r
@@ -841,8 +846,9 @@ def get_funnel_stats(days: int = 7) -> dict[str, Any]:
     # Device breakdown (page_load metadata)
     devices: dict[str, int] = {}
     cur5 = conn.execute(
-        f"SELECT metadata FROM funnel_events "
-        f"WHERE event_name = 'page_load' AND created_at >= {cutoff_sql}"
+        "SELECT metadata FROM funnel_events "
+        "WHERE event_name = 'page_load' AND created_at >= datetime('now', ?)",
+        (cutoff_param,)
     )
     for r in cur5.fetchall():
         val = list(r)[0] if not isinstance(r, (list, tuple)) else r[0]

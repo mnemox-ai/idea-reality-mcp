@@ -27,7 +27,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from html import escape as html_escape
 
@@ -176,17 +176,17 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 class CheckRequest(BaseModel):
-    idea_text: str
+    idea_text: str = Field(max_length=2000)
     depth: Literal["quick", "deep"] = "quick"
     lang: Literal["en", "zh"] = "en"
 
 
 class ExtractKeywordsRequest(BaseModel):
-    idea_text: str
+    idea_text: str = Field(max_length=2000)
 
 
 class ExpandIdeaRequest(BaseModel):
-    idea_text: str
+    idea_text: str = Field(max_length=2000)
 
 
 class SubscribeRequest(BaseModel):
@@ -824,7 +824,7 @@ async def crowd_intel(req: CrowdIntelRequest):
 
 
 class UnlockRequest(BaseModel):
-    idea_text: str
+    idea_text: str = Field(max_length=2000)
     lang: Literal["en", "zh"] = "en"
 
 
@@ -905,7 +905,7 @@ async def unlock_report(req: UnlockRequest, request: Request):
                 "description": idea_short,
                 "color": 0x00FF88,
                 "fields": [
-                    {"name": "IP", "value": client_ip, "inline": True},
+                    {"name": "IP", "value": hashlib.sha256(client_ip.encode()).hexdigest()[:12], "inline": True},
                     {"name": "Competitors", "value": str(len(full_report.get("competitors", []))), "inline": True},
                     {"name": "Lang", "value": req.lang, "inline": True},
                 ],
@@ -1006,7 +1006,7 @@ async def claim_report(req: ClaimRequest, request: Request):
                 "fields": [
                     {"name": "Email", "value": req.email.strip(), "inline": True},
                     {"name": "Idea Hash", "value": req.idea_hash[:16] + "..." if req.idea_hash else "N/A", "inline": True},
-                    {"name": "IP", "value": client_ip, "inline": True},
+                    {"name": "IP", "value": hashlib.sha256(client_ip.encode()).hexdigest()[:12], "inline": True},
                     {"name": "Idea", "value": idea_short or "N/A", "inline": False},
                 ],
             }
