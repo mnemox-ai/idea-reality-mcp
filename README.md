@@ -90,6 +90,38 @@ npx -y @smithery/cli install idea-reality-mcp --client claude
 
 </details>
 
+## Setup & Configuration
+
+First-time guided setup:
+
+```bash
+idea-reality setup
+```
+
+This walks you through:
+1. **Terms acceptance** — data collection policy and disclaimer
+2. **Platform detection** — auto-detects Claude Desktop, Claude Code, Cursor, Windsurf, Cline
+3. **Config generation** — prints the exact JSON snippet for your platform
+4. **Health check** — verifies MCP server, tools, and scoring engine
+
+### Platform Configs
+
+```bash
+idea-reality config              # interactive menu
+idea-reality config claude_code  # auto-installs via CLI
+idea-reality config cursor       # prints Cursor config
+idea-reality config raw_json     # generic MCP JSON
+```
+
+Supported: Claude Desktop · Claude Code · Cursor · Windsurf · Cline · Smithery · Docker
+
+### Health Check
+
+```bash
+idea-reality doctor        # core checks (~2s)
+idea-reality doctor --full # + GitHub API, all 6 sources, Anthropic API
+```
+
 ## Usage
 
 **MCP tool call** (any MCP-compatible agent):
@@ -241,6 +273,7 @@ When starting a new project, use the idea_check MCP tool to check if similar pro
 - [x] **v0.3** — 3-stage keyword pipeline, Chinese term mappings, LLM-powered search
 - [x] **v0.4** — Score History, Agent Templates, GitHub Action
 - [x] **v0.5** — Temporal signals, trend detection, market momentum
+- [x] **v0.6** — Onboarding CLI (`idea-reality setup`, `config`, `doctor`)
 - [ ] **v1.0** — Idea Memory Dataset (opt-in anonymous logging)
 
 ## Star History
