@@ -13,6 +13,9 @@
 - **PRODUCTHUNT_TOKEN：** optional，未設時 gracefully skip PH source
 
 ## Recent Changes
+- [2026-03-25] fix: REST/MCP parity (SO added), dead payment code removed(-790 lines), deps pinned, _get_client_ip unified(×9), error format consistent. 277 tests.
+- [2026-03-25] feat: onboarding CLI — `idea-reality setup/doctor/config`, 8 platforms, TERMS.md. README updated.
+- [2026-03-25] security: parameterized SQL(×6), Discord IP hash(×2), idea_text max_length(×4). 277 tests.
 - [2026-03-23] fix: /api/check rate limit (100/day per IP) + IP extraction consistency (request.client.host)
 - [2026-03-22] GEO: README + README.zh-TW 加 FAQ 式開頭、When to use、How it works 3 步驟
 - [2026-03-19] Repo 清理：根目錄 25→17 files，zh docs 移到 docs/zh/，gitignore 垃圾檔，README 改善
