@@ -38,13 +38,13 @@ from idea_reality_mcp.sources.hn import search_hn
 from idea_reality_mcp.sources.npm import search_npm
 from idea_reality_mcp.sources.producthunt import search_producthunt
 from idea_reality_mcp.sources.pypi import search_pypi
+from idea_reality_mcp.sources.stackoverflow import search_stackoverflow
 
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import db as score_db
 import report as report_mod
-import lemon_utils
-import paypal_utils
+## Payment utils removed — modules deleted (lemon_utils, paypal_utils)
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +76,14 @@ async def _get_github_stars():
 
 
 _VALID_LANGS = {"en", "zh"}
+
+
+def _get_client_ip(request: Request) -> str:
+    """Extract real client IP, handling reverse proxy headers."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 
 def _sanitize_lang(value: str) -> str:
@@ -497,7 +505,7 @@ async def extract_keywords_endpoint(req: ExtractKeywordsRequest, request: Reques
         raise HTTPException(status_code=503, detail="LLM extraction not available")
 
     # Rate limit
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not _check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Daily rate limit exceeded (50/day)")
 
@@ -531,7 +539,7 @@ async def expand_idea_endpoint(req: ExpandIdeaRequest, request: Request):
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=500, detail="LLM expansion not available")
 
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not _check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Daily rate limit exceeded (50/day)")
 
@@ -580,15 +588,9 @@ async def check(req: CheckRequest, request: Request):
     if not req.idea_text or not req.idea_text.strip():
         raise HTTPException(status_code=422, detail="idea_text cannot be empty")
 
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not _check_rate_limit_check(client_ip):
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "Rate limit exceeded",
-                "detail": "Maximum 100 checks per day per IP",
-            },
-        )
+        raise HTTPException(status_code=429, detail="Maximum 100 checks per day per IP")
 
     idea_text = req.idea_text.strip()
 
@@ -607,12 +609,14 @@ async def check(req: CheckRequest, request: Request):
                 npm_results,
                 pypi_results,
                 ph_results,
+                so_results,
             ) = await asyncio.gather(
                 search_github_repos(keywords),
                 search_hn(keywords),
                 search_npm(keywords),
                 search_pypi(keywords),
                 search_producthunt(keywords),
+                search_stackoverflow(keywords),
             )
             result = compute_signal(
                 idea_text=idea_text,
@@ -623,6 +627,7 @@ async def check(req: CheckRequest, request: Request):
                 npm_results=npm_results,
                 pypi_results=pypi_results,
                 ph_results=ph_results,
+                so_results=so_results,
                 lang=req.lang,
             )
         else:
@@ -694,9 +699,7 @@ async def check(req: CheckRequest, request: Request):
     )
 
     # Save query log (SHA256 hashed IP, no PII)
-    client_ip = request.headers.get(
-        "x-forwarded-for", request.client.host if request.client else "unknown"
-    ).split(",")[0].strip()
+    client_ip = _get_client_ip(request)
     ip_hash = hashlib.sha256(client_ip.encode()).hexdigest()
     try:
         country = _extract_country(request)
@@ -839,7 +842,7 @@ async def unlock_report(req: UnlockRequest, request: Request):
         raise HTTPException(status_code=422, detail="idea_text cannot be empty")
 
     idea_text = req.idea_text.strip()
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
 
     # 1. Run deep scan (same as /api/check with depth=deep)
     keywords = await _extract_keywords_via_haiku(idea_text)
@@ -957,7 +960,7 @@ async def subscribe(req: SubscribeRequest, request: Request):
         raise HTTPException(status_code=422, detail="Invalid email")
 
     # Rate limit (shared with extract-keywords: 50/IP/day)
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not _check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
@@ -985,9 +988,7 @@ async def claim_report(req: ClaimRequest, request: Request):
     if not req.email or not req.email.strip() or "@" not in req.email:
         raise HTTPException(status_code=422, detail="Invalid email")
 
-    client_ip = request.headers.get(
-        "x-forwarded-for", request.client.host if request.client else "unknown"
-    ).split(",")[0].strip()
+    client_ip = _get_client_ip(request)
 
     # Save as subscriber for record keeping
     try:
@@ -1070,7 +1071,7 @@ async def record_page_view(req: PageViewRequest, request: Request):
 
     Body: { "page": "report" }
     """
-    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown").split(",")[0].strip()
+    client_ip = _get_client_ip(request)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     entry = _view_limits[client_ip]
     if entry["reset_date"] != today:
@@ -1129,9 +1130,7 @@ async def record_funnel_events(request: Request):
     if not req.session_id or len(req.session_id) < 20 or len(req.session_id) > 50:
         return {"ok": True}
 
-    client_ip = request.headers.get(
-        "x-forwarded-for", request.client.host if request.client else "unknown"
-    ).split(",")[0].strip()
+    client_ip = _get_client_ip(request)
     ip_hash = hashlib.sha256(client_ip.encode()).hexdigest()
 
     # Rate limit
@@ -1777,267 +1776,31 @@ async def report_preview(req: ReportPreviewRequest, request: Request):
 
 
 # ---------------------------------------------------------------------------
-# LemonSqueezy payment endpoints
+# Payment endpoints (REMOVED — LemonSqueezy + PayPal modules deleted)
 # ---------------------------------------------------------------------------
 
 @app.post("/api/create-checkout")
 async def create_checkout(req: CheckoutRequest):
-    """Create a LemonSqueezy checkout for a paid report.
-
-    Body: { "idea_text": "...", "idea_hash": "...", "language": "en",
-            "success_url": "https://..." }
-    Returns: { "checkout_url": "https://mnemox-ai.lemonsqueezy.com/checkout/..." }
-    """
-    if not lemon_utils._get_api_key():
-        raise HTTPException(status_code=503, detail="LemonSqueezy is not configured")
-
-    if not req.idea_text or not req.idea_text.strip():
-        raise HTTPException(status_code=422, detail="idea_text cannot be empty")
-
-    try:
-        url = await lemon_utils.create_checkout(
-            idea_text=req.idea_text.strip(),
-            idea_hash=req.idea_hash,
-            language=req.language,
-            success_url=req.success_url,
-            depth=req.depth,
-            tier=req.tier,
-        )
-    except Exception as exc:
-        logger.exception("LemonSqueezy checkout creation failed")
-        raise HTTPException(status_code=502, detail="Payment service unavailable. Please try again.") from exc
-
-    return {"checkout_url": url}
+    """Removed — payment feature discontinued."""
+    raise HTTPException(status_code=410, detail="Payment feature has been removed")
 
 
 @app.post("/api/lemon-webhook")
 async def lemon_webhook(request: Request):
-    """Handle LemonSqueezy webhook events.
-
-    On order_created:
-      1. Extract idea_text from custom data
-      2. Run compute_signal + generate_report
-      3. Save report to DB with buyer_email
-    """
-    if not lemon_utils._get_webhook_secret():
-        raise HTTPException(status_code=503, detail="LemonSqueezy webhook is not configured")
-
-    payload = await request.body()
-    signature = request.headers.get("x-signature", "")
-
-    try:
-        event = lemon_utils.verify_webhook(payload, signature)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid request.")
-
-    event_name = event.get("meta", {}).get("event_name", "")
-
-    if event_name == "order_created":
-        attrs = event.get("data", {}).get("attributes", {})
-        custom_data = event.get("meta", {}).get("custom_data", {})
-        idea_text = custom_data.get("idea_text", "")
-        idea_hash_val = custom_data.get("idea_hash", "")
-        language = _sanitize_lang(custom_data.get("language", "en"))
-        depth = custom_data.get("depth", "quick")
-        tier = custom_data.get("tier", "single")
-        buyer_email = attrs.get("user_email", "")
-        order_id = str(event.get("data", {}).get("id", ""))
-
-        # Idempotency check — skip if this order was already processed
-        existing = score_db.get_report_by_stripe_session(order_id)
-        if existing:
-            logger.info("[WEBHOOK] Duplicate webhook for order %s, skipping", order_id)
-            return {"status": "already_processed"}
-
-        if idea_text:
-            try:
-                keywords = await _extract_keywords_via_haiku(idea_text)
-                keyword_source = "llm"
-                if keywords is None:
-                    keywords = extract_keywords(idea_text)
-                    keyword_source = "dictionary"
-                if depth == "deep":
-                    github_results, hn_results, npm_results, pypi_results, ph_results = (
-                        await asyncio.gather(
-                            search_github_repos(keywords),
-                            search_hn(keywords),
-                            search_npm(keywords),
-                            search_pypi(keywords),
-                            search_producthunt(keywords),
-                        )
-                    )
-                    signal_result = compute_signal(
-                        idea_text=idea_text,
-                        keywords=keywords,
-                        github_results=github_results,
-                        hn_results=hn_results,
-                        depth="deep",
-                        npm_results=npm_results,
-                        pypi_results=pypi_results,
-                        ph_results=ph_results,
-                    )
-                else:
-                    github_results, hn_results = await asyncio.gather(
-                        search_github_repos(keywords),
-                        search_hn(keywords),
-                    )
-                    signal_result = compute_signal(
-                        idea_text=idea_text,
-                        keywords=keywords,
-                        github_results=github_results,
-                        hn_results=hn_results,
-                        depth="quick",
-                    )
-
-                full_report = await report_mod.generate_report(
-                    idea_text=idea_text,
-                    signal_result=signal_result,
-                    language=language,
-                    tier=tier,
-                )
-
-                report_data = {**signal_result, "report": full_report, "keyword_source": keyword_source}
-
-                report_id = str(uuid.uuid4())
-                score_db.save_report(
-                    report_id=report_id,
-                    idea_text=idea_text,
-                    idea_hash=idea_hash_val or score_db.idea_hash(idea_text),
-                    score=signal_result["reality_signal"],
-                    report_data=json.dumps(report_data),
-                    language=language,
-                    stripe_session_id=order_id,  # reuse column for LemonSqueezy order ID
-                    buyer_email=buyer_email,
-                )
-                logger.info(
-                    "[LEMON] Report saved: report_id=%s, email=%s, score=%d, keywords=%s",
-                    report_id, buyer_email, signal_result["reality_signal"], keyword_source,
-                )
-            except Exception:
-                logger.exception("[LEMON] Failed to generate/save report for order %s", order_id)
-
-    return {"received": True}
-
-
-# ---------------------------------------------------------------------------
-# PayPal Checkout endpoints
-# ---------------------------------------------------------------------------
-
-
-class PayPalOrderRequest(BaseModel):
-    idea_text: str
-    idea_hash: str = ""
-    depth: Literal["quick", "deep"] = "quick"
-
-
-class PayPalCaptureRequest(BaseModel):
-    order_id: str
-    idea_hash: str = ""
-    idea_text: str = ""
-    depth: Literal["quick", "deep"] = "deep"
-    language: Literal["en", "zh"] = "en"
+    """Removed — payment feature discontinued."""
+    raise HTTPException(status_code=410, detail="Payment feature has been removed")
 
 
 @app.post("/api/create-paypal-order")
-async def create_paypal_order(req: PayPalOrderRequest, request: Request):
-    """Create a PayPal checkout order for a paid report.
-
-    Returns: { "order_id": str, "approve_url": str }
-    """
-    if not paypal_utils._get_client_id():
-        raise HTTPException(status_code=503, detail="PayPal is not configured")
-
-    if not req.idea_text or not req.idea_text.strip():
-        raise HTTPException(status_code=422, detail="idea_text cannot be empty")
-
-    # Build return/cancel URLs from the Referer or default to mnemox.ai
-    origin = (request.headers.get("origin") or "https://mnemox.ai").rstrip("/")
-    success_url = f"{origin}/check/?paypal_complete=1"
-    cancel_url = f"{origin}/check/"
-
-    try:
-        result = await paypal_utils.create_order(
-            idea_text=req.idea_text.strip(),
-            idea_hash=req.idea_hash,
-            depth=req.depth,
-            success_url=success_url,
-            cancel_url=cancel_url,
-        )
-    except Exception as exc:
-        logger.exception("PayPal order creation failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"PayPal error: {exc}") from exc
-
-    return result
+async def create_paypal_order(request: Request):
+    """Removed — payment feature discontinued."""
+    raise HTTPException(status_code=410, detail="Payment feature has been removed")
 
 
 @app.post("/api/capture-paypal-order")
-async def capture_paypal_order(req: PayPalCaptureRequest):
-    """Capture a PayPal order after user approval, generate report.
-
-    Returns: { "status": "complete", "report_data": {...}, "report_id": str }
-    """
-    if not paypal_utils._get_client_id():
-        raise HTTPException(status_code=503, detail="PayPal is not configured")
-
-    if not req.order_id:
-        raise HTTPException(status_code=422, detail="order_id is required")
-
-    # 1. Capture the payment
-    try:
-        capture_result = await paypal_utils.capture_order(req.order_id)
-    except Exception as exc:
-        logger.exception("PayPal capture failed for order %s", req.order_id)
-        raise HTTPException(status_code=502, detail="Payment capture failed.") from exc
-
-    if capture_result.get("status") != "COMPLETED":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Payment not completed: {capture_result.get('status', 'unknown')}",
-        )
-
-    # 2. Idempotency — check if report already exists for this order
-    existing = score_db.get_report_by_stripe_session(req.order_id)
-    if existing:
-        return {
-            "status": "complete",
-            "report_data": json.loads(existing["report_data"]) if isinstance(existing["report_data"], str) else existing["report_data"],
-            "report_id": existing["report_id"],
-        }
-
-    # 3. Generate report
-    idea_text = req.idea_text.strip()
-    idea_hash_val = req.idea_hash or (score_db.idea_hash(idea_text) if idea_text else "")
-    buyer_email = capture_result.get("payer_email", "")
-
-    if not idea_text:
-        raise HTTPException(status_code=422, detail="idea_text is required to generate report")
-
-    try:
-        gen_result = await _generate_report_on_the_fly(
-            idea_text=idea_text,
-            idea_hash_val=idea_hash_val,
-            language=req.language,
-            order_id=req.order_id,
-            buyer_email=buyer_email,
-            depth=req.depth,
-            tier="single",
-        )
-    except Exception as exc:
-        logger.exception("Report generation failed for PayPal order %s", req.order_id)
-        raise HTTPException(status_code=500, detail="Report generation failed.") from exc
-
-    # 4. Fetch the saved report to return full data
-    report_row = score_db.get_report(gen_result["report_id"])
-    report_data = {}
-    if report_row:
-        rd = report_row.get("report_data", "{}")
-        report_data = json.loads(rd) if isinstance(rd, str) else rd
-
-    return {
-        "status": "complete",
-        "report_data": report_data,
-        "report_id": gen_result["report_id"],
-    }
+async def capture_paypal_order(request: Request):
+    """Removed — payment feature discontinued."""
+    raise HTTPException(status_code=410, detail="Payment feature has been removed")
 
 
 async def _generate_report_on_the_fly(
@@ -2172,37 +1935,7 @@ async def _checkout_status_logic(
             except Exception:
                 logger.exception("[CHECKOUT] On-the-fly generation failed for idea_hash=%s", idea_hash[:16])
 
-    # 4. Not in DB — try LemonSqueezy API to verify + regenerate
-    if order_id and lemon_utils._get_api_key():
-        try:
-            order_attrs = await lemon_utils.get_order(order_id)
-            if order_attrs.get("status") == "paid":
-                custom = order_attrs.get("first_order_item", {}).get("custom_data", {})
-                if not custom:
-                    custom = {}
-                lemon_idea_text = custom.get("idea_text", "")
-                language = _sanitize_lang(custom.get("language", "en"))
-                idea_hash_val = custom.get("idea_hash", "")
-                lemon_depth = custom.get("depth", "quick")
-                lemon_tier = custom.get("tier", "single")
-
-                if lemon_idea_text:
-                    try:
-                        return await _generate_report_on_the_fly(
-                            idea_text=lemon_idea_text,
-                            idea_hash_val=idea_hash_val,
-                            language=language,
-                            order_id=order_id,
-                            buyer_email=order_attrs.get("user_email", ""),
-                            depth=lemon_depth,
-                            tier=lemon_tier,
-                        )
-                    except Exception:
-                        logger.exception("[LEMON] Report generation failed for order %s", order_id)
-        except Exception:
-            logger.exception("[LEMON] Failed to verify/regenerate order %s", order_id)
-
-    # 5. Nothing worked
+    # 4. Nothing worked (LemonSqueezy API lookup removed)
     return {"payment_status": "unpaid", "status": "pending"}
 
 
