@@ -50,6 +50,10 @@ One score. Six sources. Trend detection. Your agent decides what to do next.
   <a href="https://mnemox.ai/check"><strong>Try it in your browser — no install</strong></a>
 </p>
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/mnemox-ai-idea-reality-mcp).
+
 ## Quick Start
 
 ```bash
