@@ -13,6 +13,7 @@
 - **PRODUCTHUNT_TOKEN：** optional，未設時 gracefully skip PH source
 
 ## Recent Changes
+- [2026-04-04] fix: v0.5.1 scoring accuracy — keyword synonyms(40+), PyPI two-tier rewrite(JSON+libraries.io), SO backoff hardening, dictionary-first strategy. todo 35→74, expense 40→77, chatbot 69→75. 298 tests.
 - [2026-03-25] fix: REST/MCP parity (SO added), dead payment code removed(-790 lines), deps pinned, _get_client_ip unified(×9), error format consistent. 277 tests.
 - [2026-03-25] feat: onboarding CLI — `idea-reality setup/doctor/config`, 8 platforms, TERMS.md. README updated.
 - [2026-03-25] security: parameterized SQL(×6), Discord IP hash(×2), idea_text max_length(×4). 277 tests.
@@ -29,7 +30,7 @@
 - [2026-03-15] Jarvis 系統建立，加入 /morning 掃描範圍
 
 ## Current Status
-- v0.5.0, 277 tests passing
+- v0.5.1, 298 tests passing
 - **PayPal 已移除** — 全部免費，商業模式轉向品牌 + 流量
 - 新增 3 API endpoints: badge-data, crowd-intel, pulse
 - pivot hints 支援中文（lang=zh）
