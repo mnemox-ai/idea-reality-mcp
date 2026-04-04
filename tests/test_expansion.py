@@ -191,10 +191,8 @@ class TestIdeaCheckUsesExpansion:
         ):
             await idea_check(short_idea, depth="quick")
 
-        # extract_keywords called twice: first with idea_text, then with expanded_description
-        assert mock_extract.call_count == 2
-        second_call_args = mock_extract.call_args_list[1]
-        assert second_call_args[0][0] == _VALID_EXPANSION["expanded_description"]
+        # extract_keywords called once with idea_text (expansion enriches via core_concept, not replaces)
+        assert mock_extract.call_count == 1
 
 
 class TestIdeaCheckFallbackOnExpansionFailure:

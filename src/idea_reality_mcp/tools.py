@@ -38,35 +38,36 @@ async def idea_check(
     Returns:
         Reality check report with signal score, evidence, similar projects, and pivot hints.
     """
-    # LLM-first keyword extraction: better search queries for all ideas.
-    # Dictionary pipeline is the fast fallback when LLM is unavailable.
+    # Dictionary keywords are the primary search queries (short, precise, synonym-expanded).
+    # LLM expansion supplements with core_concept but does NOT replace dictionary queries.
     keyword_source = "dictionary"
     expansion = None
     platform_queries: dict = {}
 
-    # Dictionary extraction (instant, always available)
-    dict_keywords = extract_keywords(idea_text)
+    # Dictionary extraction with synonym expansion (instant, always available)
+    keywords = extract_keywords(idea_text)
 
-    # Try LLM expansion (no word count gate — all ideas benefit)
+    # Try LLM expansion — enrich keywords with core_concept, not replace
     expansion = await expand_idea(idea_text)
-
     if expansion is not None:
-        keywords = extract_keywords(expansion["expanded_description"])
-        if expansion["core_concept"] not in keywords:
-            keywords.append(expansion["core_concept"])
+        core = expansion.get("core_concept", "")
+        if core and core not in keywords:
+            # Insert core_concept early for search priority, keep dict keywords
+            keywords.insert(0, core)
+            keywords = keywords[:8]  # respect cap
         keyword_source = "expanded"
+        # Generate platform-specific queries from expansion, but merge with dict keywords
         platform_queries = generate_platform_queries(expansion, keywords)
-    else:
-        keywords = dict_keywords
 
     if depth == "deep":
         # Deep mode: query all sources in parallel
-        github_task = search_github_repos(platform_queries.get("github", keywords))
-        hn_task = search_hn(platform_queries.get("hackernews", keywords))
-        npm_task = search_npm(platform_queries.get("npm", keywords))
-        pypi_task = search_pypi(platform_queries.get("pypi", keywords))
-        ph_task = search_producthunt(platform_queries.get("producthunt", keywords))
-        so_task = search_stackoverflow(platform_queries.get("stackoverflow", keywords))
+        # Use dictionary keywords for all sources (short, precise, synonym-expanded)
+        github_task = search_github_repos(keywords)
+        hn_task = search_hn(keywords)
+        npm_task = search_npm(keywords)
+        pypi_task = search_pypi(keywords)
+        ph_task = search_producthunt(keywords)
+        so_task = search_stackoverflow(keywords)
 
         github_results, hn_results, npm_results, pypi_results, ph_results, so_results = (
             await asyncio.gather(
@@ -90,8 +91,8 @@ async def idea_check(
     else:
         # Quick mode: GitHub + HN in parallel
         github_results, hn_results = await asyncio.gather(
-            search_github_repos(platform_queries.get("github", keywords)),
-            search_hn(platform_queries.get("hackernews", keywords)),
+            search_github_repos(keywords),
+            search_hn(keywords),
         )
 
         result = compute_signal(
