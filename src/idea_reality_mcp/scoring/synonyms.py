@@ -209,3 +209,64 @@ SYNONYMS: dict[str, list[str]] = {
     "cms":          ["content management", "headless cms", "blog", "publishing"],
     "blogging":     ["blog", "cms", "publishing", "writing platform"],
 }
+
+# ---------------------------------------------------------------------------
+# Keyword synonyms — maps common idea words to search-friendly alternatives.
+# Used by dictionary fallback when LLM keyword extraction is unavailable.
+# Each key is a lowercase token; values are 2-4 alternative search queries.
+# ---------------------------------------------------------------------------
+KEYWORD_SYNONYMS: dict[str, list[str]] = {
+    # Productivity / task management
+    "todo": ["task manager", "checklist app", "to-do list"],
+    "task": ["todo app", "project management", "task tracker"],
+    "note": ["note taking", "knowledge base", "second brain"],
+    "calendar": ["scheduling app", "event planner", "booking system"],
+    # Finance
+    "expense": ["budget tracker", "finance manager", "money tracker"],
+    "invoice": ["billing software", "payment processing", "invoicing"],
+    "payment": ["checkout system", "payment gateway", "billing"],
+    "trading": ["stock trading", "algorithmic trading", "trading bot"],
+    # Communication
+    "chat": ["messaging", "messaging app", "real-time chat", "instant messaging"],
+    "email": ["email client", "newsletter", "email marketing"],
+    "notification": ["push notification", "alert system", "notification service"],
+    # E-commerce
+    "shop": ["ecommerce", "online store", "marketplace"],
+    "cart": ["shopping cart", "checkout", "ecommerce"],
+    "inventory": ["stock management", "warehouse management", "inventory tracking"],
+    # Auth / security
+    "auth": ["authentication", "login system", "identity management"],
+    "login": ["authentication", "sign in", "oauth"],
+    "password": ["password manager", "credential vault", "secret management"],
+    # Content / CMS
+    "blog": ["blogging platform", "content management", "static site generator"],
+    "cms": ["content management", "headless cms", "blog engine"],
+    "wiki": ["knowledge base", "documentation", "wiki engine"],
+    # Developer tools
+    "deploy": ["deployment automation", "ci cd", "devops"],
+    "monitor": ["monitoring system", "observability", "uptime checker"],
+    "log": ["logging system", "log aggregation", "log management"],
+    # AI / ML
+    "chatbot": ["conversational ai", "virtual assistant", "chat assistant"],
+    "recommend": ["recommendation engine", "collaborative filtering", "content recommendation"],
+    "search": ["search engine", "full text search", "semantic search"],
+    # Data
+    "dashboard": ["analytics dashboard", "data visualization", "reporting tool"],
+    "form": ["form builder", "survey tool", "data collection"],
+    "scraper": ["web scraper", "data extraction", "web crawler"],
+    # Social
+    "social": ["social network", "community platform", "social media"],
+    "forum": ["discussion board", "community forum", "q&a platform"],
+    "poll": ["voting app", "survey tool", "polling system"],
+    # Media
+    "video": ["video player", "video streaming", "video editor"],
+    "image": ["image editor", "photo gallery", "image processing"],
+    "music": ["music player", "audio streaming", "music library"],
+    # Misc
+    "weather": ["weather app", "weather forecast", "weather api"],
+    "map": ["mapping service", "geolocation", "maps api"],
+    "booking": ["reservation system", "appointment scheduler", "booking platform"],
+    "crm": ["customer relationship", "sales pipeline", "contact management"],
+    "hr": ["human resources", "employee management", "hr software"],
+    "pos": ["point of sale", "retail system", "checkout terminal"],
+}
