@@ -19,6 +19,7 @@ class StackOverflowResults:
     top_questions: list[dict] = field(default_factory=list)
     evidence: list[dict] = field(default_factory=list)
     recent_question_ratio: float | None = None
+    skipped: bool = False
 
 
 def _api_key() -> str | None:
@@ -62,15 +63,27 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
     seen_ids: set[int] = set()
     evidence: list[dict] = []
 
+    backoff_hit = False
+
     async with httpx.AsyncClient(timeout=15.0) as client:
         for query in keywords:
+            if backoff_hit:
+                evidence.append({
+                    "source": "stackoverflow",
+                    "type": "skipped",
+                    "query": query,
+                    "count": 0,
+                    "detail": f"Skipped '{query}' due to API backoff",
+                })
+                continue
+
             params: dict = {
                 "order": "desc",
                 "sort": "relevance",
                 "intitle": query,
                 "site": "stackoverflow",
                 "pagesize": 10,
-                "filter": "!9_bDDxJY5",  # include question_id, title, link, score, answer_count, is_answered, creation_date, tags
+                "filter": "!9_bDDxJY5",
             }
             if key:
                 params["key"] = key
@@ -80,10 +93,24 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
                 resp.raise_for_status()
                 data = resp.json()
 
+                # Check for API-level errors
+                if "error_id" in data:
+                    evidence.append({
+                        "source": "stackoverflow",
+                        "type": "error",
+                        "query": query,
+                        "count": 0,
+                        "detail": f"SO API error: {data.get('error_message', 'unknown')}",
+                    })
+                    if data.get("error_name") == "throttle_violation":
+                        backoff_hit = True
+                    continue
+
+                # Check for backoff signal
+                if data.get("backoff"):
+                    backoff_hit = True
+
                 items = data.get("items", [])
-                # The SO API does not return a reliable total in search; use quota_remaining
-                # and items count. We use len(items) + has_more as a lower-bound indicator,
-                # but treat total as the max items count seen (consistent with HN pattern).
                 count = len(items)
                 if data.get("has_more"):
                     # Bump count to signal there are more results beyond pagesize
@@ -95,7 +122,6 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
                     max_count = count
                     best_ratio = ratio
 
-                # Collect unique questions (dedup by question_id)
                 for item in items:
                     qid = item.get("question_id")
                     if qid and qid not in seen_ids:
@@ -124,6 +150,14 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
                     "query": query,
                     "count": 0,
                     "detail": f"Failed to query Stack Overflow for '{query}'",
+                })
+            except Exception:
+                evidence.append({
+                    "source": "stackoverflow",
+                    "type": "error",
+                    "query": query,
+                    "count": 0,
+                    "detail": f"Unexpected error querying Stack Overflow for '{query}'",
                 })
 
     # Sort by score descending and keep top 5

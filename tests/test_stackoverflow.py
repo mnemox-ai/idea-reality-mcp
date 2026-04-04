@@ -311,3 +311,74 @@ class TestSearchStackOverflowMultipleKeywords:
             result = await search_stackoverflow(["some topic"])
 
         assert result.recent_question_ratio == pytest.approx(0.5)
+
+
+class TestSearchStackOverflowBackoff:
+    """Verify backoff and API error handling."""
+
+    @pytest.mark.asyncio
+    async def test_backoff_field_skips_remaining_queries(self):
+        """When API returns backoff field, skip remaining keyword queries."""
+        backoff_response = {
+            "items": [],
+            "has_more": False,
+            "backoff": 10,
+        }
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.side_effect = [
+            _mock_response(SAMPLE_RESPONSE),      # kw1 succeeds
+            _mock_response(backoff_response),      # kw2 returns backoff
+            _mock_response(SAMPLE_RESPONSE),       # kw3 should be skipped
+        ]
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.stackoverflow.httpx.AsyncClient", return_value=mock_client):
+            result = await search_stackoverflow(["kw1", "kw2", "kw3"])
+
+        assert result.total_count == 3  # from kw1
+        assert mock_client.get.call_count == 2  # kw3 skipped
+
+    @pytest.mark.asyncio
+    async def test_error_id_in_response(self):
+        """API error responses with error_id should be handled gracefully."""
+        error_response = {
+            "error_id": 502,
+            "error_name": "throttle_violation",
+            "error_message": "too many requests",
+        }
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = _mock_response(error_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.stackoverflow.httpx.AsyncClient", return_value=mock_client):
+            result = await search_stackoverflow(["test"])
+
+        assert isinstance(result, StackOverflowResults)
+        assert result.total_count == 0
+
+    @pytest.mark.asyncio
+    async def test_skipped_field_exists(self):
+        result = StackOverflowResults()
+        assert hasattr(result, "skipped")
+        assert result.skipped is False
+
+    @pytest.mark.asyncio
+    async def test_json_decode_error_handled(self):
+        """Non-JSON response should not crash."""
+        mock_resp = MagicMock(spec=httpx.Response)
+        mock_resp.status_code = 200
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.side_effect = ValueError("No JSON")
+
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = mock_resp
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.stackoverflow.httpx.AsyncClient", return_value=mock_client):
+            result = await search_stackoverflow(["test"])
+
+        assert isinstance(result, StackOverflowResults)
+        assert result.total_count == 0

@@ -717,7 +717,7 @@ def compute_signal(
                     weights[k] += ph_w * (weights[k] / total_remaining)
 
         # Stack Overflow — redistribute weight if unavailable
-        so_available = so_results is not None
+        so_available = so_results is not None and not getattr(so_results, "skipped", False)
         if so_available:
             so_val = _so_score(so_results.total_count)
             sources_used.append("stackoverflow")
