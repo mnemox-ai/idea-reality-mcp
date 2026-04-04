@@ -291,16 +291,18 @@ def _extract_country(request: Request) -> str | None:
 
 _HAIKU_SYSTEM_PROMPT = """You are a search query generator for developer tool market research.
 
-Given a product idea description (English or Chinese), generate 4-6 search queries
+Given a product idea description (English or Chinese), generate 5-8 search queries
 optimized for finding similar projects on GitHub, npm, and PyPI.
 
 Rules:
 1. Output ONLY a JSON array of strings. No explanation, no markdown.
-2. Each query should be 2-5 words.
-3. Include queries for: GitHub repo search, npm/PyPI package search, HN discussion search.
-4. Use English terms even if input is in Chinese.
-5. Prioritize specific technical terms over generic words.
-6. Never include: "tool", "app", "platform", "system", "AI", "powered", "smart", "build"."""
+2. Each query should be 2-4 words, matching how developers name repositories and packages.
+3. Include SYNONYMS for common concepts (e.g., "todo" -> also generate "task manager", "checklist").
+4. Include queries for: GitHub repo name search, npm/PyPI package name search, HN discussion search.
+5. Use English terms even if input is in Chinese.
+6. Prioritize specific technical terms over generic words.
+7. Never include: "tool", "app", "platform", "system", "AI", "powered", "smart", "build".
+8. Think about what a developer would name their repo or package for this idea."""
 
 
 async def _extract_keywords_via_haiku(idea_text: str) -> list[str] | None:
