@@ -435,7 +435,7 @@ class TestComputeSignalQuick:
         assert isinstance(result["top_similars"], list)
         assert isinstance(result["pivot_hints"], list)
         assert len(result["pivot_hints"]) == 3
-        assert result["meta"]["version"] == "0.5.0"
+        assert result["meta"]["version"] == "0.5.1"
         assert result["meta"]["depth"] == "quick"
         assert result["meta"]["sources_used"] == ["github", "hackernews"]
         assert "checked_at" in result["meta"]
