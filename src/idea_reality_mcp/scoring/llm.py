@@ -14,7 +14,7 @@ import os
 import httpx
 
 _DEFAULT_API_URL = "https://idea-reality-mcp.onrender.com"
-_TIMEOUT_SECONDS = 8.0
+_TIMEOUT_SECONDS = 5.0
 
 
 async def extract_keywords_llm(idea_text: str) -> list[str] | None:

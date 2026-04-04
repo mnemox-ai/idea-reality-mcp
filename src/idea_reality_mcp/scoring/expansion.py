@@ -14,7 +14,7 @@ import os
 import httpx
 
 _DEFAULT_API_URL = "https://idea-reality-mcp.onrender.com"
-_TIMEOUT_SECONDS = 8.0
+_TIMEOUT_SECONDS = 5.0
 
 _REQUIRED_KEYS = frozenset({
     "expanded_description",

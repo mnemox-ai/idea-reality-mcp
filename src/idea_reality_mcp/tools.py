@@ -38,22 +38,26 @@ async def idea_check(
     Returns:
         Reality check report with signal score, evidence, similar projects, and pivot hints.
     """
-    # Dictionary pipeline — proven 100% anchor hit on golden set, fast, no network dependency.
-    # LLM extraction is available via the Render API (/api/check, /api/extract-keywords)
-    # for web users; MCP stdio clients get the reliable dictionary path.
+    # LLM-first keyword extraction: better search queries for all ideas.
+    # Dictionary pipeline is the fast fallback when LLM is unavailable.
     keyword_source = "dictionary"
-    keywords = extract_keywords(idea_text)
     expansion = None
     platform_queries: dict = {}
 
-    if len(idea_text.split()) < 15:
-        expansion = await expand_idea(idea_text)
-        if expansion is not None:
-            keywords = extract_keywords(expansion["expanded_description"])
-            if expansion["core_concept"] not in keywords:
-                keywords.append(expansion["core_concept"])
-            keyword_source = "expanded"
-            platform_queries = generate_platform_queries(expansion, keywords)
+    # Dictionary extraction (instant, always available)
+    dict_keywords = extract_keywords(idea_text)
+
+    # Try LLM expansion (no word count gate — all ideas benefit)
+    expansion = await expand_idea(idea_text)
+
+    if expansion is not None:
+        keywords = extract_keywords(expansion["expanded_description"])
+        if expansion["core_concept"] not in keywords:
+            keywords.append(expansion["core_concept"])
+        keyword_source = "expanded"
+        platform_queries = generate_platform_queries(expansion, keywords)
+    else:
+        keywords = dict_keywords
 
     if depth == "deep":
         # Deep mode: query all sources in parallel
