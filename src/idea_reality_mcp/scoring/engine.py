@@ -13,7 +13,7 @@ from ..sources.npm import NpmResults
 from ..sources.pypi import PyPIResults
 from ..sources.producthunt import ProductHuntResults
 from ..sources.stackoverflow import StackOverflowResults
-from .synonyms import INTENT_ANCHORS, SYNONYMS
+from .synonyms import INTENT_ANCHORS, KEYWORD_SYNONYMS, SYNONYMS
 
 # ---------------------------------------------------------------------------
 # Keyword extraction constants
@@ -381,11 +381,22 @@ def extract_keywords(idea_text: str) -> list[str]:
         for token in ranked[:3]:
             _add(token)
 
-    # Ensure minimum 3, cap at 8
-    while len(queries) < 3:
-        queries.append(queries[0] if queries else idea_text.strip()[:80])
+    # --- Synonym expansion: inject alternative queries for common keywords ---
+    synonym_queries: list[str] = []
+    for token in all_tokens:
+        if token in KEYWORD_SYNONYMS:
+            for syn in KEYWORD_SYNONYMS[token][:2]:  # max 2 synonyms per token
+                if syn not in queries and syn not in synonym_queries:
+                    synonym_queries.append(syn)
 
-    return queries[:8]
+    # Merge: keep original queries, fill remaining slots with synonym queries
+    merged = list(dict.fromkeys(queries + synonym_queries))  # dedupe preserving order
+
+    # Ensure minimum 3, cap at 8
+    while len(merged) < 3:
+        merged.append(merged[0] if merged else idea_text.strip()[:80])
+
+    return merged[:8]
 
 
 # ---------------------------------------------------------------------------

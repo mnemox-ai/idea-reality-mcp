@@ -693,3 +693,27 @@ class TestTemporalBoost:
             depth="quick",
         )
         assert result["reality_signal"] <= 100
+
+
+class TestKeywordSynonymExpansion:
+    """Verify dictionary extraction produces search-friendly queries for common ideas."""
+
+    def test_todo_generates_task_manager_query(self):
+        """'todo list app' must produce at least one query containing 'task manager'."""
+        result = extract_keywords("todo list app")
+        all_text = " ".join(result).lower()
+        assert "task manager" in all_text or "checklist" in all_text or "to-do" in all_text
+
+    def test_expense_generates_budget_query(self):
+        result = extract_keywords("expense tracker app")
+        all_text = " ".join(result).lower()
+        assert "budget" in all_text or "finance" in all_text or "money" in all_text
+
+    def test_chat_generates_messaging_query(self):
+        result = extract_keywords("chat application")
+        all_text = " ".join(result).lower()
+        assert "messaging" in all_text or "real-time chat" in all_text
+
+    def test_synonym_expansion_respects_8_query_cap(self):
+        result = extract_keywords("todo list productivity checklist task manager")
+        assert len(result) <= 8
