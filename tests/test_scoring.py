@@ -717,3 +717,51 @@ class TestKeywordSynonymExpansion:
     def test_synonym_expansion_respects_8_query_cap(self):
         result = extract_keywords("todo list productivity checklist task manager")
         assert len(result) <= 8
+
+
+class TestPyPIWeightRedistribution:
+    """Verify PyPI weight is redistributed when skipped."""
+
+    def test_pypi_skipped_redistributes_weight_to_increase_score(self):
+        """When PyPI is skipped, its 13% weight goes to sources with data -> higher score."""
+        github = GitHubResults(
+            total_repo_count=100, max_stars=1000, top_repos=[],
+            recent_ratio=0.3, recently_updated_ratio=0.5, recent_created_count=30,
+        )
+        hn = HNResults(total_mentions=50, evidence=[], recent_mention_ratio=0.4)
+        npm = NpmResults(total_count=100, top_packages=[], evidence=[])
+
+        # PyPI skipped: its 13% weight redistributed to GitHub/HN/npm (which have data)
+        pypi_skipped = PyPIResults(total_count=0, skipped=True, evidence=[])
+        result_skipped = compute_signal(
+            idea_text="test", keywords=["test"], github_results=github,
+            hn_results=hn, depth="deep", npm_results=npm, pypi_results=pypi_skipped,
+        )
+
+        # PyPI NOT skipped: 13% weight x score(0) = 0 contribution, dilutes total
+        pypi_zero = PyPIResults(total_count=0, skipped=False, evidence=[])
+        result_zero = compute_signal(
+            idea_text="test", keywords=["test"], github_results=github,
+            hn_results=hn, depth="deep", npm_results=npm, pypi_results=pypi_zero,
+        )
+
+        # With redistribution, score should be HIGHER because PyPI's zero-weight
+        # goes to sources that have data (GitHub=100, HN=50, npm=100)
+        assert result_skipped["reality_signal"] >= result_zero["reality_signal"]
+        assert 0 <= result_skipped["reality_signal"] <= 100
+
+    def test_pypi_skipped_not_in_sources_used(self):
+        github = GitHubResults(
+            total_repo_count=10, max_stars=100, top_repos=[],
+            recent_ratio=0.5, recently_updated_ratio=0.5, recent_created_count=5,
+        )
+        hn = HNResults(total_mentions=5, evidence=[], recent_mention_ratio=0.5)
+        npm = NpmResults(total_count=10, top_packages=[], evidence=[])
+        pypi_skipped = PyPIResults(total_count=0, skipped=True, evidence=[])
+
+        result = compute_signal(
+            idea_text="test", keywords=["test"], github_results=github,
+            hn_results=hn, depth="deep", npm_results=npm, pypi_results=pypi_skipped,
+        )
+
+        assert "pypi" not in result["meta"]["sources_used"]

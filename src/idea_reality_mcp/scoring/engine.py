@@ -681,14 +681,25 @@ def compute_signal(
     else:
         # Deep mode
         n_score = _npm_score(npm_results.total_count) if npm_results else 0
-        p_score = _pypi_score(pypi_results.total_count) if pypi_results else 0
 
         weights = dict(_DEEP_WEIGHTS)
 
         if npm_results:
             sources_used.append("npm")
-        if pypi_results:
+
+        # PyPI — redistribute weight if skipped/unavailable
+        pypi_available = pypi_results is not None and not getattr(pypi_results, "skipped", False)
+        if pypi_available:
+            p_score = _pypi_score(pypi_results.total_count)
             sources_used.append("pypi")
+        else:
+            p_score = 0
+            pypi_w = weights.pop("pypi", 0.13)
+            remaining_keys = list(weights.keys())
+            total_remaining = sum(weights[k] for k in remaining_keys)
+            if total_remaining > 0:
+                for k in remaining_keys:
+                    weights[k] += pypi_w * (weights[k] / total_remaining)
 
         # Product Hunt — redistribute weight if skipped/unavailable
         ph_available = ph_results is not None and not ph_results.skipped
