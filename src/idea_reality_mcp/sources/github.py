@@ -2,11 +2,21 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 import httpx
+
+logger = logging.getLogger(__name__)
+
+# Log whether GITHUB_TOKEN is configured (at import time)
+if os.environ.get("GITHUB_TOKEN"):
+    logger.info("GITHUB_TOKEN is set — authenticated GitHub API requests enabled")
+else:
+    logger.warning("GITHUB_TOKEN is NOT set — GitHub API requests will be unauthenticated (60 req/hr limit)")
 
 GITHUB_API = "https://api.github.com/search/repositories"
 
@@ -102,6 +112,52 @@ def _headers() -> dict[str, str]:
     return headers
 
 
+def _normalize_query(query: str) -> str:
+    """Normalize query for GitHub search — replace hyphens with spaces.
+
+    LLM-generated keywords often use hyphen-slug format (e.g. 'voice-scheduling-agent')
+    but GitHub search works better with spaces.
+    """
+    return query.replace("-", " ")
+
+
+async def _github_get_with_retry(
+    client: httpx.AsyncClient,
+    params: dict,
+    *,
+    max_retries: int = 2,
+    label: str = "",
+) -> httpx.Response:
+    """GET GitHub API with retry on 403/429 (rate limit).
+
+    Raises httpx.HTTPStatusError after all retries are exhausted.
+    """
+    delays = [1.0, 2.0]  # exponential-ish backoff
+    last_exc: Exception | None = None
+    for attempt in range(1 + max_retries):
+        resp = await client.get(GITHUB_API, params=params, headers=_headers())
+        if resp.status_code not in (403, 429):
+            resp.raise_for_status()
+            return resp
+        # Rate-limited — decide whether to retry
+        last_exc = httpx.HTTPStatusError(
+            f"GitHub {resp.status_code}", request=resp.request, response=resp
+        )
+        if attempt < max_retries:
+            delay = delays[attempt]
+            logger.warning(
+                "GitHub API %d for query %r (attempt %d/%d) — retrying in %.1fs",
+                resp.status_code, label, attempt + 1, 1 + max_retries, delay,
+            )
+            await asyncio.sleep(delay)
+        else:
+            logger.error(
+                "GitHub API %d for query %r — all %d attempts exhausted",
+                resp.status_code, label, 1 + max_retries,
+            )
+    raise last_exc  # type: ignore[misc]
+
+
 async def search_github_repos(keywords: list[str]) -> GitHubResults:
     """Search GitHub for repositories matching keyword variants.
 
@@ -128,13 +184,13 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         for query in normalized_keywords:
+            search_q = _normalize_query(query)
             try:
-                resp = await client.get(
-                    GITHUB_API,
-                    params={"q": query, "sort": "stars", "order": "desc", "per_page": 5},
-                    headers=_headers(),
+                resp = await _github_get_with_retry(
+                    client,
+                    params={"q": search_q, "sort": "stars", "order": "desc", "per_page": 5},
+                    label=search_q,
                 )
-                resp.raise_for_status()
                 data = resp.json()
                 query_count = data.get("total_count", 0)
                 if query_count > max_total_count:
@@ -155,22 +211,23 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                         "updated": item.get("updated_at", ""),
                         "description": (item.get("description") or "")[:200],
                     })
-            except httpx.HTTPError:
+            except httpx.HTTPError as exc:
+                logger.warning("GitHub search failed for query %r: %s", search_q, exc)
                 continue
 
             # Second query: recently created repos for this keyword
             try:
-                recent_q = f"{query} created:>{created_since}"
-                resp = await client.get(
-                    GITHUB_API,
+                recent_q = f"{search_q} created:>{created_since}"
+                resp = await _github_get_with_retry(
+                    client,
                     params={"q": recent_q, "sort": "stars", "order": "desc", "per_page": 1},
-                    headers=_headers(),
+                    label=f"{search_q} (recent)",
                 )
-                resp.raise_for_status()
                 recent_count = resp.json().get("total_count", 0)
                 if recent_count > max_recent_created:
                     max_recent_created = recent_count
-            except httpx.HTTPError:
+            except httpx.HTTPError as exc:
+                logger.warning("GitHub recent-search failed for query %r: %s", search_q, exc)
                 continue
 
     # Filter noise repos before ranking.

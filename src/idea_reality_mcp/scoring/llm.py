@@ -42,6 +42,8 @@ async def extract_keywords_llm(idea_text: str) -> list[str] | None:
 
         # Ensure every element is a non-empty string
         cleaned = [str(k).strip() for k in keywords if str(k).strip()]
+        # Normalize: replace hyphens with spaces for better search API compatibility
+        cleaned = [k.replace("-", " ") for k in cleaned]
         if len(cleaned) < 2:
             return None
 

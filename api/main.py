@@ -296,7 +296,9 @@ optimized for finding similar projects on GitHub, npm, and PyPI.
 
 Rules:
 1. Output ONLY a JSON array of strings. No explanation, no markdown.
-2. Each query should be 2-4 words, matching how developers name repositories and packages.
+2. Each query should be 2-4 words of natural language separated by SPACES.
+   IMPORTANT: Return "voice scheduling agent" NOT "voice-scheduling-agent".
+   Never use hyphens to join words. Search APIs work best with space-separated terms.
 3. Include SYNONYMS for common concepts (e.g., "todo" -> also generate "task manager", "checklist").
 4. Include queries for: GitHub repo name search, npm/PyPI package name search, HN discussion search.
 5. Use English terms even if input is in Chinese.
@@ -341,6 +343,8 @@ async def _extract_keywords_via_haiku(idea_text: str) -> list[str] | None:
             return None
 
         cleaned = [str(k).strip() for k in keywords if str(k).strip()]
+        # Normalize: replace hyphens with spaces for better search API compatibility
+        cleaned = [k.replace("-", " ") for k in cleaned]
         if len(cleaned) < 2:
             return None
 

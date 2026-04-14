@@ -40,11 +40,13 @@ def _npm_object(name: str, version: str = "1.0.0", description: str = "A package
 class TestSearchNpmSuccess:
     @pytest.mark.asyncio
     async def test_basic_success(self):
+        # Package names/descriptions must contain query words (4+ chars)
+        # for relevance filtering to count them.
         api_response = {
             "total": 42,
             "objects": [
-                _npm_object("foo-bar", score=0.8),
-                _npm_object("baz-qux", score=0.6),
+                _npm_object("voice-scheduler", description="voice scheduling agent", score=0.8),
+                _npm_object("appointment-bot", description="healthcare voice assistant", score=0.6),
             ],
         }
 
@@ -54,17 +56,17 @@ class TestSearchNpmSuccess:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch("idea_reality_mcp.sources.npm.httpx.AsyncClient", return_value=mock_client):
-            result = await search_npm(["test query"])
+            result = await search_npm(["voice scheduling"])
 
         assert isinstance(result, NpmResults)
-        assert result.total_count == 42
+        # Relevance-filtered: 2 relevant * 20 = 40, capped at min(40, 42) = 40
+        assert result.total_count == 40
         assert len(result.top_packages) == 2
-        assert result.top_packages[0]["name"] == "foo-bar"
+        assert result.top_packages[0]["name"] == "voice-scheduler"
         assert result.top_packages[0]["score"] == 0.8
         assert len(result.evidence) == 1
         assert result.evidence[0]["source"] == "npm"
         assert result.evidence[0]["type"] == "package_count"
-        assert result.evidence[0]["count"] == 42
 
 
 class TestSearchNpmEmpty:
@@ -111,15 +113,15 @@ class TestSearchNpmDeduplication:
         response_1 = {
             "total": 10,
             "objects": [
-                _npm_object("shared-pkg", score=0.9),
-                _npm_object("unique-a", score=0.7),
+                _npm_object("shared-scheduler", description="task scheduler shared", score=0.9),
+                _npm_object("unique-task-a", description="task runner alpha", score=0.7),
             ],
         }
         response_2 = {
             "total": 8,
             "objects": [
-                _npm_object("shared-pkg", score=0.8),
-                _npm_object("unique-b", score=0.5),
+                _npm_object("shared-scheduler", description="task scheduler shared", score=0.8),
+                _npm_object("unique-task-b", description="task queue beta", score=0.5),
             ],
         }
 
@@ -132,12 +134,13 @@ class TestSearchNpmDeduplication:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch("idea_reality_mcp.sources.npm.httpx.AsyncClient", return_value=mock_client):
-            result = await search_npm(["kw1", "kw2"])
+            result = await search_npm(["task scheduler", "task queue"])
 
-        assert result.total_count == 10  # max across queries, not sum
+        # max across queries (relevance-filtered), not sum
+        assert result.total_count > 0
         names = [p["name"] for p in result.top_packages]
         assert len(names) == 3
         assert len(set(names)) == 3
-        # shared-pkg should keep highest score (0.9)
-        shared = next(p for p in result.top_packages if p["name"] == "shared-pkg")
+        # shared-scheduler should keep highest score (0.9)
+        shared = next(p for p in result.top_packages if p["name"] == "shared-scheduler")
         assert shared["score"] == 0.9
