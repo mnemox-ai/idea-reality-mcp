@@ -76,6 +76,15 @@ INTENT_ANCHORS: frozenset[str] = frozenset({
     "editor",
     "cms",
     "blogging",
+    # Event / social planning (v0.5.1 — niche-group use cases:
+    # reunions, meetups, alumni groups, community events)
+    "event", "events",
+    "reunion", "meetup", "gathering",
+    "rsvp", "invitation", "invite",
+    "poll", "voting", "vote", "election",
+    "attendance", "attendee",
+    "host", "hosting",
+    "itinerary",
 })
 
 # ---------------------------------------------------------------------------
@@ -208,6 +217,24 @@ SYNONYMS: dict[str, list[str]] = {
     # Content / media
     "cms":          ["content management", "headless cms", "blog", "publishing"],
     "blogging":     ["blog", "cms", "publishing", "writing platform"],
+    # Event / social planning (v0.5.1)
+    "event":        ["events", "gathering", "meetup", "party", "function"],
+    "events":       ["event", "gathering", "meetup", "party", "function"],
+    "reunion":      ["alumni reunion", "gathering", "meetup", "class reunion", "family reunion"],
+    "meetup":       ["gathering", "event", "group meetup", "social meetup"],
+    "gathering":    ["meetup", "event", "social gathering", "reunion"],
+    "rsvp":         ["invitation", "attendance", "guest list", "confirm attendance"],
+    "invitation":   ["rsvp", "invite", "event invite", "guest list"],
+    "invite":       ["invitation", "rsvp", "event invite"],
+    "poll":         ["voting", "survey", "ballot", "doodle poll"],
+    "voting":       ["poll", "ballot", "election", "vote tracker"],
+    "vote":         ["voting", "poll", "ballot"],
+    "election":     ["voting", "ballot", "poll", "selection"],
+    "attendance":   ["rsvp", "attendee", "guest list", "headcount"],
+    "attendee":     ["attendance", "guest", "participant", "rsvp"],
+    "host":         ["hosting", "organizer", "event host", "planner"],
+    "hosting":      ["host", "organizer", "event host"],
+    "itinerary":    ["travel itinerary", "trip plan", "schedule", "agenda"],
 }
 
 # ---------------------------------------------------------------------------
@@ -269,4 +296,13 @@ KEYWORD_SYNONYMS: dict[str, list[str]] = {
     "crm": ["customer relationship", "sales pipeline", "contact management"],
     "hr": ["human resources", "employee management", "hr software"],
     "pos": ["point of sale", "retail system", "checkout terminal"],
+    # Event / social planning (v0.5.1)
+    "event": ["event planner", "event management", "gathering app"],
+    "reunion": ["reunion planner", "alumni reunion app", "class reunion"],
+    "meetup": ["meetup app", "group meetup", "social meetup"],
+    "rsvp": ["rsvp tracker", "invitation tracker", "guest list"],
+    "invitation": ["digital invitation", "event invite", "e-invite"],
+    "attendance": ["attendance tracker", "guest list", "headcount"],
+    "host": ["event host", "host rotation", "party host"],
+    "itinerary": ["itinerary planner", "trip planner", "travel agenda"],
 }
