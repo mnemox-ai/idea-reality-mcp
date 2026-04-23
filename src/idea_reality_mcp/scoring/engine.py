@@ -226,6 +226,37 @@ CHINESE_TECH_MAP: dict[str, str] = {
     "溯源": "traceability",
     "家教": "tutor", "導師": "mentor",
     "元素": "element",
+    # Event / social planning (v0.5.1 — Traditional Chinese daily-life vocabulary
+    # for reunion / alumni / family gathering / community event scenarios).
+    # IMPORTANT: longer compound keys must appear before shorter substrings
+    # because CHINESE_TECH_MAP iteration is sorted by key length (longest first)
+    # at usage site — but keeping physical proximity helps reviewers.
+    "同學會": "alumni reunion",
+    "系友會": "alumni",
+    "校友會": "alumni",
+    "家族聚會": "family reunion",
+    "聚會": "gathering",
+    "聚餐": "dining gathering",
+    "輪流主辦": "rotating host",
+    "主辦": "host",
+    "輪流": "rotating",
+    "出席人數": "attendance",
+    "出席": "attendance",
+    "到場": "attendance",
+    "時間投票": "date poll",
+    "投票": "voting",
+    "投票選舉": "election",
+    "邀請函": "invitation",
+    "邀請": "invitation",
+    "回覆": "rsvp",
+    "紀錄": "log",
+    "修改紀錄": "audit log",
+    "編輯紀錄": "edit history",
+    "活動": "event",
+    "行程": "itinerary",
+    "行程規劃": "itinerary planner",
+    "打包清單": "packing list",
+    "分帳": "expense splitting",
 }
 
 
