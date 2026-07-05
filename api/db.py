@@ -181,6 +181,21 @@ def _row_to_dict(cursor) -> dict[str, Any] | None:
 # ---------------------------------------------------------------------------
 
 
+def _add_column_if_missing(conn, table: str, column: str, coltype: str) -> None:
+    """Add `column` to `table` if it isn't already present (portable ALTER guard).
+
+    SQLite/libSQL raise on a duplicate ADD COLUMN, so we probe PRAGMA table_info first.
+    """
+    try:
+        cur = conn.execute(f"PRAGMA table_info({table})")
+        existing = {row[1] for row in cur.fetchall()}
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
+            conn.commit()
+    except Exception:  # noqa: BLE001 — never let a migration probe break init
+        logger.exception("[DB] _add_column_if_missing(%s.%s) failed", table, column)
+
+
 def init_db() -> None:
     """Create all tables and indexes if they don't exist."""
     conn = _get_conn()
@@ -195,12 +210,16 @@ def init_db() -> None:
             depth TEXT DEFAULT 'quick',
             lang TEXT DEFAULT 'en',
             keyword_source TEXT DEFAULT 'dictionary',
-            created_at TEXT DEFAULT (datetime('now'))
+            created_at TEXT DEFAULT (datetime('now')),
+            embedding BLOB
         )
     """)
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_idea_hash ON score_history(idea_hash)"
     )
+    # Existing (pre-embedding) tables won't get the column from CREATE IF NOT EXISTS —
+    # add it in-place. Idempotent: skipped when already present.
+    _add_column_if_missing(conn, "score_history", "embedding", "BLOB")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS query_log (
             id INTEGER PRIMARY KEY,
@@ -310,21 +329,117 @@ def save_score(
     depth: str = "quick",
     lang: str = "en",
     keyword_source: str = "dictionary",
+    embedding: bytes | None = None,
 ) -> int:
-    """Insert a score record and return the row id."""
+    """Insert a score record and return the row id.
+
+    `embedding` is an optional packed float32 BLOB (see api/embeddings.pack_embedding).
+    When omitted the row is stored without a vector and can be backfilled later.
+    """
     h = idea_hash(idea_text)
     conn = _get_conn()
     cur = conn.execute(
         "INSERT INTO score_history "
-        "(idea_hash, idea_text, score, breakdown, keywords, depth, lang, keyword_source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (h, idea_text, score, breakdown, keywords, depth, lang, keyword_source),
+        "(idea_hash, idea_text, score, breakdown, keywords, depth, lang, keyword_source, embedding) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (h, idea_text, score, breakdown, keywords, depth, lang, keyword_source, embedding),
     )
     conn.commit()
     _sync_after_write(conn)
     row_id = cur.lastrowid
     conn.close()
     return row_id
+
+
+def set_embedding(row_id: int, embedding: bytes) -> None:
+    """Attach/replace the embedding BLOB on an existing score_history row."""
+    conn = _get_conn()
+    conn.execute("UPDATE score_history SET embedding = ? WHERE id = ?", (embedding, row_id))
+    conn.commit()
+    _sync_after_write(conn)
+    conn.close()
+
+
+def rows_missing_embedding(limit: int = 1000) -> list[dict[str, Any]]:
+    """Return score_history rows that have no embedding yet (id + idea_text), oldest first.
+
+    Used by the one-time / incremental backfill (scripts/backfill_embeddings.py).
+    """
+    conn = _get_conn()
+    cur = conn.execute(
+        "SELECT id, idea_text FROM score_history "
+        "WHERE embedding IS NULL AND idea_text IS NOT NULL AND length(idea_text) > 0 "
+        "ORDER BY id ASC LIMIT ?",
+        (limit,),
+    )
+    result = _rows_to_dicts(cur)
+    conn.close()
+    return result
+
+
+def search_similar_by_embedding(
+    query_embedding: Sequence[float],
+    exclude_hash: str | None = None,
+    limit: int = 10,
+    min_score: float = 0.0,
+) -> list[dict[str, Any]]:
+    """Semantic nearest-neighbours over score_history by cosine similarity.
+
+    Brute-force over every row that has an embedding (fine at ~10k rows). Returns dicts
+    with idea_text, score, depth, lang, created_at and an added `similarity` (0..1),
+    sorted most-similar first. `min_score` filters out weak matches (e.g. 0.35).
+    Callers should fall back to the keyword LIKE search when this returns [] (no
+    embeddings yet, or NumPy/embedding provider unavailable).
+    """
+    import numpy as np
+
+    conn = _get_conn()
+    sql = (
+        "SELECT idea_hash, idea_text, score, depth, lang, created_at, embedding "
+        "FROM score_history WHERE embedding IS NOT NULL"
+    )
+    params: list = []
+    if exclude_hash:
+        sql += " AND idea_hash != ?"
+        params.append(exclude_hash)
+    cur = conn.execute(sql, params)
+    rows = _rows_to_dicts(cur)
+    conn.close()
+    if not rows:
+        return []
+
+    q = np.asarray(query_embedding, dtype=np.float32)
+    qn = np.linalg.norm(q)
+    if qn == 0:
+        return []
+    q = q / qn
+
+    scored: list[dict[str, Any]] = []
+    for r in rows:
+        blob = r.get("embedding")
+        if not blob:
+            continue
+        v = np.frombuffer(blob, dtype="<f4")
+        if v.shape[0] == 0:
+            continue
+        vn = np.linalg.norm(v)
+        if vn == 0:
+            continue
+        sim = float(np.dot(q, v / vn))
+        if sim < min_score:
+            continue
+        scored.append(
+            {
+                "idea_text": r.get("idea_text"),
+                "score": r.get("score"),
+                "depth": r.get("depth"),
+                "lang": r.get("lang"),
+                "created_at": r.get("created_at"),
+                "similarity": round(sim, 4),
+            }
+        )
+    scored.sort(key=lambda d: d["similarity"], reverse=True)
+    return scored[:limit]
 
 
 def get_history(hash_val: str) -> list[dict[str, Any]]:

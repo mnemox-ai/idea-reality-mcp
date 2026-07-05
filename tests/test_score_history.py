@@ -105,3 +105,73 @@ def test_save_score_returns_incrementing_ids():
         )
         ids.append(row_id)
     assert ids[0] < ids[1] < ids[2]
+
+
+# ---------------------------------------------------------------------------
+# Semantic embeddings (P1)
+# ---------------------------------------------------------------------------
+
+import numpy as np  # noqa: E402
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from api.embeddings import pack_embedding, unpack_embedding  # noqa: E402
+
+
+def _unit(seed):
+    rng = np.random.default_rng(seed)
+    x = rng.standard_normal(1536).astype(np.float32)
+    return (x / np.linalg.norm(x)).tolist()
+
+
+def test_pack_unpack_roundtrip():
+    v = [0.1, -0.2, 0.3, 0.0]
+    assert np.allclose(unpack_embedding(pack_embedding(v)), v, atol=1e-6)
+    assert unpack_embedding(b"") == []
+
+
+def test_embedding_column_added_to_legacy_table(tmp_path, monkeypatch):
+    """init_db must ALTER-in the embedding column on a pre-embedding table."""
+    import sqlite3
+
+    db_path = str(tmp_path / "legacy.db")
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        "CREATE TABLE score_history (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "idea_hash TEXT, idea_text TEXT, score INT, breakdown TEXT, keywords TEXT, "
+        "depth TEXT, lang TEXT, keyword_source TEXT, created_at TEXT)"
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr(score_db, "DB_PATH", db_path)
+    score_db.init_db()
+    cols = {r[1] for r in sqlite3.connect(db_path).execute("PRAGMA table_info(score_history)").fetchall()}
+    assert "embedding" in cols
+
+
+def test_semantic_search_ranks_paraphrase_first():
+    base = np.asarray(_unit(1), dtype=np.float32)
+    para = base * 0.9 + np.asarray(_unit(2), dtype=np.float32) * 0.1
+    para = (para / np.linalg.norm(para)).tolist()
+    far = _unit(99)
+
+    score_db.save_score("split bills with roommates", 71, "{}", "[]", embedding=pack_embedding(base.tolist()))
+    score_db.save_score("a photo editing tool", 55, "{}", "[]", embedding=pack_embedding(far))
+
+    res = score_db.search_similar_by_embedding(para, limit=5)
+    assert res, "expected at least one match"
+    assert res[0]["idea_text"] == "split bills with roommates"
+    assert res[0]["similarity"] > res[-1]["similarity"]
+
+
+def test_rows_missing_embedding_and_backfill_flow():
+    rid = score_db.save_score("idea without vector", 60, "{}", "[]")
+    missing_ids = [r["id"] for r in score_db.rows_missing_embedding()]
+    assert rid in missing_ids
+    score_db.set_embedding(rid, pack_embedding(_unit(7)))
+    assert rid not in [r["id"] for r in score_db.rows_missing_embedding()]
+
+
+def test_semantic_search_empty_corpus_and_zero_vector():
+    assert score_db.search_similar_by_embedding(_unit(1)) == []  # nothing embedded yet
+    score_db.save_score("something", 50, "{}", "[]", embedding=pack_embedding(_unit(3)))
+    assert score_db.search_similar_by_embedding([0.0] * 1536) == []  # zero query -> []
