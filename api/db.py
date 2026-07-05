@@ -377,6 +377,17 @@ def rows_missing_embedding(limit: int = 1000) -> list[dict[str, Any]]:
     return result
 
 
+def count_missing_embedding() -> int:
+    """Number of embeddable rows still lacking an embedding (for backfill progress/dry-run)."""
+    conn = _get_conn()
+    n = conn.execute(
+        "SELECT COUNT(*) FROM score_history "
+        "WHERE embedding IS NULL AND idea_text IS NOT NULL AND length(idea_text) > 0"
+    ).fetchone()[0]
+    conn.close()
+    return int(n)
+
+
 def search_similar_by_embedding(
     query_embedding: Sequence[float],
     exclude_hash: str | None = None,

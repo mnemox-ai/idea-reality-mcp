@@ -41,6 +41,16 @@ def main() -> int:
 
     db.init_db()  # ensures the embedding column exists on the target DB
 
+    if args.dry_run:
+        # A real run shrinks the NULL set as it writes; a dry run must NOT loop over
+        # rows_missing_embedding (it never advances without writes) — count once instead.
+        n = db.count_missing_embedding()
+        capped = n if args.limit == 0 else min(n, args.limit)
+        est_tokens = capped * 40  # ~40 tokens/idea rough
+        print(f"[backfill] dry-run: {n} rows missing embedding; would embed {capped} "
+              f"(~{est_tokens:,} tokens, approx ${est_tokens / 1_000_000 * 0.02:.4f})")
+        return 0
+
     total_done = 0
     started = time.time()
     while True:
@@ -54,10 +64,6 @@ def main() -> int:
         ids = [r["id"] for r in rows]
         texts = [r["idea_text"] for r in rows]
         print(f"[backfill] {len(rows)} rows (ids {ids[0]}..{ids[-1]})", flush=True)
-
-        if args.dry_run:
-            total_done += len(rows)
-            continue
 
         try:
             vectors = embed_texts(texts)
@@ -73,8 +79,7 @@ def main() -> int:
             break
 
     elapsed = time.time() - started
-    verb = "would embed" if args.dry_run else "embedded"
-    print(f"[backfill] done — {verb} {total_done} rows in {elapsed:.1f}s")
+    print(f"[backfill] done — embedded {total_done} rows in {elapsed:.1f}s")
     return 0
 
 
