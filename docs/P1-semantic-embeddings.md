@@ -1,9 +1,18 @@
 # P1 — Semantic Embeddings (activate the query-log moat)
 
 **Why**: `search_similar_ideas` matched on keyword LIKE — it misses paraphrases
-("split bills with roommates" vs "expense sharing app"). The ~280+ (growing) rows
-of `score_history` (real idea queries) are the engine's only proprietary asset;
-embeddings turn them from a keyword table into a semantic index.
+("split bills with roommates" vs "expense sharing app"). The **10,150 rows /
+8,337 distinct ideas** in `score_history` on Turso (confirmed 2026-07-06 via the
+Turso HTTP API; also surfaced by `/api/stats` `total_ideas_scanned`) are the
+engine's only proprietary asset; embeddings turn them from a keyword table into a
+semantic index.
+
+> ⚠️ Gotcha: `api/db.py` **silently** falls back to a local empty SQLite when
+> `libsql_client` is missing OR Turso env vars are unset (only a log warning).
+> Any local script must `pip install libsql-client` AND export `TURSO_*`, or it
+> will operate on the wrong DB and report bogus counts. The local libsql *sync*
+> client also hung here (Windows) — the Turso **HTTP API** (`https://<db>/v2/pipeline`)
+> works and is the reliable path for the backfill / analysis from this machine.
 
 ## Status
 
