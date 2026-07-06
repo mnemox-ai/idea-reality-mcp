@@ -592,11 +592,88 @@ async def expand_idea_endpoint(req: ExpandIdeaRequest, request: Request):
         raise HTTPException(status_code=500, detail="LLM expansion failed")
 
 
+async def _compute_report(
+    idea_text: str, depth: str, lang: str, include: list[str],
+) -> tuple[dict, list, str, str]:
+    """Core reality check: keyword extraction -> source scan -> signal -> pivots ->
+    engine_version -> optional demand attach -> score-history save.
+
+    NO request-scoped side-effects (rate-limit / discord / query-log / funnel live in the
+    endpoint) so this can be reused by /api/check AND the background deep upgrade of /api/scan.
+    Returns (result, keywords, keyword_source, pivot_source).
+    """
+    keyword_source = "llm"
+    keywords = await _extract_keywords_via_haiku(idea_text)
+    if keywords is None:
+        keyword_source = "dictionary"
+        keywords = extract_keywords(idea_text)
+
+    if depth == "deep":
+        (github_results, hn_results, npm_results, pypi_results, ph_results, so_results) = await asyncio.gather(
+            search_github_repos(keywords),
+            search_hn(keywords),
+            search_npm(keywords),
+            search_pypi(keywords),
+            search_producthunt(keywords),
+            search_stackoverflow(keywords),
+        )
+        result = compute_signal(
+            idea_text=idea_text, keywords=keywords, github_results=github_results, hn_results=hn_results,
+            depth=depth, npm_results=npm_results, pypi_results=pypi_results, ph_results=ph_results,
+            so_results=so_results, lang=lang,
+        )
+    else:
+        github_results, hn_results = await asyncio.gather(
+            search_github_repos(keywords), search_hn(keywords),
+        )
+        result = compute_signal(
+            idea_text=idea_text, keywords=keywords, github_results=github_results, hn_results=hn_results,
+            depth=depth, lang=lang,
+        )
+
+    result["meta"]["keyword_source"] = keyword_source
+    result["meta"]["lang"] = lang
+
+    # LLM pivot hints — replace template hints with data-driven suggestions
+    pivot_source = "template"
+    llm_hints = await _generate_pivot_hints_llm(
+        idea_text=idea_text, reality_signal=result["reality_signal"],
+        top_similars=result.get("top_similars", []), evidence=result.get("evidence", []), lang=lang,
+    )
+    if llm_hints:
+        result["pivot_hints"] = llm_hints
+        pivot_source = "llm"
+    result["meta"]["pivot_source"] = pivot_source
+
+    result["idea_hash"] = score_db.idea_hash(idea_text)
+    result["meta"]["engine_version"] = ENGINE_VERSION
+
+    # Opt-in demand-signal attach (the query-log moat). Non-fatal.
+    if include:
+        try:
+            result["crowd_intelligence"] = report_mod._build_crowd_intelligence(
+                idea_text, result["idea_hash"], result["reality_signal"]
+            )
+        except Exception:
+            logger.exception("crowd_intelligence attach failed (non-fatal)")
+
+    # Save to score history (the data flywheel). Non-fatal.
+    try:
+        score_db.save_score(
+            idea_text=idea_text, score=result["reality_signal"], breakdown=json.dumps(result),
+            keywords=json.dumps(keywords), depth=depth, keyword_source=keyword_source,
+        )
+    except Exception:
+        logger.exception("Failed to save score history")
+
+    return result, keywords, keyword_source, pivot_source
+
+
 @app.post("/api/check")
 async def check(req: CheckRequest, request: Request):
     """Run an idea reality check.
 
-    Body: { "idea_text": "...", "depth": "quick" | "deep" }
+    Body: { "idea_text": "...", "depth": "quick" | "deep", "include": [...] }
     Returns the full reality check report dict.
     """
     if not req.idea_text or not req.idea_text.strip():
@@ -608,106 +685,14 @@ async def check(req: CheckRequest, request: Request):
 
     idea_text = req.idea_text.strip()
 
-    # Try LLM keywords first
-    keyword_source = "llm"
-    keywords = await _extract_keywords_via_haiku(idea_text)
-    if keywords is None:
-        keyword_source = "dictionary"
-        keywords = extract_keywords(idea_text)
-
     try:
-        if req.depth == "deep":
-            (
-                github_results,
-                hn_results,
-                npm_results,
-                pypi_results,
-                ph_results,
-                so_results,
-            ) = await asyncio.gather(
-                search_github_repos(keywords),
-                search_hn(keywords),
-                search_npm(keywords),
-                search_pypi(keywords),
-                search_producthunt(keywords),
-                search_stackoverflow(keywords),
-            )
-            result = compute_signal(
-                idea_text=idea_text,
-                keywords=keywords,
-                github_results=github_results,
-                hn_results=hn_results,
-                depth=req.depth,
-                npm_results=npm_results,
-                pypi_results=pypi_results,
-                ph_results=ph_results,
-                so_results=so_results,
-                lang=req.lang,
-            )
-        else:
-            # Quick mode: GitHub + HN only
-            github_results, hn_results = await asyncio.gather(
-                search_github_repos(keywords),
-                search_hn(keywords),
-            )
-            result = compute_signal(
-                idea_text=idea_text,
-                keywords=keywords,
-                github_results=github_results,
-                hn_results=hn_results,
-                depth=req.depth,
-                lang=req.lang,
-            )
+        result, keywords, keyword_source, pivot_source = await _compute_report(
+            idea_text, req.depth, req.lang, req.include
+        )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.") from exc
-
-    result["meta"]["keyword_source"] = keyword_source
-    result["meta"]["lang"] = req.lang
-
-    # LLM pivot hints — replace template hints with data-driven suggestions
-    pivot_source = "template"
-    llm_hints = await _generate_pivot_hints_llm(
-        idea_text=idea_text,
-        reality_signal=result["reality_signal"],
-        top_similars=result.get("top_similars", []),
-        evidence=result.get("evidence", []),
-        lang=req.lang,
-    )
-    if llm_hints:
-        result["pivot_hints"] = llm_hints
-        pivot_source = "llm"
-    result["meta"]["pivot_source"] = pivot_source
-
-    # Always include idea_hash (needed for subscribe flow)
-    result["idea_hash"] = score_db.idea_hash(idea_text)
-
-    # Engine version so every consumer (site / MCP / AngelRun) can tell which engine
-    # produced this report and stay in sync as it evolves.
-    result["meta"]["engine_version"] = ENGINE_VERSION
-
-    # Opt-in demand-signal attach (the query-log moat). Only when the caller asks — keeps
-    # the default lean path fast. Non-fatal: a crowd/embedding hiccup must never fail the check.
-    if req.include:
-        try:
-            result["crowd_intelligence"] = report_mod._build_crowd_intelligence(
-                idea_text, result["idea_hash"], result["reality_signal"]
-            )
-        except Exception:
-            logger.exception("crowd_intelligence attach failed (non-fatal)")
-
-    # Save to score history
-    try:
-        score_db.save_score(
-            idea_text=idea_text,
-            score=result["reality_signal"],
-            breakdown=json.dumps(result),
-            keywords=json.dumps(keywords),
-            depth=req.depth,
-            keyword_source=keyword_source,
-        )
-    except Exception:
-        logger.exception("Failed to save score history")
-        # Non-fatal — still return the result
 
     # Discord webhook — query intelligence (no PII, 5s timeout, non-fatal)
     top_sim_name = None
@@ -760,6 +745,81 @@ async def check(req: CheckRequest, request: Request):
             pass  # non-fatal
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Progressive scan (Skyscanner-style): quick paints instantly, deep fills in.
+# ---------------------------------------------------------------------------
+# Single-worker in-memory store (this deployment runs uvicorn with 1 worker). A worker
+# restart drops in-flight scans -> the poll returns status "expired" and the client keeps
+# the quick result it already has. Fine at this scale; move to Turso/Redis if we ever run
+# more than one worker.
+_SCAN_TTL = 180.0   # seconds a scan entry stays fetchable
+_SCAN_MAX = 500     # cap entries so a burst can't grow memory unbounded
+_scan_cache: dict[str, dict] = {}
+_scan_tasks: set = set()   # keep strong refs to background tasks so they aren't GC'd mid-flight
+
+
+def _scan_gc() -> None:
+    now = _time.time()
+    for k in [k for k, v in _scan_cache.items() if now - v["ts"] > _SCAN_TTL]:
+        _scan_cache.pop(k, None)
+    if len(_scan_cache) > _SCAN_MAX:  # trim oldest
+        for k in sorted(_scan_cache, key=lambda k: _scan_cache[k]["ts"])[: len(_scan_cache) - _SCAN_MAX]:
+            _scan_cache.pop(k, None)
+
+
+async def _deep_upgrade(scan_id: str, idea_text: str, lang: str, include: list[str]) -> None:
+    """Background: run the full deep scan and replace the partial entry when done."""
+    try:
+        result, *_ = await _compute_report(idea_text, "deep", lang, include)
+        _scan_cache[scan_id] = {"partial": False, "status": "done", "result": result, "ts": _time.time()}
+    except Exception:
+        logger.exception("[scan] deep upgrade failed for %s", scan_id)
+        cur = _scan_cache.get(scan_id)
+        if cur:  # keep the quick result usable, just flag deep failed
+            cur["status"] = "deep_failed"
+            cur["ts"] = _time.time()
+
+
+@app.post("/api/scan")
+async def scan_start(req: CheckRequest, request: Request):
+    """Start a progressive scan. Returns the quick result immediately + a scan_id, and runs
+    the full deep scan in the background. Poll GET /api/scan/{scan_id} until partial=false to
+    get competitors + score filled in (the Skyscanner pattern)."""
+    if not req.idea_text or not req.idea_text.strip():
+        raise HTTPException(status_code=422, detail="idea_text cannot be empty")
+    if not _check_rate_limit_check(_get_client_ip(request)):
+        raise HTTPException(status_code=429, detail="Maximum 100 checks per day per IP")
+
+    idea_text = req.idea_text.strip()
+    try:
+        quick, *_ = await _compute_report(idea_text, "quick", req.lang, req.include)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.") from exc
+
+    _scan_gc()
+    scan_id = uuid.uuid4().hex
+    _scan_cache[scan_id] = {"partial": True, "status": "scanning", "result": quick, "ts": _time.time()}
+    task = asyncio.create_task(_deep_upgrade(scan_id, idea_text, req.lang, req.include))
+    _scan_tasks.add(task)
+    task.add_done_callback(_scan_tasks.discard)
+    return {"scan_id": scan_id, "partial": True, "status": "scanning", "result": quick}
+
+
+@app.get("/api/scan/{scan_id}")
+async def scan_poll(scan_id: str):
+    """Poll a progressive scan. partial=true -> quick result (deep still running);
+    partial=false -> full deep result. status 'expired' -> scan aged out, keep the quick you have."""
+    entry = _scan_cache.get(scan_id)
+    if not entry:
+        return {"scan_id": scan_id, "status": "expired", "partial": False, "result": None}
+    return {
+        "scan_id": scan_id,
+        "partial": entry["partial"],
+        "status": entry["status"],
+        "result": entry["result"],
+    }
 
 
 @app.get("/api/history/{idea_hash}")
