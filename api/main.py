@@ -145,6 +145,10 @@ async def _notify_discord(
 
 mcp_http = mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
 
+# Engine version — bumped when the report shape / signal changes. Every consumer
+# (site, MCP, AngelRun) reads meta.engine_version to know it's on the latest engine.
+ENGINE_VERSION = "2026-07-06-demand"
+
 # ---------------------------------------------------------------------------
 # App — lifespan=mcp_http.lifespan initialises the MCP task group on startup
 # ---------------------------------------------------------------------------
@@ -187,6 +191,10 @@ class CheckRequest(BaseModel):
     idea_text: str = Field(max_length=2000)
     depth: Literal["quick", "deep"] = "quick"
     lang: Literal["en", "zh"] = "en"
+    # Opt-in extras so a single engine serves every entry (site / MCP / AngelRun) from the
+    # same call. Default [] keeps the lean response unchanged for existing clients.
+    # "crowd" / "demand" -> attach crowd_intelligence (+ demand_heat) from the query-log moat.
+    include: list[Literal["crowd", "demand"]] = Field(default_factory=list)
 
 
 class ExtractKeywordsRequest(BaseModel):
@@ -672,6 +680,20 @@ async def check(req: CheckRequest, request: Request):
 
     # Always include idea_hash (needed for subscribe flow)
     result["idea_hash"] = score_db.idea_hash(idea_text)
+
+    # Engine version so every consumer (site / MCP / AngelRun) can tell which engine
+    # produced this report and stay in sync as it evolves.
+    result["meta"]["engine_version"] = ENGINE_VERSION
+
+    # Opt-in demand-signal attach (the query-log moat). Only when the caller asks — keeps
+    # the default lean path fast. Non-fatal: a crowd/embedding hiccup must never fail the check.
+    if req.include:
+        try:
+            result["crowd_intelligence"] = report_mod._build_crowd_intelligence(
+                idea_text, result["idea_hash"], result["reality_signal"]
+            )
+        except Exception:
+            logger.exception("crowd_intelligence attach failed (non-fatal)")
 
     # Save to score history
     try:
