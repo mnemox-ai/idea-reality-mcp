@@ -446,11 +446,75 @@ def search_similar_by_embedding(
 ) -> list[dict[str, Any]]:
     """Semantic nearest-neighbours over score_history by cosine similarity.
 
-    Uses the cached, normalized embedding matrix (vectorized matmul). Returns dicts with
-    idea_hash, idea_text, score, depth, lang, created_at + `similarity` (0..1), most similar
-    first, above `min_score`. Returns [] when numpy/embeddings are unavailable or the corpus
-    is empty — callers must fall back to the keyword LIKE search.
+    Returns dicts with idea_hash, idea_text, score, depth, lang, created_at + `similarity`
+    (0..1), most similar first, above `min_score`. Returns [] when embeddings are unavailable
+    or the corpus is empty — callers must fall back to the keyword LIKE search.
+
+    Two backends, same contract:
+    - **Turso (prod)**: pushes the cosine search into the DB with native `vector_distance_cos`
+      (a full scan + top-K sort over ~10k rows, server-side). The app never loads the 60 MB
+      matrix into memory — this is what keeps the 512 MB instance from OOM-ing.
+    - **local SQLite (dev/tests)**: no vector functions, so fall back to the in-memory numpy
+      matrix. The dev DB is tiny, so the memory cost is irrelevant there.
     """
+    if not any(query_embedding):  # zero vector -> cosine undefined
+        return []
+    if _use_turso:
+        return _search_by_embedding_turso(query_embedding, exclude_hash, limit, min_score)
+    return _search_by_embedding_numpy(query_embedding, exclude_hash, limit, min_score)
+
+
+def _search_by_embedding_turso(query_embedding, exclude_hash, limit, min_score):
+    """Native Turso/libSQL vector search — zero app-side matrix, cosine done in the DB."""
+    import struct
+
+    qblob = struct.pack(f"<{len(query_embedding)}f", *query_embedding)
+    fetch_n = limit + (1 if exclude_hash else 0)
+    conn = _get_conn()
+    try:
+        cur = conn.execute(
+            "SELECT idea_hash, idea_text, score, depth, lang, created_at, "
+            "vector_distance_cos(embedding, ?) AS dist "
+            "FROM score_history WHERE embedding IS NOT NULL "
+            "ORDER BY dist ASC LIMIT ?",
+            (qblob, fetch_n),
+        )
+        rows = _rows_to_dicts(cur)
+    except Exception:
+        # local SQLite (no vector fn) or a malformed blob -> caller falls back to keyword.
+        logger.exception("[db] native vector search failed")
+        return []
+    finally:
+        conn.close()
+
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        dist = r.get("dist")
+        if dist is None:
+            continue
+        sim = 1.0 - float(dist)  # vector_distance_cos returns cosine *distance*
+        if sim < min_score:
+            continue
+        if exclude_hash and r.get("idea_hash") == exclude_hash:
+            continue
+        out.append(
+            {
+                "idea_hash": r.get("idea_hash"),
+                "idea_text": r.get("idea_text"),
+                "score": r.get("score"),
+                "depth": r.get("depth"),
+                "lang": r.get("lang"),
+                "created_at": r.get("created_at"),
+                "similarity": round(sim, 4),
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _search_by_embedding_numpy(query_embedding, exclude_hash, limit, min_score):
+    """In-memory matrix cosine search — dev/test fallback (local SQLite has no vector fns)."""
     np = _load_embedding_matrix()
     mat = _emb_cache["mat"]
     meta = _emb_cache["meta"]
