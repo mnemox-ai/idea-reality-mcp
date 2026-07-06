@@ -800,19 +800,11 @@ async def crowd_intel(req: CrowdIntelRequest):
     if not row:
         raise HTTPException(status_code=404, detail="Idea not found")
 
-    # Parse keywords from the stored row
-    keywords: list[str] = []
-    try:
-        kw_raw = row.get("keywords", "[]")
-        parsed = json.loads(kw_raw) if isinstance(kw_raw, str) else []
-        if isinstance(parsed, list):
-            keywords = [k for k in parsed if isinstance(k, str)]
-    except Exception:
-        pass
-
-    similar = score_db.search_similar_ideas(
-        keywords, exclude_hash=req.idea_hash, limit=20
-    )
+    # Semantic similar-idea lookup (keyword LIKE fallback) — same path as the report's
+    # crowd_intelligence, keyed off the idea's stored text.
+    full, mode = report_mod._similar_ideas(row.get("idea_text", ""), req.idea_hash)
+    heat = report_mod._demand_heat(full) if mode == "semantic" else None  # over full match set
+    similar = full[:20]
     similar_count = len(similar)
     avg_score = (
         round(sum(s["score"] for s in similar) / similar_count, 1)
@@ -823,13 +815,17 @@ async def crowd_intel(req: CrowdIntelRequest):
     competition_density = round(similar_count / total * 100, 1) if total else 0
     top_categories = score_db.get_category_distribution(limit=5)
 
-    return {
+    resp = {
         "similar_count": similar_count,
         "avg_score": avg_score,
         "your_score": row["score"],
         "competition_density_relative": competition_density,
         "top_categories": top_categories,
+        "match_mode": mode,
     }
+    if heat:
+        resp["demand_heat"] = heat
+    return resp
 
 
 class UnlockRequest(BaseModel):

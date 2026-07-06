@@ -20,3 +20,8 @@ services:
         sync: false   # set manually in Render dashboard
       - key: TURSO_AUTH_TOKEN
         sync: false   # set manually in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false   # set manually in Render dashboard — enables semantic crowd search
+                      # (unset -> crowd_intelligence gracefully falls back to keyword LIKE)
+      - key: EMB_CACHE_TTL
+        value: "600"  # seconds the in-memory embedding matrix is cached before reload
