@@ -19,6 +19,11 @@
 - ⚠️ 這台桌機 `.git` 有個從別台機器(johns)帶來的 phantom worktree 參照，`git status`/`git diff` 會報 fatal（但 commit/push/pull 正常）。**筆電 fresh clone 或 pull 不受影響**。
 
 ## Recent Changes
+- [2026-07-06] **引擎延遲診斷 + GitHub source 平行化（`07f0f92`）+ ANN 索引放棄（環境建不了）+ DB 踩雷已恢復**。
+  - **診斷**：quick 14-31s 的真因＝`search_github_repos` **每關鍵字循序打 2 請求**（非 token 問題，`GITHUB_TOKEN` 健康 5000/5000）。**修＝平行化**（`asyncio.gather`+`Semaphore(5)`）→ GitHub 3kw 5.0s→1.8s、prod quick **14-31s→11-18s**。16 tests 綠。剩餘延遲＝2 個 LLM call（keyword 3s+pivot 5s，有依賴不能全平行）。
+  - **修正認知**：crowd 真實延遲 **~6s 不是 26s**（26s 是我猛打 DB 的競爭假象）→ ANN 索引沒那麼急。
+  - 🔴 **ANN 索引放棄**：Turso HTTP `/v2/pipeline` ~60s 硬上限、10k bulk build 超時；libsql sync 在 Windows hang；turso CLI 無 Windows。**要建得換 Linux env + platform token 走 CLI**，或改 offline 聚類（見 master plan §2.0）。
+  - ⚠️ **DB 踩雷（已恢復零損失）**：試 `DROP COLUMN embedding_vec`（大表 rewrite）在 server 端 churning、一度拖慢 live 到 502；停手後 DB 自行 roll back。**殘留無害**（live 用 `embedding` 舊欄）：`embedding_vec F32_BLOB(1536)`（10,150 populated）+ orphan shadow 表清不掉。**別再對大表下同步 DDL（DROP COLUMN/大 UPDATE/CREATE vector INDEX）走 HTTP**。
 - [2026-07-06] **P1+P2 引擎工程：`/api/check include=` demand 選配（`fad8414`）+ 漸進式 scan API（`4e4b97a`/`a52ab01`）+ 撞到「引擎整體慢」的真相 + 起手 Turso ANN 索引（欄位就緒、索引卡 HTTP）**。詳見 master plan `docs/2026-07-06-demand-sensing-accelerator-master-plan.md` §2.0。
   - **P1**：`/api/check` 加 `include=["demand"]` opt-in → 同一顆引擎回 `crowd_intelligence.demand_heat` + `meta.engine_version`（`ENGINE_VERSION="2026-07-06-demand"`）；預設 lean 不變。AngelRun 端接進 `ScoreReport.demandHeat`。
   - **P2 漸進式**：抽 `_compute_report()` 核心 helper（無 request 副作用）+ `POST /api/scan`（quick 秒回 + scan_id、背景跑 deep）+ `GET /api/scan/{id}`（輪詢，partial→full）。in-memory TTL store（單 worker）。機制驗過：quick competitors 5 → deep 14。
