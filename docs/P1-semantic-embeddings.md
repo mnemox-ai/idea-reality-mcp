@@ -39,17 +39,31 @@ semantic index.
   the scorer wiring must dedup results by `idea_hash`.
 - Re-run the same script on a cron / after new checks to keep coverage (idempotent).
 
-### ☐ Next (this phase)
-2. **Wire semantic search into the scorer** — in the `top_similars` /
-   `existingProjects` path (tools.py / api/main.py `/api/check`): embed the incoming
-   idea, call `search_similar_by_embedding`, fall back to `search_similar_ideas`
-   on `[]` or provider error. Store the new check's embedding via `save_score(embedding=)`.
-3. **Deploy** — Render redeploy (requirements now include numpy + libsql-client);
-   set `OPENAI_API_KEY` in Render env.
-4. **Demand-heat signal (the unique output)** — "N people queried a *semantically*
-   similar idea in the last 90 days, trend ↑". New helper over the embedded corpus +
-   `created_at`; surface it to flip the verdict from "judgment" ("5 people already
-   built this → you lose") to "navigation" ("crowded, but 23 searched in 90d → gap here").
+### ✅ Wiring + demand-heat DONE (2026-07-06, on origin/main @ b191cce, Render deploying)
+- `report._build_crowd_intelligence` (full report) + `/api/crowd-intel` now go
+  semantic-first via `_similar_ideas` (embed → `search_similar_by_embedding`, dedup by
+  idea_hash, min_score 0.45), keyword LIKE fallback on any failure = zero regression.
+- `_demand_heat`: closely-related searches in the last 90d + trend (rising/steady/cooling),
+  FACTS-only. Added as `demand_heat` + `match_mode` fields.
+- Perf: in-memory normalized embedding matrix cache (`EMB_CACHE_TTL=600`) + vectorized
+  cosine — no 60 MB blob load per request.
+- Integration-verified locally (zero-keyword-overlap paraphrase matches; graceful fallback);
+  12/12 unit tests green.
+- NOTE: `/api/check` (lean) does NOT carry crowd_intelligence — the semantic upgrade lands
+  in the full report path + `/api/crowd-intel` (the correct "who else searched this" home).
+  top_similars = external products, unchanged.
+
+### 🔑 ACTION REQUIRED (Sean) — the last switch
+- **Set `OPENAI_API_KEY` in the Render dashboard.** Until set, crowd gracefully falls back
+  to keyword (today's behaviour, zero risk). Once set, the next request loads the 10,150-row
+  semantic index → `match_mode: "semantic"` + `demand_heat` appear. numpy + libsql-client are
+  already in requirements; render.yaml declares the key + `EMB_CACHE_TTL`.
+- Verify after setting: `POST /api/crowd-intel` with a real idea_hash → expect
+  `match_mode: "semantic"`.
+
+### ☐ Optional follow-ups (not blocking)
+- Store new-check embeddings inline (currently the cron backfill covers new rows).
+- Cron the backfill (`scripts/backfill_embeddings_http.py`, idempotent) to keep coverage.
 
 ## Decisions
 - Provider `text-embedding-3-small` (1536-d, cheap, httpx). Swap to `-large` only if
