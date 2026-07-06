@@ -53,13 +53,33 @@ semantic index.
   in the full report path + `/api/crowd-intel` (the correct "who else searched this" home).
   top_similars = external products, unchanged.
 
-### 🔑 ACTION REQUIRED (Sean) — the last switch
-- **Set `OPENAI_API_KEY` in the Render dashboard.** Until set, crowd gracefully falls back
-  to keyword (today's behaviour, zero risk). Once set, the next request loads the 10,150-row
-  semantic index → `match_mode: "semantic"` + `demand_heat` appear. numpy + libsql-client are
-  already in requirements; render.yaml declares the key + `EMB_CACHE_TTL`.
-- Verify after setting: `POST /api/crowd-intel` with a real idea_hash → expect
-  `match_mode: "semantic"`.
+### ✅ LIVE + OOM fix (2026-07-06 — native Turso vector search, `85d7401`)
+- **`OPENAI_API_KEY` is set on Render** and semantic is **live** — `POST /api/crowd-intel`
+  returns `match_mode: "semantic"` + `demand_heat` (verified: "6 closely-related searches in
+  the last 90 days (rising)").
+- 🔴 **What broke first**: setting the key made the in-memory matrix path load ~60 MB (doubled
+  transiently on `np.vstack`) on top of the ~300 MB baseline → the **512 MB Starter instance
+  OOM-killed the worker** on the first crowd-intel / full-report call → crash loop (SIGKILL,
+  no Python traceback). `/api/check` quick (what AngelRun uses) was unaffected — it doesn't
+  build crowd_intelligence.
+- ✅ **Fix = push the cosine search into Turso** instead of loading a matrix in the app.
+  `search_similar_by_embedding` now dispatches on backend:
+  - **Turso (prod)**: `ORDER BY vector_distance_cos(embedding, ?) ASC LIMIT k` — server-side
+    full scan over ~10k rows, app-side memory ~0. The stored raw float32 BLOBs are already
+    `F32_BLOB`-compatible (self-distance ≈ 2.9e-8), so **no migration, no re-backfill**.
+  - **local SQLite (dev/tests)**: unchanged numpy matrix fallback (SQLite has no vector fns).
+  - Verified: 12/12 unit tests green; native path returns correct paraphrase matches on prod
+    Turso; after the fix, crowd-intel served repeatedly with **zero instance restarts**, stays
+    on the $7 Starter plan (no upgrade needed).
+- ⚠️ Windows-local note: the libsql **sync** client hangs here, so the native path can't be
+  exercised through `api/db.py` on this machine — verify via the Turso **HTTP** client
+  (`scripts/turso_http.py`) or against live prod. Render (Linux) runs the sync client fine.
+
+### ☐ Optional follow-ups (not blocking)
+- Store new-check embeddings inline (currently the cron backfill covers new rows).
+- Cron the backfill (`scripts/backfill_embeddings_http.py`, idempotent) to keep coverage.
+- If the corpus ever passes ~100k rows, add a Turso native vector index (`vector_top_k`) so the
+  search stops doing a full scan; the blob format is already forward-compatible.
 
 ### ☐ Optional follow-ups (not blocking)
 - Store new-check embeddings inline (currently the cron backfill covers new rows).
