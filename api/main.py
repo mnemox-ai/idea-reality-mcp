@@ -794,14 +794,18 @@ async def scan_start(req: CheckRequest, request: Request):
 
     idea_text = req.idea_text.strip()
     try:
-        quick, *_ = await _compute_report(idea_text, "quick", req.lang, req.include)
+        # First layer stays lean: NO crowd/demand attach here (the query-log vector search is
+        # slow without an ANN index, ~20s) — it would defeat "paint fast". Demand rides in with
+        # the deep upgrade in the background instead.
+        quick, *_ = await _compute_report(idea_text, "quick", req.lang, [])
     except Exception as exc:
         raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.") from exc
 
     _scan_gc()
     scan_id = uuid.uuid4().hex
     _scan_cache[scan_id] = {"partial": True, "status": "scanning", "result": quick, "ts": _time.time()}
-    task = asyncio.create_task(_deep_upgrade(scan_id, idea_text, req.lang, req.include))
+    # deep upgrade carries the caller's include (crowd/demand) — user isn't waiting on it.
+    task = asyncio.create_task(_deep_upgrade(scan_id, idea_text, req.lang, req.include or ["demand"]))
     _scan_tasks.add(task)
     task.add_done_callback(_scan_tasks.discard)
     return {"scan_id": scan_id, "partial": True, "status": "scanning", "result": quick}
