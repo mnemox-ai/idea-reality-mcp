@@ -593,20 +593,29 @@ async def expand_idea_endpoint(req: ExpandIdeaRequest, request: Request):
 
 
 async def _compute_report(
-    idea_text: str, depth: str, lang: str, include: list[str],
+    idea_text: str, depth: str, lang: str, include: list[str], flash: bool = False,
 ) -> tuple[dict, list, str, str]:
     """Core reality check: keyword extraction -> source scan -> signal -> pivots ->
     engine_version -> optional demand attach -> score-history save.
 
     NO request-scoped side-effects (rate-limit / discord / query-log / funnel live in the
     endpoint) so this can be reused by /api/check AND the background deep upgrade of /api/scan.
+
+    flash=True (progressive first layer): skip the two LLM round-trips — dictionary keywords
+    (no Haiku ~3s) + template pivots (no LLM ~5s) — so first paint is just the source scan.
+    The deep upgrade re-runs full quality in the background.
+
     Returns (result, keywords, keyword_source, pivot_source).
     """
-    keyword_source = "llm"
-    keywords = await _extract_keywords_via_haiku(idea_text)
-    if keywords is None:
+    if flash:
         keyword_source = "dictionary"
         keywords = extract_keywords(idea_text)
+    else:
+        keyword_source = "llm"
+        keywords = await _extract_keywords_via_haiku(idea_text)
+        if keywords is None:
+            keyword_source = "dictionary"
+            keywords = extract_keywords(idea_text)
 
     if depth == "deep":
         (github_results, hn_results, npm_results, pypi_results, ph_results, so_results) = await asyncio.gather(
@@ -634,16 +643,19 @@ async def _compute_report(
     result["meta"]["keyword_source"] = keyword_source
     result["meta"]["lang"] = lang
 
-    # LLM pivot hints — replace template hints with data-driven suggestions
+    # LLM pivot hints — replace template hints with data-driven suggestions.
+    # Skipped in flash mode (keeps the template hints) so the first layer doesn't pay the ~5s.
     pivot_source = "template"
-    llm_hints = await _generate_pivot_hints_llm(
-        idea_text=idea_text, reality_signal=result["reality_signal"],
-        top_similars=result.get("top_similars", []), evidence=result.get("evidence", []), lang=lang,
-    )
-    if llm_hints:
-        result["pivot_hints"] = llm_hints
-        pivot_source = "llm"
+    if not flash:
+        llm_hints = await _generate_pivot_hints_llm(
+            idea_text=idea_text, reality_signal=result["reality_signal"],
+            top_similars=result.get("top_similars", []), evidence=result.get("evidence", []), lang=lang,
+        )
+        if llm_hints:
+            result["pivot_hints"] = llm_hints
+            pivot_source = "llm"
     result["meta"]["pivot_source"] = pivot_source
+    result["meta"]["partial"] = flash  # flag so consumers know this is the fast first layer
 
     result["idea_hash"] = score_db.idea_hash(idea_text)
     result["meta"]["engine_version"] = ENGINE_VERSION
@@ -794,10 +806,10 @@ async def scan_start(req: CheckRequest, request: Request):
 
     idea_text = req.idea_text.strip()
     try:
-        # First layer stays lean: NO crowd/demand attach here (the query-log vector search is
-        # slow without an ANN index, ~20s) — it would defeat "paint fast". Demand rides in with
-        # the deep upgrade in the background instead.
-        quick, *_ = await _compute_report(idea_text, "quick", req.lang, [])
+        # First layer = flash: dictionary keywords + template pivots + NO crowd, so first paint
+        # is just the (now-parallel) source scan (~3-5s). Full LLM quality + demand ride in with
+        # the deep upgrade in the background.
+        quick, *_ = await _compute_report(idea_text, "quick", req.lang, [], flash=True)
     except Exception as exc:
         raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.") from exc
 
