@@ -19,6 +19,12 @@
 - ⚠️ 這台桌機 `.git` 有個從別台機器(johns)帶來的 phantom worktree 參照，`git status`/`git diff` 會報 fatal（但 commit/push/pull 正常）。**筆電 fresh clone 或 pull 不受影響**。
 
 ## Recent Changes
+- [2026-07-06] **P1+P2 引擎工程：`/api/check include=` demand 選配（`fad8414`）+ 漸進式 scan API（`4e4b97a`/`a52ab01`）+ 撞到「引擎整體慢」的真相 + 起手 Turso ANN 索引（欄位就緒、索引卡 HTTP）**。詳見 master plan `docs/2026-07-06-demand-sensing-accelerator-master-plan.md` §2.0。
+  - **P1**：`/api/check` 加 `include=["demand"]` opt-in → 同一顆引擎回 `crowd_intelligence.demand_heat` + `meta.engine_version`（`ENGINE_VERSION="2026-07-06-demand"`）；預設 lean 不變。AngelRun 端接進 `ScoreReport.demandHeat`。
+  - **P2 漸進式**：抽 `_compute_report()` 核心 helper（無 request 副作用）+ `POST /api/scan`（quick 秒回 + scan_id、背景跑 deep）+ `GET /api/scan/{id}`（輪詢，partial→full）。in-memory TTL store（單 worker）。機制驗過：quick competitors 5 → deep 14。
+  - 🔴 **關鍵發現＝引擎整體慢**：quick 本身 14-31s（source GitHub retry 變動大）、crowd 從 Render 26-31s（`vector_distance_cos` 全掃 10k 無索引）。**P1 讓 AngelRun 帶 include:demand 加 ~20s 逼近 28s timeout → 已撤（AngelRun `0518fdc`）**；scan 第一層也改成不吃 crowd（crowd 只在背景 deep）。
+  - 🟡 **Turso ANN 索引起手（未完）**：已加 `score_history.embedding_vec F32_BLOB(1536)` 欄 + backfill 10,150 筆（in-DB `UPDATE ... = embedding`，raw BLOB 直接相容 F32_BLOB）。**但 `CREATE INDEX libsql_vector_idx` 走 Turso HTTP `/v2/pipeline` 建不起來**（`unable to update global metadata table`）→ 待從 Render 端 libsql client 或 Turso CLI 建。建好後把 `search_similar_by_embedding` Turso 路徑改 `vector_top_k` → crowd 26s→ms。
+  - **next（引擎加速真 P2，按收益）**：① Turso ANN 索引（從 Render 建）② GitHub source 延遲/token 健康 ③ LLM 平行化 ④ flash 首層。
 - [2026-07-06] **perf: 語意搜尋改用 Turso 原生向量、根治 OOM crash-loop → semantic LIVE on prod（`85d7401`）**。
   - **症狀**：Sean 在 Render 設 `OPENAI_API_KEY` 後，服務對外 502 crash-loop。查 log＝instance 每 1-3 分鐘 restart、無 Python traceback ＝ **OOM SIGKILL**。
   - **根因**：wiring 的 in-memory numpy 矩陣路徑，一被 crowd-intel / full-report 呼叫就把 10,150 筆向量（~60MB，`np.vstack` 載入時再翻倍）疊在 ~300MB baseline 上 → 破 512MB Starter → worker 被砍。`/api/check` quick（AngelRun 用的）不走 crowd_intelligence 所以沒事。
