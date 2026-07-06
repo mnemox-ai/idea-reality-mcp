@@ -16,6 +16,10 @@ def _use_tmp_db(tmp_path, monkeypatch):
     """Use a temporary database for each test."""
     db_path = str(tmp_path / "test_score_history.db")
     monkeypatch.setattr(score_db, "DB_PATH", db_path)
+    # Force the semantic-search matrix to reload every call so the in-memory cache
+    # never leaks one test's embeddings into another's fresh DB.
+    monkeypatch.setattr(score_db, "_EMB_CACHE_TTL", 0.0, raising=False)
+    score_db.invalidate_embedding_cache()
     score_db.init_db()
 
 
