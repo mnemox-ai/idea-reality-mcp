@@ -660,14 +660,16 @@ async def _compute_report(
     result["idea_hash"] = score_db.idea_hash(idea_text)
     result["meta"]["engine_version"] = ENGINE_VERSION
 
-    # Opt-in demand-signal attach (the query-log moat). Non-fatal.
+    # Opt-in demand-signal attach (the query-log moat). Uses the FAST offline-topic path
+    # (~1s, <1MB) — not the ~6s full-scan — so it's safe on hot paths (AngelRun funnel, scan).
+    # Non-fatal: a demand hiccup must never fail the check.
     if include:
         try:
-            result["crowd_intelligence"] = report_mod._build_crowd_intelligence(
-                idea_text, result["idea_hash"], result["reality_signal"]
-            )
+            demand = report_mod.topic_demand(idea_text)
+            if demand:
+                result["crowd_intelligence"] = demand
         except Exception:
-            logger.exception("crowd_intelligence attach failed (non-fatal)")
+            logger.exception("demand attach failed (non-fatal)")
 
     # Save to score history (the data flywheel). Non-fatal.
     try:

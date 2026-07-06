@@ -769,6 +769,23 @@ def get_last_check_time() -> str | None:
     return row[0] if row else None
 
 
+def get_demand_topics() -> list[dict[str, Any]]:
+    """Return the offline-built Demand Radar topics (~100 small rows) — centroid + heat/trend +
+    label. Empty list if the table doesn't exist yet (built by scripts/build_demand_topics.py),
+    so callers fall back gracefully."""
+    conn = _get_conn()
+    try:
+        cur = conn.execute(
+            "SELECT topic_id, centroid, label, sample_ideas, member_count, "
+            "searches_90d, prev_90d, trend, updated_at FROM demand_topics"
+        )
+        return _rows_to_dicts(cur)
+    except Exception:
+        return []  # table missing / not built yet
+    finally:
+        conn.close()
+
+
 # ---------------------------------------------------------------------------
 # Crowd Intelligence — similar idea queries (for paid reports)
 # ---------------------------------------------------------------------------

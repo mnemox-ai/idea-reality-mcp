@@ -181,6 +181,83 @@ def _demand_heat(semantic_rows: list[dict], heat_threshold: float = 0.55, window
     }
 
 
+# ---------------------------------------------------------------------------
+# Demand Radar — fast topic-level demand from the offline-clustered demand_topics table.
+# ~100 unit-norm centroids cached in-process (<1MB, TTL). A query embeds once (~1s) then does
+# a 100-row dot product (<10ms) — the fast replacement for the ~6s full-scan demand signal.
+# ---------------------------------------------------------------------------
+_TOPIC_TTL = float(os.environ.get("TOPIC_CACHE_TTL", "600"))
+_topic_cache: dict = {"loaded_at": 0.0, "mat": None, "meta": None}
+
+
+def _load_topic_centroids():
+    """(Re)load the ~100 topic centroids into the process cache. Returns numpy module or None."""
+    import time as _t
+    try:
+        import numpy as np
+    except Exception:
+        return None
+    now = _t.time()
+    if _topic_cache["mat"] is not None and (now - _topic_cache["loaded_at"]) < _TOPIC_TTL:
+        return np
+    try:
+        rows = score_db.get_demand_topics()
+    except Exception:
+        rows = []
+    if not rows:
+        _topic_cache.update(loaded_at=now, mat=None, meta=None)
+        return np
+    import struct
+    mat = np.array(
+        [struct.unpack(f"<{len(r['centroid']) // 4}f", r["centroid"]) for r in rows],
+        dtype=np.float32,
+    )
+    _topic_cache.update(loaded_at=now, mat=mat, meta=rows)
+    return np
+
+
+def topic_demand(idea_text: str, min_sim: float = 0.35) -> dict | None:
+    """Nearest offline demand-topic to an idea → its precomputed heat/trend. Fast (~1s, <1MB).
+    Returns a crowd_intelligence-shaped dict (match_mode:'topic' + demand_heat), or None when
+    topics aren't built, embeddings are off, or the idea is far from every topic (unique)."""
+    np = _load_topic_centroids()
+    mat = _topic_cache["mat"]
+    meta = _topic_cache["meta"]
+    if np is None or mat is None or not meta or not embeddings_enabled():
+        return None
+    try:
+        q = np.asarray(embed_one(idea_text), dtype=np.float32)
+    except Exception:
+        logger.exception("[demand] query embed failed")
+        return None
+    qn = float(np.linalg.norm(q))
+    if qn == 0:
+        return None
+    sims = mat @ (q / qn)
+    i = int(np.argmax(sims))
+    if float(sims[i]) < min_sim:
+        return None  # idea is far from every known demand topic
+    r = meta[i]
+    cur = int(r.get("searches_90d") or 0)
+    prev = int(r.get("prev_90d") or 0)
+    trend = r.get("trend") or "steady"
+    try:
+        samples = json.loads(r.get("sample_ideas") or "[]")
+    except Exception:
+        samples = []
+    return {
+        "match_mode": "topic",
+        "demand_heat": {
+            "similar_searches_90d": cur,
+            "prev_90d": prev,
+            "trend": trend,
+            "message": f"{cur} closely-related searches in the last 90 days ({trend}).",
+        },
+        "topic_label": r.get("label"),
+        "sample_ideas": samples,
+    }
+
+
 def _build_crowd_intelligence(idea_text: str, idea_hash: str, score: int) -> dict:
     """Query score_history for similar ideas (semantic, keyword fallback). FACTS only.
 
