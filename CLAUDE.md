@@ -19,6 +19,7 @@
 - ⚠️ 這台桌機 `.git` 有個從別台機器(johns)帶來的 phantom worktree 參照，`git status`/`git diff` 會報 fatal（但 commit/push/pull 正常）。**筆電 fresh clone 或 pull 不受影響**。
 
 ## Recent Changes
+- [2026-07-06] **Scan flash 首層（`a2444a9`）：漸進式 first paint 14-31s→3.6s**。`_compute_report(flash=True)` 第一層跳過兩個 LLM（dictionary keyword + template pivot）+ 無 crowd → prod 實測 first paint **3.6s**；背景 deep 補完整品質（輪詢驗過 competitors 5→11、`meta.partial` 標記）。**Skyscanner 漸進式真正成立**。`/api/check` 單次呼叫仍 11-18s（要快改走 `/api/scan`，前端 lane）。
 - [2026-07-06] **引擎延遲診斷 + GitHub source 平行化（`07f0f92`）+ ANN 索引放棄（環境建不了）+ DB 踩雷已恢復**。
   - **診斷**：quick 14-31s 的真因＝`search_github_repos` **每關鍵字循序打 2 請求**（非 token 問題，`GITHUB_TOKEN` 健康 5000/5000）。**修＝平行化**（`asyncio.gather`+`Semaphore(5)`）→ GitHub 3kw 5.0s→1.8s、prod quick **14-31s→11-18s**。16 tests 綠。剩餘延遲＝2 個 LLM call（keyword 3s+pivot 5s，有依賴不能全平行）。
   - **修正認知**：crowd 真實延遲 **~6s 不是 26s**（26s 是我猛打 DB 的競爭假象）→ ANN 索引沒那麼急。
