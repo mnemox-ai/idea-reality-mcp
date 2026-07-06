@@ -183,52 +183,70 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     repo_query_hits: dict[str, int] = {}
 
     async with httpx.AsyncClient(timeout=15.0) as client:
-        for query in normalized_keywords:
+        # Fire the per-keyword requests CONCURRENTLY instead of sequentially — this loop was the
+        # dominant latency in quick mode (2 requests × N keywords, serial, ~1s each). Bounded by a
+        # semaphore to stay under GitHub's secondary rate limit on bursts.
+        sem = asyncio.Semaphore(5)
+
+        async def _main_search(query: str):
             search_q = _normalize_query(query)
-            try:
-                resp = await _github_get_with_retry(
-                    client,
-                    params={"q": search_q, "sort": "stars", "order": "desc", "per_page": 5},
-                    label=search_q,
-                )
-                data = resp.json()
-                query_count = data.get("total_count", 0)
-                if query_count > max_total_count:
-                    max_total_count = query_count
+            async with sem:
+                try:
+                    resp = await _github_get_with_retry(
+                        client,
+                        params={"q": search_q, "sort": "stars", "order": "desc", "per_page": 5},
+                        label=search_q,
+                    )
+                    return resp.json()
+                except httpx.HTTPError as exc:
+                    logger.warning("GitHub search failed for query %r: %s", search_q, exc)
+                    return None
 
-                for item in data.get("items", []):
-                    name = item.get("full_name", "")
-                    if not name:
-                        continue
-                    stars = item.get("stargazers_count", 0)
-                    if stars > max_stars:
-                        max_stars = stars
-                    repo_query_hits[name] = repo_query_hits.get(name, 0) + 1
-                    all_repos.append({
-                        "name": name,
-                        "url": item.get("html_url", ""),
-                        "stars": stars,
-                        "updated": item.get("updated_at", ""),
-                        "description": (item.get("description") or "")[:200],
-                    })
-            except httpx.HTTPError as exc:
-                logger.warning("GitHub search failed for query %r: %s", search_q, exc)
-                continue
+        async def _recent_search(query: str):
+            search_q = _normalize_query(query)
+            async with sem:
+                try:
+                    recent_q = f"{search_q} created:>{created_since}"
+                    resp = await _github_get_with_retry(
+                        client,
+                        params={"q": recent_q, "sort": "stars", "order": "desc", "per_page": 1},
+                        label=f"{search_q} (recent)",
+                    )
+                    return resp.json().get("total_count", 0)
+                except httpx.HTTPError as exc:
+                    logger.warning("GitHub recent-search failed for query %r: %s", search_q, exc)
+                    return 0
 
-            # Second query: recently created repos for this keyword
-            try:
-                recent_q = f"{search_q} created:>{created_since}"
-                resp = await _github_get_with_retry(
-                    client,
-                    params={"q": recent_q, "sort": "stars", "order": "desc", "per_page": 1},
-                    label=f"{search_q} (recent)",
-                )
-                recent_count = resp.json().get("total_count", 0)
-                if recent_count > max_recent_created:
-                    max_recent_created = recent_count
-            except httpx.HTTPError as exc:
-                logger.warning("GitHub recent-search failed for query %r: %s", search_q, exc)
+        main_results, recent_results = await asyncio.gather(
+            asyncio.gather(*[_main_search(q) for q in normalized_keywords]),
+            asyncio.gather(*[_recent_search(q) for q in normalized_keywords]),
+        )
+
+        for data in main_results:
+            if not data:
                 continue
+            query_count = data.get("total_count", 0)
+            if query_count > max_total_count:
+                max_total_count = query_count
+            for item in data.get("items", []):
+                name = item.get("full_name", "")
+                if not name:
+                    continue
+                stars = item.get("stargazers_count", 0)
+                if stars > max_stars:
+                    max_stars = stars
+                repo_query_hits[name] = repo_query_hits.get(name, 0) + 1
+                all_repos.append({
+                    "name": name,
+                    "url": item.get("html_url", ""),
+                    "stars": stars,
+                    "updated": item.get("updated_at", ""),
+                    "description": (item.get("description") or "")[:200],
+                })
+
+        for recent_count in recent_results:
+            if recent_count and recent_count > max_recent_created:
+                max_recent_created = recent_count
 
     # Filter noise repos before ranking.
     # Build keyword list from query strings for relevance check.
