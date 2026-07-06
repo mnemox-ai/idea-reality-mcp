@@ -21,6 +21,15 @@ import httpx
 sys.path.insert(0, os.path.dirname(__file__))
 import db as score_db  # noqa: E402
 
+try:
+    from embeddings import embed_one, embeddings_enabled  # noqa: E402
+except Exception:  # numpy/httpx/module missing -> semantic search simply disabled
+    def embeddings_enabled() -> bool:  # type: ignore
+        return False
+
+    def embed_one(text: str):  # type: ignore
+        raise RuntimeError("embeddings unavailable")
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,46 +104,112 @@ def _build_score_breakdown(signal_result: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _build_crowd_intelligence(idea_text: str, idea_hash: str, score: int) -> dict:
-    """Query score_history for similar ideas. Report FACTS only.
-
-    Does NOT say 'lower score = entry angles' or any causal claims.
-    Just: N queries matched, avg score, depth breakdown.
-    """
-    # Extract meaningful words for LIKE search
+def _keyword_similar(idea_text: str, idea_hash: str, limit: int = 50) -> list[dict]:
+    """Legacy keyword-LIKE similar search (fallback when semantic is unavailable)."""
     words = [w.lower() for w in idea_text.split() if len(w) >= 4]
     if not words:
         words = [w.lower() for w in idea_text.split() if len(w) >= 3]
+    return score_db.search_similar_ideas(keywords=words[:5], exclude_hash=idea_hash, limit=limit)
 
-    similar = score_db.search_similar_ideas(
-        keywords=words[:5],
-        exclude_hash=idea_hash,
-        limit=50,
-    )
 
-    # Total database size for context
+def _similar_ideas(idea_text: str, idea_hash: str) -> tuple[list[dict], str]:
+    """Similar-idea lookup: semantic embeddings first, keyword LIKE as fallback.
+
+    Returns (rows, mode). Semantic rows carry `similarity` + are deduped by idea_hash
+    (the same idea searched repeatedly would otherwise dominate). Any failure in the
+    semantic path (no key, provider error, numpy missing) degrades to keyword — the
+    exact behaviour before P1, so there is no regression.
+    """
+    if embeddings_enabled():
+        try:
+            vec = embed_one(idea_text)
+            sem = score_db.search_similar_by_embedding(
+                vec, exclude_hash=idea_hash, limit=500, min_score=0.45
+            )
+            if sem:
+                seen: set = set()
+                deduped: list[dict] = []
+                for r in sem:  # already sorted by similarity desc
+                    h = r.get("idea_hash")
+                    if h in seen:
+                        continue
+                    seen.add(h)
+                    deduped.append(r)
+                return deduped, "semantic"
+        except Exception:
+            logger.exception("[crowd] semantic search failed; falling back to keyword")
+    return _keyword_similar(idea_text, idea_hash), "keyword"
+
+
+def _demand_heat(semantic_rows: list[dict], heat_threshold: float = 0.55, window_days: int = 90) -> dict | None:
+    """Demand signal from semantic matches: closely-related searches in the last
+    `window_days`, and the trend vs the prior equal window. FACTS only — no causal
+    claims. Returns None when there aren't enough dated matches to report."""
+    from datetime import timedelta
+
+    now = datetime.now(timezone.utc)
+    cur_start = now - timedelta(days=window_days)
+    prev_start = now - timedelta(days=2 * window_days)
+    cur = prev = 0
+    for r in semantic_rows:
+        if r.get("similarity", 0) < heat_threshold:
+            continue
+        ts = r.get("created_at")
+        if not ts:
+            continue
+        try:
+            dt = datetime.strptime(str(ts)[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if dt >= cur_start:
+            cur += 1
+        elif dt >= prev_start:
+            prev += 1
+    if cur == 0 and prev == 0:
+        return None
+    if cur > prev * 1.25:
+        trend = "rising"
+    elif cur < prev * 0.75:
+        trend = "cooling"
+    else:
+        trend = "steady"
+    return {
+        "similar_searches_90d": cur,
+        "prev_90d": prev,
+        "trend": trend,
+        "message": f"{cur} closely-related searches in the last 90 days ({trend}).",
+    }
+
+
+def _build_crowd_intelligence(idea_text: str, idea_hash: str, score: int) -> dict:
+    """Query score_history for similar ideas (semantic, keyword fallback). FACTS only.
+
+    Does NOT say 'lower score = entry angles' or any causal claims. Just: N similar
+    queries, avg score, depth breakdown, and (semantic mode) a 90-day demand signal.
+    """
+    similar, mode = _similar_ideas(idea_text, idea_hash)
     total_checks = score_db.get_total_checks()
 
     if not similar:
         return {
             "similar_count": 0,
             "total_database_queries": total_checks,
+            "match_mode": mode,
             "message": (
                 f"Your idea is unique among {total_checks} queries in our database. "
                 f"No one has searched for anything similar yet."
             ),
         }
 
-    scores = [s["score"] for s in similar]
+    display = similar[:50]
+    scores = [s["score"] for s in display]
     avg_score = round(sum(scores) / len(scores), 1)
 
-    # Depth breakdown
-    depth_counts = {}
-    for s in similar:
+    depth_counts: dict = {}
+    for s in display:
         d = s.get("depth", "quick")
         depth_counts[d] = depth_counts.get(d, 0) + 1
 
-    # Score comparison
     if score > avg_score + 10:
         score_comparison = "higher than"
     elif score < avg_score - 10:
@@ -142,19 +217,25 @@ def _build_crowd_intelligence(idea_text: str, idea_hash: str, score: int) -> dic
     else:
         score_comparison = "similar to"
 
-    return {
-        "similar_count": len(similar),
+    out = {
+        "similar_count": len(display),
         "avg_score": avg_score,
         "your_score": score,
         "score_comparison": score_comparison,
         "total_database_queries": total_checks,
         "depth_breakdown": depth_counts,
+        "match_mode": mode,
         "message": (
-            f"{len(similar)} people searched for similar ideas. "
+            f"{len(display)} people searched for similar ideas. "
             f"Average competition score: {avg_score}/100. "
             f"Your score is {score_comparison} the average."
         ),
     }
+    if mode == "semantic":
+        heat = _demand_heat(similar)  # computed over the full match set, not just the top 50
+        if heat:
+            out["demand_heat"] = heat
+    return out
 
 
 # ---------------------------------------------------------------------------
