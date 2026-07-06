@@ -28,12 +28,18 @@ semantic index.
 - **tests** — 12/12 green in `test_score_history.py` (roundtrip, legacy-table
   migration, semantic ranking, backfill flow, empty/zero-vector edges).
 
+### ✅ Backfill DONE (2026-07-06)
+- prod Turso `score_history`: **10,150 / 10,150 embedded (0 missing)** via
+  `scripts/backfill_embeddings_http.py` (Turso HTTP API — the sync client hangs).
+  ~14 min, 12 rows/s, ~$0.008.
+- Verified: stored-vs-fresh cosine = 1.0000 (correct text stored); real semantic
+  queries return paraphrase matches keyword-LIKE would miss (e.g. "split bills with
+  roommates" → "Group expense app that scans receipts" 0.74).
+- Real data also confirms **duplicate ideas** (same idea_hash from repeat queries) →
+  the scorer wiring must dedup results by `idea_hash`.
+- Re-run the same script on a cron / after new checks to keep coverage (idempotent).
+
 ### ☐ Next (this phase)
-1. **Run the backfill on prod Turso** — needs `pip install libsql-client` in the
-   run env (system python here lacks it → falls back to local SQLite), plus
-   `OPENAI_API_KEY` + `TURSO_*`. Cost ~$0.01. Command:
-   `TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… OPENAI_API_KEY=… python scripts/backfill_embeddings.py`
-   Then re-run on a cron / after each batch of new checks to keep coverage.
 2. **Wire semantic search into the scorer** — in the `top_similars` /
    `existingProjects` path (tools.py / api/main.py `/api/check`): embed the incoming
    idea, call `search_similar_by_embedding`, fall back to `search_similar_ideas`
