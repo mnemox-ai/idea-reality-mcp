@@ -19,6 +19,10 @@
 - ⚠️ 這台桌機 `.git` 有個從別台機器(johns)帶來的 phantom worktree 參照，`git status`/`git diff` 會報 fatal（但 commit/push/pull 正常）。**筆電 fresh clone 或 pull 不受影響**。
 
 ## Recent Changes
+- [2026-07-06] **Demand Radar offline 聚類 A+B（`030a245` + AngelRun `e6d929b`）：crowd/demand 6s→~1s、0.6MB、無 OOM**。取代建不起來的 ANN 索引。plan＝`docs/2026-07-06-demand-radar-offline-clustering.md`。
+  - **A 離線**：`scripts/build_demand_topics.py`——唯讀分塊讀 10k embedding → sklearn MiniBatchKMeans 聚 100 主題 → 每主題算 90d 熱度/趨勢/標籤 → **只寫 `demand_topics`（100 列小表）**，零碰大表 DDL（記取這次教訓）。跑法：`export TURSO_* + OPENAI_API_KEY; python scripts/build_demand_topics.py --k 100`（`--dry-run` 預覽）。
+  - **B 線上**：`report.topic_demand()`（載 100 中心進 <1MB TTL cache、query embed 一次比 100 中心 <10ms）+ `db.get_demand_topics()`；`_compute_report` 的 include=demand 改走它。prod 驗過 `match_mode:"topic"` + demand_heat「26 搜尋 rising」。**AngelRun include:demand 重新開**（現在 +1s 不撞 28s timeout）。
+  - 剩 C（公開 `/api/demand-radar` + 官網趨勢頁 + AngelRun CTA + 標籤細修 wedge/icp 過泛）、D（刷新 cron）。/api/crowd-intel（site 詳細版）仍走 full-scan 未動。
 - [2026-07-06] **Scan flash 首層（`a2444a9`）：漸進式 first paint 14-31s→3.6s**。`_compute_report(flash=True)` 第一層跳過兩個 LLM（dictionary keyword + template pivot）+ 無 crowd → prod 實測 first paint **3.6s**；背景 deep 補完整品質（輪詢驗過 competitors 5→11、`meta.partial` 標記）。**Skyscanner 漸進式真正成立**。`/api/check` 單次呼叫仍 11-18s（要快改走 `/api/scan`，前端 lane）。
 - [2026-07-06] **引擎延遲診斷 + GitHub source 平行化（`07f0f92`）+ ANN 索引放棄（環境建不了）+ DB 踩雷已恢復**。
   - **診斷**：quick 14-31s 的真因＝`search_github_repos` **每關鍵字循序打 2 請求**（非 token 問題，`GITHUB_TOKEN` 健康 5000/5000）。**修＝平行化**（`asyncio.gather`+`Semaphore(5)`）→ GitHub 3kw 5.0s→1.8s、prod quick **14-31s→11-18s**。16 tests 綠。剩餘延遲＝2 個 LLM call（keyword 3s+pivot 5s，有依賴不能全平行）。

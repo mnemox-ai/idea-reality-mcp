@@ -96,9 +96,9 @@ CREATE TABLE demand_topics (
 
 | 階段 | 內容 | 檔案 | 粗估 | 風險 |
 |------|------|------|------|------|
-| **A. 離線聚類** | `build_demand_topics.py`（讀→kmeans→聚合→寫 demand_topics）+ 建 `demand_topics` 表 | scripts + 1 小 migration | ~0.5 天 | 低（唯讀大表 + 小寫入） |
-| **B. 線上 topic 熱度** | `report._topic_demand` + cache；`demand_heat` hot-path 改走它；重新開 AngelRun/flash 的 demand | api/report.py | ~0.5 天 | 低（純 code + 小表讀） |
-| **C. 公開 Demand Radar** | `/api/demand-radar` + 官網趨勢頁 + AngelRun CTA | api + 前端 | ~1-2 天 | 低-中（前端 lane） |
+| **A. 離線聚類** | ✅ **DONE**（`030a245`）：`scripts/build_demand_topics.py` 跑通，寫 100 列到 `demand_topics`（唯讀大表分塊讀 + 只寫小表，零危險操作） | scripts | — | ✅ |
+| **B. 線上 topic 熱度** | ✅ **DONE**（`030a245` + AngelRun `e6d929b`）：`report.topic_demand()` + `db.get_demand_topics()`，`_compute_report` 的 include=demand 改走它（~1s、<1MB、無 OOM）；AngelRun include:demand 重新開。prod 驗過 `match_mode:"topic"` + demand_heat rising。 | api/report.py, api/main.py, api/db.py | — | ✅ |
+| **C. 公開 Demand Radar** | `/api/demand-radar` + 官網趨勢頁 + AngelRun CTA（+ 標籤品質細修：wedge/icp 過泛，改用 sample_ideas 為主/加停用詞） | api + 前端 | ~1-2 天 | 低-中（前端 lane） |
 | **D. 刷新 cron** | Render cron 週期重跑 A | render.yaml | ~0.5 天 | 低 |
 
 **建議順序**：A → B（先把 crowd 弄快 + 解鎖 demand）→ C（殺手鐧對外）→ D（自動新鮮）。A+B 半天多就能讓 demand 從 6s→0.5s 且安全。
