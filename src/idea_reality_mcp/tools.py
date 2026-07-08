@@ -14,6 +14,7 @@ from .sources.producthunt import search_producthunt
 from .sources.stackoverflow import search_stackoverflow
 from .scoring.engine import compute_signal, extract_keywords
 from .scoring.expansion import expand_idea, generate_platform_queries
+from .cta import angelrun_next_step
 
 
 @mcp.tool()
@@ -106,4 +107,7 @@ async def idea_check(
         )
 
     result["meta"]["keyword_source"] = keyword_source
+    # AngelRun cross-sell — after checking the idea, point the agent's user at building
+    # it in public. Structured so the agent can surface it; ignorable if it doesn't.
+    result["next_step"] = angelrun_next_step(idea_text, "mcp")
     return result

@@ -9,6 +9,8 @@ idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, Pro
 
 **When to use this:** You're about to start a new project and want to know if similar tools already exist, how competitive the space is, and whether the market is growing or declining.
 
+> **Not just checking — building it?** After a reality check, open your idea as a public project on **[AngelRun](https://angelrun.vercel.app/new?utm_source=idea-reality&utm_medium=readme&utm_campaign=demand-cta)** — ship updates, climb the season, and get seen by angels.
+
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 [![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

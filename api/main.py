@@ -32,6 +32,7 @@ from pydantic import BaseModel, Field
 from html import escape as html_escape
 
 from idea_reality_mcp.scoring.engine import compute_signal, extract_keywords
+from idea_reality_mcp.cta import angelrun_next_step
 from idea_reality_mcp.server import mcp  # registers all tools via server.py
 from idea_reality_mcp.sources.github import search_github_repos
 from idea_reality_mcp.sources.hn import search_hn
@@ -659,6 +660,10 @@ async def _compute_report(
 
     result["idea_hash"] = score_db.idea_hash(idea_text)
     result["meta"]["engine_version"] = ENGINE_VERSION
+
+    # AngelRun cross-sell — a reality check is a moment of build intent, so point the
+    # user at building it in public. Additive/ignorable field (existing clients skip it).
+    result["next_step"] = angelrun_next_step(idea_text, "api")
 
     # Opt-in demand-signal attach (the query-log moat). Uses the FAST offline-topic path
     # (~1s, <1MB) — not the ~6s full-scan — so it's safe on hot paths (AngelRun funnel, scan).

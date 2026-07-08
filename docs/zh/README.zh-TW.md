@@ -8,6 +8,8 @@ idea-reality-mcp 是一個 MCP server，掃描 GitHub、npm、PyPI、Hacker News
 
 **什麼時候用：** 你準備開始一個新專案，想知道有沒有類似工具、市場競爭程度、以及趨勢是成長還是衰退。
 
+> **不只是查、想真的做出來？** 查完現實分數後，把點子開成一個公開專案上 **[AngelRun](https://angelrun.vercel.app/new?utm_source=idea-reality&utm_medium=readme&utm_campaign=demand-cta)** — 發進度、爬賽季、讓天使看到你。
+
 ## 運作方式
 
 1. **描述你的點子**——用自然語言，例如「一個把 Figma 設計稿轉成 React 元件的 CLI 工具」
