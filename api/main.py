@@ -933,18 +933,52 @@ async def crowd_intel(req: CrowdIntelRequest):
     return resp
 
 
+_LABEL_JUNK = {
+    "test", "probe", "misc", "demo", "example", "sample", "check", "foo", "bar",
+    "hello", "ping", "asdf", "todo", "xxx",
+}
+
+
+def _topic_script(label: str) -> str:
+    """Coarse writing-system of a label so the feed can be segmented by language.
+
+    Needed because the stored `lang` field is unreliable — non-English ideas are saved with
+    the default 'en' — so the label's script is the only trustworthy language signal."""
+    letters = [c for c in label if c.isalpha()]
+    if not letters:
+        return "other"
+    ascii_letters = sum(1 for c in letters if c.isascii())
+    if ascii_letters / len(letters) >= 0.6:
+        return "latin"
+    if any("Ѐ" <= c <= "ӿ" for c in label):
+        return "cyrillic"
+    if any("一" <= c <= "鿿" for c in label) or any("぀" <= c <= "ヿ" for c in label):
+        return "cjk"
+    return "other"
+
+
+def _is_junk_label(label: str) -> bool:
+    toks = [w.lower() for w in label.replace("/", " ").split() if w]
+    return not toks or all(w in _LABEL_JUNK for w in toks)
+
+
 @app.get("/api/demand-radar")
-async def demand_radar(limit: int = 24):
+async def demand_radar(limit: int = 24, lang: str | None = None, min_askers: int = 2):
     """Public Demand Radar — the aggregate "what people want AI to build" trend feed.
 
     Topic-level ONLY: a human-readable label, how many distinct people asked in the last
     90 days, the trend direction, and an AngelRun build link per topic. It NEVER returns
     raw queries (sample_ideas) — only aggregates that no individual can be recovered from.
     This is the SEO/GEO magnet + top of the idea-reality -> AngelRun funnel.
+
+    Each topic carries a `script` (latin | cyrillic | cjk | other) so the frontend can offer
+    language tabs (global-first English by default). `lang` filters server-side: "en"→latin,
+    or a specific script, or omit/"all" for everything. Junk/near-empty topics are dropped.
     """
     limit = min(max(limit, 1), 50)
+    want = {"en": "latin"}.get(lang, lang)  # alias en -> latin script
     try:
-        rows = score_db.get_demand_radar(limit)
+        rows = score_db.get_demand_radar(100)  # fetch the pool; filter + trim below
     except Exception:
         logger.exception("demand-radar query failed")
         rows = []
@@ -952,18 +986,27 @@ async def demand_radar(limit: int = 24):
     topics = []
     for r in rows:
         label = (r.get("label") or "").strip()
-        if not label:
+        if not label or _is_junk_label(label):
+            continue
+        askers = int(r.get("searches_90d") or 0)
+        if askers < max(min_askers, 1):
+            continue
+        script = _topic_script(label)
+        if want and want != "all" and script != want:
             continue
         topics.append({
             "id": r.get("topic_id"),
             "label": label,
-            # value is distinct-requester count in the 90d window (see build_demand_topics.py):
+            "script": script,
+            # distinct-requester count in the 90d window (see build_demand_topics.py):
             # poisoning-resistant — one actor asking 300x counts as one person.
-            "askers_90d": int(r.get("searches_90d") or 0),
+            "askers_90d": askers,
             "prev_90d": int(r.get("prev_90d") or 0),
             "trend": r.get("trend") or "steady",
             "build_url": angelrun_next_step(label, "demand-radar")["url"],
         })
+        if len(topics) >= limit:
+            break
 
     return {
         "updated_at": rows[0].get("updated_at") if rows else None,
