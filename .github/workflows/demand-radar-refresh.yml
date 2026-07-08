@@ -1,0 +1,36 @@
+name: Demand Radar refresh
+
+# Rebuilds the ~100 offline demand topics (build sequence step 2/D) so the public
+# /api/demand-radar feed and the funnel's demand signal stay fresh. Runs on GitHub
+# Actions — NOT in the 512MB Render web process (sklearn + 10k embeddings would OOM there).
+# The script reads score_history (chunked, read-only) + query_log and writes only the
+# small demand_topics table; heat is distinct-requester (poisoning-resistant).
+
+on:
+  schedule:
+    - cron: "17 4 * * 1" # Mondays 04:17 UTC — weekly, demand shifts slowly
+  workflow_dispatch: {} # allow manual runs
+
+concurrency:
+  group: demand-radar-refresh
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install --quiet numpy scikit-learn httpx
+
+      - name: Rebuild demand topics
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: python scripts/build_demand_topics.py --k 100
