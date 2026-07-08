@@ -786,6 +786,27 @@ def get_demand_topics() -> list[dict[str, Any]]:
         conn.close()
 
 
+def get_demand_radar(limit: int = 24) -> list[dict[str, Any]]:
+    """Public Demand Radar feed rows — rising demand topics ranked by 90d heat.
+
+    Returns SAFE, aggregate fields ONLY (label + counts + trend). NEVER selects
+    sample_ideas (raw user query text) — the public feed must not expose what
+    individuals typed into the checker. Rising topics surface first."""
+    conn = _get_conn()
+    try:
+        cur = conn.execute(
+            "SELECT topic_id, label, member_count, searches_90d, prev_90d, trend, updated_at "
+            "FROM demand_topics WHERE searches_90d > 0 "
+            "ORDER BY (trend = 'rising') DESC, searches_90d DESC LIMIT ?",
+            (limit,),
+        )
+        return _rows_to_dicts(cur)
+    except Exception:
+        return []  # table missing / not built yet
+    finally:
+        conn.close()
+
+
 # ---------------------------------------------------------------------------
 # Crowd Intelligence — similar idea queries (for paid reports)
 # ---------------------------------------------------------------------------

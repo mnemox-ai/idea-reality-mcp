@@ -933,6 +933,45 @@ async def crowd_intel(req: CrowdIntelRequest):
     return resp
 
 
+@app.get("/api/demand-radar")
+async def demand_radar(limit: int = 24):
+    """Public Demand Radar — the aggregate "what people want AI to build" trend feed.
+
+    Topic-level ONLY: a human-readable label, how many distinct people asked in the last
+    90 days, the trend direction, and an AngelRun build link per topic. It NEVER returns
+    raw queries (sample_ideas) — only aggregates that no individual can be recovered from.
+    This is the SEO/GEO magnet + top of the idea-reality -> AngelRun funnel.
+    """
+    limit = min(max(limit, 1), 50)
+    try:
+        rows = score_db.get_demand_radar(limit)
+    except Exception:
+        logger.exception("demand-radar query failed")
+        rows = []
+
+    topics = []
+    for r in rows:
+        label = (r.get("label") or "").strip()
+        if not label:
+            continue
+        topics.append({
+            "id": r.get("topic_id"),
+            "label": label,
+            # value is distinct-requester count in the 90d window (see build_demand_topics.py):
+            # poisoning-resistant — one actor asking 300x counts as one person.
+            "askers_90d": int(r.get("searches_90d") or 0),
+            "prev_90d": int(r.get("prev_90d") or 0),
+            "trend": r.get("trend") or "steady",
+            "build_url": angelrun_next_step(label, "demand-radar")["url"],
+        })
+
+    return {
+        "updated_at": rows[0].get("updated_at") if rows else None,
+        "count": len(topics),
+        "topics": topics,
+    }
+
+
 class UnlockRequest(BaseModel):
     idea_text: str = Field(max_length=2000)
     lang: Literal["en", "zh"] = "en"
