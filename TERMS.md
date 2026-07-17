@@ -5,7 +5,7 @@ Last updated: 2026-03-25
 ## What This Tool Does
 
 idea-reality-mcp provides algorithmic reality scores based on publicly available
-data from GitHub, Hacker News, npm, PyPI, Product Hunt, and Stack Overflow.
+data from GitHub, Hacker News, npm, PyPI, and Stack Overflow.
 
 ## Not Professional Advice
 

@@ -1,148 +1,89 @@
-"""Tests for Product Hunt source adapter."""
+"""Tests for the Product Hunt source — which is permanently disabled.
+
+WHAT THESE TESTS USED TO BE, AND WHY IT MATTERS
+------------------------------------------------
+This file previously held four tests that passed for four months, proving Product Hunt
+search worked. It never worked once.
+
+They passed because of this helper::
+
+    def _graphql_response(total, products):
+        return {"data": {"posts": {"totalCount": total, "edges": edges}}}
+
+That is a reply Product Hunt cannot give to our query. The query asked for
+``posts(search: $query)`` and the live API answers::
+
+    Field 'posts' doesn't accept argument 'search'
+
+So the tests invented the API's response, fed it to the parser, and asserted the parser
+could read the invention. The one thing that was broken — the query — was the one thing
+the mock replaced. Green tests, dead source, and a README selling it as a feature.
+
+That lesson is worth more than the source ever was: a mock standing in for a call you
+have never made against the real service does not test that call, it hides it.
+
+WHAT THEY TEST NOW
+------------------
+That the source stays skipped no matter what — because a live-but-empty Product Hunt is
+worse than an absent one. scoring/engine.py redistributes Product Hunt's 14% deep-mode
+weight when ``skipped`` is True, but scores a fabricated "zero competitors found" when
+it is False. See sources/producthunt.py for the full autopsy.
+"""
 
 from __future__ import annotations
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import httpx
 
 from idea_reality_mcp.sources.producthunt import ProductHuntResults, search_producthunt
 
 
-def _mock_response(json_data: dict, status_code: int = 200) -> MagicMock:
-    resp = MagicMock(spec=httpx.Response)
-    resp.status_code = status_code
-    resp.json.return_value = json_data
-    if status_code >= 400:
-        resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            message=f"HTTP {status_code}",
-            request=MagicMock(),
-            response=resp,
-        )
-    else:
-        resp.raise_for_status.return_value = None
-    return resp
-
-
-def _graphql_response(total: int, products: list[dict]) -> dict:
-    edges = [{"node": p} for p in products]
-    return {"data": {"posts": {"totalCount": total, "edges": edges}}}
-
-
-class TestSearchProductHuntNoToken:
+class TestProductHuntIsDisabled:
     @pytest.mark.asyncio
-    async def test_skipped_without_token(self):
-        with patch("idea_reality_mcp.sources.producthunt._token", return_value=None):
-            result = await search_producthunt(["test query"])
+    async def test_skipped_without_token(self, monkeypatch):
+        monkeypatch.delenv("PRODUCTHUNT_TOKEN", raising=False)
+        result = await search_producthunt(["test query"])
 
         assert isinstance(result, ProductHuntResults)
         assert result.skipped is True
         assert result.total_count == 0
         assert result.top_products == []
-        assert len(result.evidence) == 1
         assert result.evidence[0]["type"] == "skipped"
 
-
-class TestSearchProductHuntSuccess:
     @pytest.mark.asyncio
-    async def test_basic_success(self):
-        products = [
-            {
-                "name": "CoolApp",
-                "tagline": "The coolest app ever",
-                "url": "https://www.producthunt.com/posts/coolapp",
-                "votesCount": 500,
-                "createdAt": "2025-06-01T00:00:00Z",
-            },
-            {
-                "name": "NiceApp",
-                "tagline": "A nice application",
-                "url": "https://www.producthunt.com/posts/niceapp",
-                "votesCount": 200,
-                "createdAt": "2025-05-01T00:00:00Z",
-            },
-        ]
-        api_response = _graphql_response(total=15, products=products)
+    async def test_still_skipped_WITH_a_valid_token(self, monkeypatch):
+        """The regression that matters — a token must never re-enable this source.
 
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response(api_response)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
+        On 2026-07-17 a real token was set on prod for ~1 hour. The source stopped being
+        skipped, the invalid query failed, the exception was swallowed, total_count stayed
+        0, and engine.py scored that as "no competitors on Product Hunt" across 14% of the
+        deep-mode weight — inflating every idea's originality, silently, with no error.
+        """
+        monkeypatch.setenv("PRODUCTHUNT_TOKEN", "a-real-looking-token")
+        result = await search_producthunt(["mcp server", "idea checker"])
 
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="fake-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["test query"])
-
-        assert isinstance(result, ProductHuntResults)
-        assert result.skipped is False
-        assert result.total_count == 15
-        assert len(result.top_products) == 2
-        assert result.top_products[0]["name"] == "CoolApp"
-        assert result.top_products[0]["votes"] == 500
-        assert len(result.evidence) == 1
-        assert result.evidence[0]["source"] == "producthunt"
-        assert result.evidence[0]["type"] == "product_count"
-
-
-class TestSearchProductHuntApiError:
-    @pytest.mark.asyncio
-    async def test_api_error(self):
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response({}, status_code=401)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="bad-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["broken"])
-
-        assert isinstance(result, ProductHuntResults)
+        assert result.skipped is True, (
+            "PRODUCTHUNT_TOKEN re-enabled the source. engine.py will now score a "
+            "fabricated zero across 14% of deep mode instead of redistributing it."
+        )
         assert result.total_count == 0
-        assert result.top_products == []
-        assert len(result.evidence) == 1
-        assert result.evidence[0]["type"] == "error"
+        assert result.recent_launch_ratio == 0.0
 
-
-class TestSearchProductHuntDeduplication:
     @pytest.mark.asyncio
-    async def test_dedup_across_keywords(self):
-        shared = {
-            "name": "SharedApp",
-            "tagline": "Shared",
-            "url": "https://www.producthunt.com/posts/shared",
-            "votesCount": 300,
-            "createdAt": "2025-06-01T00:00:00Z",
-        }
-        unique_a = {
-            "name": "UniqueA",
-            "tagline": "Unique A",
-            "url": "https://www.producthunt.com/posts/uniquea",
-            "votesCount": 100,
-            "createdAt": "2025-05-01T00:00:00Z",
-        }
-        response_1 = _graphql_response(total=5, products=[shared, unique_a])
-        response_2 = _graphql_response(total=3, products=[shared])
+    async def test_never_makes_a_network_call(self, monkeypatch):
+        monkeypatch.setenv("PRODUCTHUNT_TOKEN", "a-real-looking-token")
 
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.side_effect = [
-            _mock_response(response_1),
-            _mock_response(response_2),
-        ]
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
+        def explode(*args, **kwargs):
+            raise AssertionError("Product Hunt must not make network calls while disabled")
 
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["kw1", "kw2"])
+        monkeypatch.setattr("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", explode)
+        result = await search_producthunt(["anything"])
 
-        assert result.total_count == 5  # max across queries, not sum
-        names = [p["name"] for p in result.top_products]
-        assert len(names) == 2
-        assert len(set(names)) == 2
+        assert result.skipped is True
+
+    @pytest.mark.asyncio
+    async def test_explains_itself_to_whoever_reads_the_evidence(self):
+        """The skip reason must say WHY, or someone sets the token again in six months."""
+        result = await search_producthunt(["test"])
+        detail = result.evidence[0]["detail"].lower()
+        assert "no post text search" in detail
+        assert "redistributed" in detail

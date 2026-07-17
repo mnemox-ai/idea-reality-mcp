@@ -10,7 +10,9 @@
   - `ANY /mcp` — MCP Streamable HTTP transport（Smithery / MCP HTTP clients 連接用）
 - **CORS：** 允許 mnemox.ai、mnemox-ai.github.io、localhost
 - **部署：** `render.yaml`（free tier，sleep/wake acceptable）
-- **PRODUCTHUNT_TOKEN：** optional，未設時 gracefully skip PH source
+- **PRODUCTHUNT_TOKEN：** 已失效、被忽略。Product Hunt 永久停用——他們的 API 沒有貼文全文搜尋
+  (`posts()` 不接受 `search`)，那個 adapter 從上線起沒回過任何一筆。**不要再設這個 token**：
+  設了會讓來源從「誠實跳過」變成「回報 Product Hunt 上零競爭者」，污染 deep 模式 14% 的權重。
 
 ## 🔑 HANDOFF — 待 Sean 處理（2026-07-06，換筆電接續）
 - ✅ **P1 語意 embedding 全部完成、LIVE on prod**（`85d7401`）。`OPENAI_API_KEY` 已設在 Render，`/api/crowd-intel` 回 `match_mode:"semantic"` + `demand_heat`。**沒有待辦，這條收掉。**

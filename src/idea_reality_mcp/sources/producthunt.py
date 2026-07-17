@@ -1,7 +1,38 @@
-"""Product Hunt GraphQL API source (optional).
+"""Product Hunt source — PERMANENTLY DISABLED. Do not re-enable with a token.
 
-Requires a ``PRODUCTHUNT_TOKEN`` environment variable.  When the token is not
-set the search is skipped gracefully and an empty result is returned.
+Product Hunt's API cannot do what this source claims to do, and it never could.
+Verified against the live API on 2026-07-17:
+
+    Field 'posts' doesn't accept argument 'search'
+
+The query below asks for ``posts(search: $query)``. That argument does not exist.
+Schema introspection confirms the full arg list on ``posts``::
+
+    posts(featured, postedBefore, postedAfter, topic, order, twitterUrl, url,
+          after, before, first, last)
+
+There is no text search on posts, at all. The only searchable field in the whole v2
+schema is ``topics(query:)``, which is useless here: 'mcp' and 'startup idea checker'
+return nothing, while 'artificial intelligence' returns a 107k-post category. Neither
+answers "has someone already built THIS idea", which is the only question this source
+exists to answer.
+
+WHY THIS IS HARD-DISABLED RATHER THAN JUST LEFT UNCONFIGURED:
+
+Until today the missing token was hiding the broken query — ``if not token: return
+skipped`` returned before the call could fail, so nobody ever saw the error. Setting
+the token does not fix the source; it makes it *lie*. The GraphQL call fails, the
+exception is swallowed, ``total_count`` stays 0, and ``skipped`` is False — so
+scoring/engine.py:705 treats it as a live source reporting **zero competitors on
+Product Hunt** and feeds that into 14% of the deep-mode score. Every idea then looks
+more original than it is, silently, with no error anywhere.
+
+That is exactly what happened on prod for ~1 hour on 2026-07-17 when the token was set
+during this investigation. Returning skipped=True unconditionally is what keeps
+engine.py redistributing the 14% to sources that actually answer.
+
+To bring Product Hunt back you need a real search surface (their site search is not in
+the API), not a token. Until then this returns skipped and the docs must not claim it.
 """
 
 from __future__ import annotations
@@ -31,14 +62,31 @@ def _token() -> str | None:
 
 
 async def search_producthunt(keywords: list[str]) -> ProductHuntResults:
-    """Search Product Hunt for products matching keyword variants.
+    """Always skipped. Product Hunt's API has no post text search — see module docstring.
 
-    Args:
-        keywords: List of search query strings.
+    Returns ``skipped=True`` regardless of PRODUCTHUNT_TOKEN, so engine.py redistributes
+    Product Hunt's 14% deep-mode weight instead of scoring a fabricated zero.
+    """
+    return ProductHuntResults(
+        skipped=True,
+        evidence=[{
+            "source": "producthunt",
+            "type": "skipped",
+            "query": "",
+            "count": 0,
+            "detail": (
+                "Product Hunt disabled: their API has no post text search "
+                "(posts() rejects 'search'). Weight redistributed to live sources."
+            ),
+        }],
+    )
 
-    Returns:
-        Aggregated results.  If no token is configured the ``skipped``
-        flag is set and counts are zero.
+
+async def _search_producthunt_broken(keywords: list[str]) -> ProductHuntResults:
+    """Dead code, kept only as the evidence that the query is invalid. Never called.
+
+    ``posts(search: $query)`` returns "Field 'posts' doesn't accept argument 'search'".
+    Do not wire this back up without first proving a working search against the live API.
     """
     token = _token()
     if not token:

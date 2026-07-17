@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.mnemox-ai/idea-reality-mcp",
-  "description": "Pre-build reality check. Scans GitHub, HN, npm, PyPI, Product Hunt — returns 0-100 signal.",
+  "description": "Pre-build reality check. Scans GitHub, HN, npm, PyPI, Stack Overflow — returns 0-100 signal.",
   "repository": {
     "url": "https://github.com/mnemox-ai/idea-reality-mcp",
     "source": "github"
@@ -17,12 +17,6 @@
         {
           "name": "GITHUB_TOKEN",
           "description": "GitHub PAT for higher rate limits (optional)",
-          "isRequired": false,
-          "isSecret": true
-        },
-        {
-          "name": "PRODUCTHUNT_TOKEN",
-          "description": "Product Hunt API token for deep mode (optional)",
           "isRequired": false,
           "isSecret": true
         }

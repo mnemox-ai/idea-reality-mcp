@@ -358,138 +358,26 @@ class TestHNTemporal:
 
 
 class TestPHTemporal:
-    @pytest.mark.asyncio
-    async def test_recent_launch_ratio_mixed(self):
-        """1 of 2 products launched within 6 months → ratio 0.5."""
-        now = datetime.now(timezone.utc)
-        recent_date = (now - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        old_date = (now - timedelta(days=300)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    """Product Hunt is permanently disabled, so its temporal signal is always absent.
 
-        products = [
-            {
-                "name": "RecentApp",
-                "tagline": "A recent test launch",
-                "url": "https://www.producthunt.com/posts/recentapp",
-                "votesCount": 300,
-                "createdAt": recent_date,
-            },
-            {
-                "name": "OldApp",
-                "tagline": "An old test launch",
-                "url": "https://www.producthunt.com/posts/oldapp",
-                "votesCount": 200,
-                "createdAt": old_date,
-            },
-        ]
-        api_response = _graphql_response(total=10, products=products)
+    These four tests used to mock a GraphQL reply Product Hunt cannot give — the query
+    asks for posts(search:), which the live API rejects — then asserted the parser read
+    the mock's invented createdAt dates correctly. They passed for four months against a
+    source that has never returned a single row. See tests/test_producthunt.py.
 
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response(api_response)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="fake-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["test query"])
-
-        assert isinstance(result, ProductHuntResults)
-        assert abs(result.recent_launch_ratio - 0.5) < 0.01
+    recent_launch_ratio must stay 0.0 AND skipped must stay True: engine.py only reads
+    the ratio when `not ph_results.skipped` (engine.py:750), so the skip flag is what
+    keeps a fabricated 0.0 out of the temporal boost.
+    """
 
     @pytest.mark.asyncio
-    async def test_recent_launch_ratio_all_recent(self):
-        """All products launched within 6 months → ratio 1.0."""
-        now = datetime.now(timezone.utc)
-        date1 = (now - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        date2 = (now - timedelta(days=60)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    async def test_no_temporal_signal_and_no_token_can_restore_it(self, monkeypatch):
+        monkeypatch.setenv("PRODUCTHUNT_TOKEN", "a-real-looking-token")
+        result = await search_producthunt(["test query"])
 
-        products = [
-            {
-                "name": "FreshApp",
-                "tagline": "Fresh test launch",
-                "url": "https://www.producthunt.com/posts/freshapp",
-                "votesCount": 500,
-                "createdAt": date1,
-            },
-            {
-                "name": "NewApp",
-                "tagline": "New test launch",
-                "url": "https://www.producthunt.com/posts/newapp",
-                "votesCount": 250,
-                "createdAt": date2,
-            },
-        ]
-        api_response = _graphql_response(total=8, products=products)
-
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response(api_response)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="fake-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["test query"])
-
-        assert abs(result.recent_launch_ratio - 1.0) < 0.01
-
-    @pytest.mark.asyncio
-    async def test_recent_launch_ratio_all_old(self):
-        """All products older than 6 months → ratio 0.0."""
-        now = datetime.now(timezone.utc)
-        old_date1 = (now - timedelta(days=250)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        old_date2 = (now - timedelta(days=400)).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-        products = [
-            {
-                "name": "OldApp1",
-                "tagline": "Old test launch one",
-                "url": "https://www.producthunt.com/posts/oldapp1",
-                "votesCount": 100,
-                "createdAt": old_date1,
-            },
-            {
-                "name": "OldApp2",
-                "tagline": "Old test launch two",
-                "url": "https://www.producthunt.com/posts/oldapp2",
-                "votesCount": 50,
-                "createdAt": old_date2,
-            },
-        ]
-        api_response = _graphql_response(total=5, products=products)
-
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response(api_response)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="fake-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["test query"])
-
+        assert result.skipped is True
         assert result.recent_launch_ratio == 0.0
-
-    @pytest.mark.asyncio
-    async def test_recent_launch_ratio_no_products(self):
-        """No products returned → ratio stays at default 0.0."""
-        api_response = _graphql_response(total=0, products=[])
-
-        mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.post.return_value = _mock_response(api_response)
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-
-        with (
-            patch("idea_reality_mcp.sources.producthunt._token", return_value="fake-token"),
-            patch("idea_reality_mcp.sources.producthunt.httpx.AsyncClient", return_value=mock_client),
-        ):
-            result = await search_producthunt(["test query"])
-
-        assert result.recent_launch_ratio == 0.0
+        assert result.top_products == []
 
 
 # ===========================================================================

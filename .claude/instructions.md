@@ -2,7 +2,8 @@
 
 ## What This Is
 Mnemox Idea Reality MCP Server v0.5.0 — pre-build reality check for AI coding agents.
-`idea_check` scans GitHub, HN, npm, PyPI, Product Hunt → returns reality_signal (0-100).
+`idea_check` scans GitHub, HN, npm, PyPI, Stack Overflow → returns reality_signal (0-100).
+Product Hunt is permanently disabled (their API has no post text search) — see sources/producthunt.py.
 **Status: 暫停開發中，持續監測流量。** Google SEO 第一大來源，持續有不同國家用戶查詢。290+ stars。
 
 ## Quick Ref
@@ -41,7 +42,8 @@ api/
 
 ## Modes
 - **quick**: GitHub + HN (repos 60% + stars 20% + HN 20%)
-- **deep**: 6 sources parallel (repos 25% + stars 10% + HN 15% + npm 20% + PyPI 15% + PH 15% + SO bonus)
+- **deep**: 5 sources parallel (repos 25% + stars 10% + HN 15% + npm 20% + PyPI 15% + SO bonus).
+  PH's 14% is redistributed — the source is permanently disabled, never scored.
 
 ## Key Design Decisions
 - Protocol, not SaaS — no dashboard, no user accounts
@@ -51,7 +53,7 @@ api/
 - Discord webhook = 永久查詢資料庫（每次 /api/check 自動推送）
 
 ## v0.5.0 (current)
-- Temporal Signals: GitHub recency ratio, HN trend, PH launch timing
+- Temporal Signals: GitHub recency ratio, HN trend (PH launch timing: dead, source disabled)
 - Continuous scoring: log-curve replaces threshold-based
 - market_momentum sub-score + trend indicator (accelerating/stable/declining)
 

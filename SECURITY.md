@@ -29,6 +29,9 @@ This project makes outbound HTTP requests to:
 - `hn.algolia.com` — Hacker News Algolia API
 - `registry.npmjs.org` — npm Registry API (deep mode)
 - `pypi.org` — PyPI Registry (deep mode)
-- `api.producthunt.com` — Product Hunt GraphQL API (deep mode, optional — only when `PRODUCTHUNT_TOKEN` is set)
+- `api.stackexchange.com` — Stack Overflow API (deep mode)
 
-No user data is stored or transmitted to any other service. The optional `GITHUB_TOKEN` and `PRODUCTHUNT_TOKEN` environment variables are used solely for API authentication and are never logged or persisted.
+No user data is stored or transmitted to any other service. The optional `GITHUB_TOKEN`
+environment variable is used solely for API authentication and is never logged or persisted.
+`PRODUCTHUNT_TOKEN` is ignored — the Product Hunt source is disabled and makes no network
+calls, so `api.producthunt.com` is never contacted.

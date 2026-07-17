@@ -1,6 +1,6 @@
 ---
 name: idea-check
-description: Pre-build reality check. Scans GitHub, HN, npm, PyPI, and Product Hunt for existing competitors before you build. Use when starting a new project, evaluating a side project idea, or doing a build-vs-buy decision.
+description: Pre-build reality check. Scans GitHub, HN, npm, PyPI, and Stack Overflow for existing competitors before you build. Use when starting a new project, evaluating a side project idea, or doing a build-vs-buy decision.
 ---
 
 # Idea Reality Check

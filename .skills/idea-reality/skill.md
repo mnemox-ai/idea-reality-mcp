@@ -1,7 +1,7 @@
 ---
 name: idea-reality
 version: 0.5.0
-description: Pre-build reality check — scan GitHub, HN, npm, PyPI, Product Hunt for existing prior art before you build.
+description: Pre-build reality check — scan GitHub, HN, npm, PyPI, Stack Overflow for existing prior art before you build.
 metadata:
   openclaw:
     emoji: "\U0001F50D"
@@ -13,7 +13,7 @@ metadata:
 
 # Idea Reality Check
 
-Scans existing projects across GitHub, Hacker News, npm, PyPI, and Product Hunt. Returns a `reality_signal` score (0-100) indicating how much prior art already exists for a given idea.
+Scans existing projects across GitHub, Hacker News, npm, PyPI, and Stack Overflow. Returns a `reality_signal` score (0-100) indicating how much prior art already exists for a given idea.
 
 ## When to Use
 
@@ -35,7 +35,7 @@ Scans existing projects across GitHub, Hacker News, npm, PyPI, and Product Hunt.
 | Mode | Sources | Weights |
 |------|---------|---------|
 | `quick` | GitHub + HN | repos 60%, stars 20%, HN 20% |
-| `deep` | GitHub + HN + npm + PyPI + Product Hunt | repos 25%, stars 10%, HN 15%, npm 20%, PyPI 15%, PH 15% |
+| `deep` | GitHub + HN + npm + PyPI + Stack Overflow | repos 25%, stars 10%, HN 15%, npm 20%, PyPI 15%, PH 15% |
 
 ## Usage
 
@@ -98,7 +98,7 @@ idea_check(idea_text="MCP server for stock trading memory", depth="deep")
   ],
   "meta": {
     "checked_at": "2026-03-14T10:00:00+00:00",
-    "sources_used": ["github", "hackernews", "npm", "pypi", "producthunt"],
+    "sources_used": ["github", "hackernews", "npm", "pypi", "stackoverflow"],
     "depth": "deep",
     "version": "0.5.0",
     "keyword_source": "dictionary"

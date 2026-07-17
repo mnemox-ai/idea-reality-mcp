@@ -1,7 +1,7 @@
 {
   "name": "idea-reality-mcp",
   "version": "0.1.0",
-  "description": "Pre-build reality check — scans GitHub, HN, npm, PyPI & Product Hunt before you build. Returns a 0-100 competition signal with real data.",
+  "description": "Pre-build reality check — scans GitHub, HN, npm, PyPI & Stack Overflow before you build. Returns a 0-100 competition signal with real data.",
   "author": {
     "name": "Mnemox AI",
     "email": "dev@mnemox.ai"

@@ -5,7 +5,7 @@ English | [繁體中文](docs/zh/README.zh-TW.md)
 
 **How to check if someone already built your app idea — automatically.**
 
-idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, Product Hunt, and Stack Overflow to check if your startup idea already exists. It returns a 0–100 reality score with evidence, trend detection, and pivot suggestions — so your AI agent can decide whether to build, pivot, or kill the idea before writing any code.
+idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, and Stack Overflow to check if your startup idea already exists. It returns a 0–100 reality score with evidence, trend detection, and pivot suggestions — so your AI agent can decide whether to build, pivot, or kill the idea before writing any code.
 
 **When to use this:** You're about to start a new project and want to know if similar tools already exist, how competitive the space is, and whether the market is growing or declining.
 
@@ -27,7 +27,7 @@ idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, Pro
 ## How it works
 
 1. **Describe your idea** in plain English — e.g. "a CLI tool that converts Figma designs to React components"
-2. **idea_check scans 6 databases** in parallel (GitHub repos + stars, Hacker News discussions, npm/PyPI packages, Product Hunt launches, Stack Overflow questions)
+2. **idea_check scans 5 databases** in parallel (GitHub repos + stars, Hacker News discussions, npm/PyPI packages, Stack Overflow questions)
 3. **Get a 0–100 reality score** with trend direction (accelerating/stable/declining), top competitors, and AI-generated pivot suggestions
 
 ## What you get
@@ -176,7 +176,7 @@ Free. No API key required.
 | Mode | Sources | Use case |
 |------|---------|----------|
 | **quick** (default) | GitHub + HN | Fast sanity check, < 3 seconds |
-| **deep** | GitHub + HN + npm + PyPI + Product Hunt + Stack Overflow | Full competitive scan |
+| **deep** | GitHub + HN + npm + PyPI + Stack Overflow | Full competitive scan |
 
 <details>
 <summary>Scoring weights</summary>
@@ -188,10 +188,16 @@ Free. No API key required.
 | Hacker News | 20% | 14% |
 | npm | — | 18% |
 | PyPI | — | 13% |
-| Product Hunt | — | 14% |
 | Stack Overflow | — | 10% |
 
-If a source is unavailable, its weight is redistributed automatically.
+If a source is unavailable, its weight is redistributed automatically — so the deep-mode
+weights above are renormalised over the sources that actually answered.
+
+> **Product Hunt was removed on 2026-07-17.** It had carried 14% of the deep-mode weight
+> since launch and had never returned a single result: the adapter asked for
+> `posts(search: $query)`, and Product Hunt's API has no text search on posts at all
+> (`Field 'posts' doesn't accept argument 'search'`). Its weight is now redistributed to
+> sources that answer. If you need it back, it needs a real search surface — not a token.
 
 </details>
 
@@ -219,7 +225,6 @@ If a source is unavailable, its weight is redistributed automatically.
     {"source": "hackernews", "type": "mention_count", "query": "...", "count": 18},
     {"source": "npm", "type": "package_count", "query": "...", "count": 56},
     {"source": "pypi", "type": "package_count", "query": "...", "count": 23},
-    {"source": "producthunt", "type": "product_count", "query": "...", "count": 8},
     {"source": "stackoverflow", "type": "question_count", "query": "...", "count": 120}
   ],
   "top_similars": [
@@ -259,8 +264,11 @@ jobs:
 
 ```bash
 export GITHUB_TOKEN=ghp_...        # Higher GitHub API rate limits
-export PRODUCTHUNT_TOKEN=your_...  # Enable Product Hunt (deep mode)
 ```
+
+`PRODUCTHUNT_TOKEN` no longer does anything — the source is disabled and ignores it.
+Setting it used to be worse than useless: it un-skipped a source whose query the API
+rejects, so it reported "0 competitors on Product Hunt" into 14% of the deep score.
 
 **Auto-trigger:** Add one line to your `CLAUDE.md`, `.cursorrules`, or `.github/copilot-instructions.md`:
 
