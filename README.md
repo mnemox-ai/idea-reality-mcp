@@ -3,6 +3,8 @@ English | [繁體中文](docs/zh/README.zh-TW.md)
 
 # idea-reality-mcp
 
+[![MCP Toplist](https://mcptoplist.com/badge/io.github.mnemox-ai%2Fidea-reality-mcp.svg)](https://mcptoplist.com/server/io.github.mnemox-ai%2Fidea-reality-mcp)
+
 **How to check if someone already built your app idea — automatically.**
 
 idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, and Stack Overflow to check if your startup idea already exists. It returns a 0–100 reality score with evidence, trend detection, and pivot suggestions — so your AI agent can decide whether to build, pivot, or kill the idea before writing any code.
