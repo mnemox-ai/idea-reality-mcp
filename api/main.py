@@ -332,6 +332,9 @@ async def _extract_keywords_via_haiku(idea_text: str) -> list[str] | None:
         client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
+            # temperature=0: same idea text must expand to the same search
+            # queries, or the whole report is unreproducible. Default is 1.0.
+            temperature=0,
             max_tokens=200,
             system=_HAIKU_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": idea_text}],
@@ -430,6 +433,9 @@ Evidence:
         client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
+            # temperature=0: same idea text must expand to the same search
+            # queries, or the whole report is unreproducible. Default is 1.0.
+            temperature=0,
             max_tokens=500,
             system=_PIVOT_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
@@ -564,6 +570,9 @@ async def expand_idea_endpoint(req: ExpandIdeaRequest, request: Request):
         client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"], timeout=30.0)
         message = await client.messages.create(
             model="claude-haiku-4-5",
+            # temperature=0: same idea text must expand to the same search
+            # queries, or the whole report is unreproducible. Default is 1.0.
+            temperature=0,
             max_tokens=300,
             system=_EXPAND_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": req.idea_text.strip()}],

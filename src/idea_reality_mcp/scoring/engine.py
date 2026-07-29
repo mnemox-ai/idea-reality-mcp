@@ -646,6 +646,18 @@ _DEEP_WEIGHTS = {
 }
 
 
+def _source_measured(results) -> bool:
+    """Did every query this source fired actually come back?
+
+    Sources predating the measurement bookkeeping (and hand-built fixtures) have
+    no counters; treat those as measured so old callers and tests are unaffected.
+    """
+    attempted = getattr(results, "queries_attempted", 0)
+    if attempted == 0:
+        return True
+    return getattr(results, "queries_failed", 0) == 0
+
+
 def compute_signal(
     idea_text: str,
     keywords: list[str],
@@ -670,6 +682,26 @@ def compute_signal(
     h_score = _hn_score(hn_results.total_mentions)
 
     sources_used = ["github", "hackernews"]
+
+    # --- measurement gate ----------------------------------------------------
+    # A source that failed (rate-limit, timeout, 5xx) used to fall through as a
+    # zero and get scored, which is how the same idea returned 88 and then 44
+    # minutes apart. Refuse to invent a number from data we did not actually
+    # collect: mark the affected dimensions unmeasured and withhold the
+    # composite. "We could not look" is a true answer; a low score is not.
+    github_ok = _source_measured(github_results)
+    hn_ok = _source_measured(hn_results)
+    source_status = {
+        "github": "ok" if github_ok else "failed",
+        "hackernews": "ok" if hn_ok else "failed",
+    }
+    unmeasured: list[str] = []
+    if not github_ok:
+        unmeasured += ["competition_density", "market_maturity"]
+    if not hn_ok:
+        unmeasured.append("community_buzz")
+    if not (github_ok and hn_ok):
+        unmeasured.append("market_momentum")  # derived from both recency signals
 
     if depth == "quick" or (npm_results is None and pypi_results is None):
         # Quick mode — original weights
@@ -888,18 +920,23 @@ def compute_signal(
     if expansion is not None and expansion.get("core_concept"):
         evidence = filter_by_core_concept(evidence, expansion["core_concept"])
 
+    # Withhold anything derived from data we did not collect.
+    complete = not unmeasured
+    out_signal = signal if complete else None
+    out_duplicate = _duplicate_likelihood(signal) if complete else None
+
     return {
-        "reality_signal": signal,
-        "duplicate_likelihood": _duplicate_likelihood(signal),
+        "reality_signal": out_signal,
+        "duplicate_likelihood": out_duplicate,
         "sub_scores": {
-            "competition_density": g_repo,
-            "market_maturity": g_star,
-            "community_buzz": h_score,
+            "competition_density": g_repo if github_ok else None,
+            "market_maturity": g_star if github_ok else None,
+            "community_buzz": h_score if hn_ok else None,
             "ecosystem_depth_npm": n_score if depth != "quick" else None,
             "ecosystem_depth_pypi": p_score if depth != "quick" else None,
             "product_launches": ph_val if depth != "quick" else None,
             "developer_interest": so_val if depth != "quick" else None,
-            "market_momentum": round(market_momentum * 100),
+            "market_momentum": round(market_momentum * 100) if (github_ok and hn_ok) else None,
         },
         "trend": trend,
         "evidence": evidence,
@@ -910,5 +947,12 @@ def compute_signal(
             "sources_used": sources_used,
             "depth": depth,
             "version": "0.5.1",
+            # Callers can tell "nothing is there" from "we could not look".
+            # reality_signal is null whenever complete is false.
+            "measurement": {
+                "complete": complete,
+                "sources": source_status,
+                "unmeasured": unmeasured,
+            },
         },
     }

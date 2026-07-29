@@ -17,6 +17,14 @@ class HNResults:
     total_mentions: int
     evidence: list[dict]
     recent_mention_ratio: float | None = None
+    # See github.GitHubResults — a failed query must never read as a genuine zero.
+    queries_attempted: int = 0
+    queries_failed: int = 0
+
+    @property
+    def measured(self) -> bool:
+        """True only when every query we fired actually came back."""
+        return self.queries_attempted > 0 and self.queries_failed == 0
 
 
 def _compute_recent_ratio(hits: list[dict], three_months_ago: int) -> float | None:
@@ -52,6 +60,7 @@ async def search_hn(keywords: list[str]) -> HNResults:
     max_mentions = 0
     best_ratio: float | None = None
     evidence: list[dict] = []
+    failed = 0
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         for query in normalized_keywords:
@@ -84,6 +93,7 @@ async def search_hn(keywords: list[str]) -> HNResults:
                     "detail": f"{count} HN posts in last 12 months for '{query}'",
                 })
             except httpx.HTTPError:
+                failed += 1
                 evidence.append({
                     "source": "hackernews",
                     "type": "error",
@@ -96,4 +106,6 @@ async def search_hn(keywords: list[str]) -> HNResults:
         total_mentions=max_mentions,
         evidence=evidence,
         recent_mention_ratio=best_ratio,
+        queries_attempted=len(normalized_keywords),
+        queries_failed=failed,
     )

@@ -102,6 +102,21 @@ class GitHubResults:
     recent_created_count: int = 0
     recent_ratio: float = 0.0
     recently_updated_ratio: float = 0.0
+    # Measurement bookkeeping. A failed query used to be indistinguishable from a
+    # genuine zero: the except branch returned None/0 and the aggregate stayed at
+    # 0, so "GitHub rate-limited us" scored the same as "nobody has built this".
+    # That is how the same idea could come back 88 one minute and 44 the next.
+    queries_attempted: int = 0
+    queries_failed: int = 0
+
+    @property
+    def measured(self) -> bool:
+        """True only when every query we fired actually came back."""
+        return self.queries_attempted > 0 and self.queries_failed == 0
+
+
+# Sentinel for "this query never came back" — distinct from a real empty result.
+_FAILED = object()
 
 
 def _headers() -> dict[str, str]:
@@ -169,12 +184,15 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
     """
     normalized_keywords = list(dict.fromkeys(k.strip() for k in keywords if k.strip()))
     if not normalized_keywords:
+        # nothing was asked, so nothing was measured
         return GitHubResults(total_repo_count=0, max_stars=0, top_repos=[])
 
     max_total_count = 0
     max_stars = 0
     all_repos: list[dict] = []
     max_recent_created = 0
+    attempted = len(normalized_keywords) * 2  # main + recent search per keyword
+    failed = 0
 
     six_months_ago = datetime.now(timezone.utc) - timedelta(days=180)
     created_since = six_months_ago.strftime("%Y-%m-%d")
@@ -200,7 +218,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                     return resp.json()
                 except httpx.HTTPError as exc:
                     logger.warning("GitHub search failed for query %r: %s", search_q, exc)
-                    return None
+                    return _FAILED
 
         async def _recent_search(query: str):
             search_q = _normalize_query(query)
@@ -215,7 +233,7 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                     return resp.json().get("total_count", 0)
                 except httpx.HTTPError as exc:
                     logger.warning("GitHub recent-search failed for query %r: %s", search_q, exc)
-                    return 0
+                    return _FAILED
 
         main_results, recent_results = await asyncio.gather(
             asyncio.gather(*[_main_search(q) for q in normalized_keywords]),
@@ -223,6 +241,9 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
         )
 
         for data in main_results:
+            if data is _FAILED:
+                failed += 1
+                continue
             if not data:
                 continue
             query_count = data.get("total_count", 0)
@@ -245,6 +266,9 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
                 })
 
         for recent_count in recent_results:
+            if recent_count is _FAILED:
+                failed += 1
+                continue
             if recent_count and recent_count > max_recent_created:
                 max_recent_created = recent_count
 
@@ -300,4 +324,6 @@ async def search_github_repos(keywords: list[str]) -> GitHubResults:
         recent_created_count=max_recent_created,
         recent_ratio=recent_ratio,
         recently_updated_ratio=recently_updated_ratio,
+        queries_attempted=attempted,
+        queries_failed=failed,
     )
