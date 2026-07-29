@@ -153,3 +153,37 @@ class TestSourcesCountFailures:
         assert res.queries_attempted == 1
         assert res.queries_failed == 1
         assert res.measured is False
+
+
+class TestDemandUnit:
+    """The two demand paths count different things and must say which.
+
+    topic_demand reads demand_topics.searches_90d, which build_demand_topics.py
+    computes as DISTINCT ip_hash per window — people. _demand_heat counts rows in
+    score_history — searches, where one person searching ten times counts ten.
+    They emitted the same field name and the same wording, so a caller phrasing it
+    as "N people" would have been right on one path and wrong on the other.
+    """
+
+    def test_semantic_path_declares_searches(self):
+        from api.report import _demand_heat
+        from datetime import datetime, timedelta, timezone
+
+        recent = (datetime.now(timezone.utc) - timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
+        out = _demand_heat([
+            {"similarity": 0.9, "created_at": recent},
+            {"similarity": 0.8, "created_at": recent},
+        ])
+        assert out is not None
+        assert out["unit"] == "searches"
+        assert "searches" in out["message"]
+
+    def test_topic_path_declares_requesters(self):
+        """Shape check on the constant, without standing up embeddings/Turso."""
+        import inspect
+
+        from api import report
+
+        src = inspect.getsource(report.topic_demand)
+        assert '"unit": "requesters"' in src
+        assert "people have" in src

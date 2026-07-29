@@ -177,6 +177,12 @@ def _demand_heat(semantic_rows: list[dict], heat_threshold: float = 0.55, window
         "similar_searches_90d": cur,
         "prev_90d": prev,
         "trend": trend,
+        # This path counts ROWS in score_history — i.e. searches, and one person
+        # searching ten times counts ten. The topic path counts distinct requesters.
+        # Both used to emit the same field name and the same wording, so a caller
+        # had no way to know which it held; `unit` makes that explicit rather than
+        # letting the UI phrase it as people.
+        "unit": "searches",
         "message": f"{cur} closely-related searches in the last 90 days ({trend}).",
     }
 
@@ -251,7 +257,15 @@ def topic_demand(idea_text: str, min_sim: float = 0.35) -> dict | None:
             "similar_searches_90d": cur,
             "prev_90d": prev,
             "trend": trend,
-            "message": f"{cur} closely-related searches in the last 90 days ({trend}).",
+            # demand_topics.searches_90d is DISTINCT ip_hash per window (see
+            # scripts/build_demand_topics.py) — people, not queries. That is the
+            # anti-poisoning design, and it is a stronger claim than the old
+            # wording made: say so, so callers can phrase it truthfully.
+            "unit": "requesters",
+            "message": (
+                f"{cur} {'person has' if cur == 1 else 'people have'} looked into this "
+                f"in the last 90 days ({trend})."
+            ),
         },
         "topic_label": r.get("label"),
         "sample_ideas": samples,
