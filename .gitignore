@@ -46,4 +46,5 @@ CLAUDE.md
 # Claude internal
 .claude/rules/
 .claude/plans/
+.claude/worktrees/
 CHEATSHEET.local

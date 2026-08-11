@@ -8,6 +8,8 @@ idea-reality-mcp 是一個 MCP server，掃描 GitHub、npm、PyPI、Hacker News
 
 **什麼時候用：** 你準備開始一個新專案，想知道有沒有類似工具、市場競爭程度、以及趨勢是成長還是衰退。
 
+> **專案狀態（2026 年 8 月）：** 維護模式。工具持續可用、維持免費開源，線上 API 照常運作；bug 回報仍會處理，但不再規劃新功能。
+
 > **不只是查、想真的做出來？** 查完現實分數後，把點子開成一個公開專案上 **[AngelRun](https://angelrun.vercel.app/new?utm_source=idea-reality&utm_medium=readme&utm_campaign=demand-cta)** — 發進度、爬賽季、讓天使看到你。
 
 ## 運作方式
@@ -254,7 +256,6 @@ export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
 - [x] **v0.3** — 三段式關鍵字 Pipeline，中文支援，LLM 搜尋智能
 - [x] **v0.4** — Score History、Agent Templates、GitHub Action
 - [x] **v0.5** — 時序信號、趨勢偵測、市場動量
-- [ ] **v1.0** — Idea Memory Dataset（匿名使用紀錄）
 
 ## Star History
 

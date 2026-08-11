@@ -18,9 +18,10 @@
 - ✅ **P1 語意 embedding 全部完成、LIVE on prod**（`85d7401`）。`OPENAI_API_KEY` 已設在 Render，`/api/crowd-intel` 回 `match_mode:"semantic"` + `demand_heat`。**沒有待辦，這條收掉。**
   - ⚠️ 過程踩到 OOM：設 key 後舊的「in-memory numpy 矩陣」路徑在 512MB Starter 上爆記憶體 crash-loop → 改成 **Turso 原生向量搜尋**（`vector_distance_cos`，DB 端算 cosine、app 記憶體歸零）根治，續留 $7 Starter 不用升級。細節 `docs/P1-semantic-embeddings.md`。
   - Render 我有 API key（存在 gitignored `CHEATSHEET.local` 的 `RENDER_API_KEY`）＝可直接查 deploy/log/改 env/觸發部署。Turso 連線也在 `CHEATSHEET.local`。
-- ⚠️ 這台桌機 `.git` 有個從別台機器(johns)帶來的 phantom worktree 參照，`git status`/`git diff` 會報 fatal（但 commit/push/pull 正常）。**筆電 fresh clone 或 pull 不受影響**。
+- ✅ phantom worktree 已修（2026-08-12）：刪 `.claude/worktrees/quirky-lehmann` 的 gitlink 檔與殘骸目錄、`git rm --cached` 移除誤 commit 進 repo 的 160000 gitlink entry（GitHub 上原顯示為壞 submodule）、`.gitignore` 加 `.claude/worktrees/`。`git status`／`diff` 恢復正常；該 worktree 的最後 commit 仍保留在本機 branch `claude/quirky-lehmann`。
 
 ## Recent Changes
+- [2026-08-12] **docs+chore: 收成模式定調**——README（en+zh）加 maintenance mode 聲明、刪 v1.0 Idea Memory Dataset 未兌現承諾；`.claude/instructions.md` Status 改為收成判決（活定位 = AngelRun 漏斗引擎 + 免費開源門面；重開條件 = 僅以 AngelRun 工單動它）。修 phantom worktree（見 HANDOFF ✅）。桌機從 `feat/crowd-intel-semantic` 切回 main 並 ff 34 commits 到 origin/main，兩個已 merge 的 feat branch 已刪。判決全文見 memory: tradememory-ideareality-harvest-verdict-2026-08-12。
 - [2026-07-08] **feat: 公開 Demand Radar `/api/demand-radar` + 抗污染熱度（`e22e892`+`d18bf9b`，Render live 驗過）＝AngelRun 開工序序 2**。公開「大家想叫 AI 蓋什麼」趨勢榜＝SEO 磁鐵 + idea-reality→AngelRun 漏斗頂。**只回聚合**（label + 90d distinct-requester 人數 + trend + 每主題 AngelRun build link），**絕不回 sample_ideas/原文**（T-8，SQL 驗過無 sample_ideas）。
   - **🔴 建置中實查到 moat 污染**：10,186 列 / 8,357 distinct；**「ICP/wedge」俄文 bot 樣板 = 2,586 列（25.4%）**、**單一 ip_hash = 3,059 查詢（33%）**。→ 熱度計數從「原始查詢數」改 **distinct ip_hash（人數）per 90d 窗**（`build_demand_topics.py` join query_log）＝一個 actor 洗幾百次只算 1 人、無法假造 rising（T-3）。標籤改 **tf-idf across topics**（wedge/icp/saas 每 cluster 都有→自動降權）+ 擴充停用詞。rebuild 前後：top 從「wedge/icp」×8（312 假查詢）→ 真需求（marketplace/niche、fraud/crypto、resume/builder，40-65 真人）。
   - **語言真相**：live rising 以**俄文+CJK 為主、英文原生薄**（stored `lang` 欄不可靠＝非英文也存 'en'，只能靠 label 字元判 script）。endpoint 每主題標 `script`(latin/cyrillic/cjk) + `lang` 過濾（en→latin/cyrillic/cjk/all）+ junk 濾（test/probe）+ min_askers。→ 前端做多語 tab、全球優先英文當預設門面但不假裝獨佔。**策略含意寫進 AngelRun `docs/2026-07-08-business-model-audit...md` 附錄 B**（VC 敘事校準成「去 bot 後 ~6k 多語需求」）。
@@ -73,9 +74,7 @@
 - [2026-03-15] Jarvis 系統建立，加入 /morning 掃描範圍
 
 ## Current Status
-- v0.5.1+, 289 tests passing (10 new GitHub retry + npm relevance tests)
-- **PayPal 已移除** — 全部免費，商業模式轉向品牌 + 流量
-- 新增 3 API endpoints: badge-data, crowd-intel, pulse
-- pivot hints 支援中文（lang=zh）
-- 8 個 production users（Clerk），2,691 筆掃描，35 國
-- Google SEO 第一大來源，358+ stars
+- **🔴 收成模式（2026-08-12 判決，詳見 `.claude/instructions.md` Status）**：功能凍結，只修 bug／安全性。活定位 = AngelRun 漏斗引擎（demand radar cron + cross-sell CTA 運轉中）+ 免費開源門面。商業化判死：transactional 撐不起訂閱、$9.99 one-off 實測 0 單（2026-03）。
+- 323 tests passing；Product Hunt 永久停用（deep = 5 sources）
+- 公開足跡（2026-08-12 實查）：775 stars／PyPI 512 downloads 月／lifetime 11,821 下載；HN 4 篇 Show HN 合計 5 分
+- Google SEO 第一大來源；營運成本 = Render $7 Starter + Turso $4.99（月 ~$12 支出，唯一現金流方向）

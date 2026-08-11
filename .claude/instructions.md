@@ -4,7 +4,7 @@
 Mnemox Idea Reality MCP Server v0.5.0 — pre-build reality check for AI coding agents.
 `idea_check` scans GitHub, HN, npm, PyPI, Stack Overflow → returns reality_signal (0-100).
 Product Hunt is permanently disabled (their API has no post text search) — see sources/producthunt.py.
-**Status: 暫停開發中，持續監測流量。** Google SEO 第一大來源，持續有不同國家用戶查詢。290+ stars。
+**Status（2026-08-12 判決）：收成模式。**功能凍結，只修 bug 與安全性問題。定位兩個：(1) AngelRun idea_check 漏斗引擎（內部零件；demand radar + cross-sell CTA 持續運轉）；(2) 免費開源門面。商業化已判死：transactional 用途撐不起訂閱，$9.99 one-off 實測 0 單。**重開條件：只有 AngelRun 需要引擎升級時，以 AngelRun 的工單動它。**Google SEO 第一大來源，持續有不同國家用戶查詢。
 
 ## Quick Ref
 - GitHub: mnemox-ai/idea-reality-mcp | PyPI: idea-reality-mcp

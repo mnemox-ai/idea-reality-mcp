@@ -9,6 +9,8 @@ idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, and
 
 **When to use this:** You're about to start a new project and want to know if similar tools already exist, how competitive the space is, and whether the market is growing or declining.
 
+> **Project status (August 2026):** Maintenance mode. The tool works, stays free & open source, and the hosted API remains up; bug reports are reviewed, but no new features are planned.
+
 > **Not just checking — building it?** After a reality check, open your idea as a public project on **[AngelRun](https://angelrun.vercel.app/new?utm_source=idea-reality&utm_medium=readme&utm_campaign=demand-cta)** — ship updates, climb the season, and get seen by angels.
 
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
@@ -284,7 +286,6 @@ When starting a new project, use the idea_check MCP tool to check if similar pro
 - [x] **v0.4** — Score History, Agent Templates, GitHub Action
 - [x] **v0.5** — Temporal signals, trend detection, market momentum
 - [x] **v0.6** — Onboarding CLI (`idea-reality setup`, `config`, `doctor`)
-- [ ] **v1.0** — Idea Memory Dataset (opt-in anonymous logging)
 
 ## Star History
 
