@@ -289,7 +289,7 @@ When starting a new project, use the idea_check MCP tool to check if similar pro
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=mnemox-ai/idea-reality-mcp&type=Date)](https://star-history.com/#mnemox-ai/idea-reality-mcp&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=mnemox-ai/idea-reality-mcp&type=Date)](https://star-history.dera.page/#mnemox-ai/idea-reality-mcp&Date)
 
 ## Found a blind spot?
 
