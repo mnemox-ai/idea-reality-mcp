@@ -259,7 +259,7 @@ export PRODUCTHUNT_TOKEN=your_...  # 啟用 Product Hunt（deep mode）
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=mnemox-ai/idea-reality-mcp&type=Date)](https://star-history.com/#mnemox-ai/idea-reality-mcp&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=mnemox-ai/idea-reality-mcp&type=Date)](https://star-history.dera.page/#mnemox-ai/idea-reality-mcp&Date)
 
 ## 結果不準？
 
