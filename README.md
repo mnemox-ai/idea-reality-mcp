@@ -16,7 +16,7 @@ idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, and
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
 [![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-277%20passing-brightgreen.svg)]()
+[![CI](https://github.com/mnemox-ai/idea-reality-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mnemox-ai/idea-reality-mcp/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
 [![Downloads](https://static.pepy.tech/badge/idea-reality-mcp)](https://pepy.tech/project/idea-reality-mcp)
 

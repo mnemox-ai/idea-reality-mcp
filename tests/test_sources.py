@@ -155,13 +155,17 @@ class TestSearchGitHubReposDeduplication:
 
         recent_response = {"total_count": 3, "items": []}
 
+        # Route by request, not by call order: main and recent searches run concurrently,
+        # so a positional side_effect list hands a "recent" payload to a main search.
+        main_responses = iter([response_1, response_2])
+
+        def _respond(url, params=None, headers=None):
+            if "created:>" in params["q"]:
+                return _mock_response(recent_response)
+            return _mock_response(next(main_responses))
+
         mock_client = AsyncMock(spec=httpx.AsyncClient)
-        mock_client.get.side_effect = [
-            _mock_response(response_1),
-            _mock_response(recent_response),
-            _mock_response(response_2),
-            _mock_response(recent_response),
-        ]
+        mock_client.get.side_effect = _respond
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 

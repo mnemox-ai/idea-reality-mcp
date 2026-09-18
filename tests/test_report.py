@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+from datetime import datetime, timedelta, timezone
 from types import ModuleType
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -249,21 +250,27 @@ class TestCrowdIntelligence:
 # Section 3: Competitors with activity badges
 # ---------------------------------------------------------------------------
 
+def _days_ago(days: int) -> str:
+    """GitHub-format timestamp relative to now. Fixed dates here rot: the badge is computed
+    against the wall clock, so a hardcoded "recent" date turns "inactive" as time passes."""
+    return (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 class TestActivityBadge:
     def test_active_badge(self):
-        recent = "2026-03-05T12:00:00Z"
+        recent = _days_ago(5)
         result = report._activity_badge(recent)
         assert result["badge"] == "🔥"
         assert result["label"] == "active"
 
     def test_inactive_badge(self):
-        old = "2025-01-01T12:00:00Z"
+        old = _days_ago(400)
         result = report._activity_badge(old)
         assert result["badge"] == "💤"
         assert result["label"] == "inactive"
 
     def test_recent_badge(self):
-        mid = "2025-12-01T12:00:00Z"
+        mid = _days_ago(90)
         result = report._activity_badge(mid)
         assert result["badge"] == "⚡"
         assert result["label"] == "recent"
