@@ -249,6 +249,89 @@ class TestExtractKeywords:
         assert len(result) <= 8
         assert any("python" in v or "fastapi" in v for v in result)
 
+    # ---- Stage B: Event / social planning anchors (v0.5.1) ----
+
+    def test_reunion_anchor_detected(self):
+        """Reunion ideas must not be hijacked by incidental workflow/payment words."""
+        result = extract_keywords(
+            "A reunion planner for friend groups with rotating host and date poll"
+        )
+        all_text = " ".join(result)
+        assert "reunion" in all_text
+        # No incidental-word hijack: the primary query must not lead with workflow
+        assert not result[0].startswith("workflow ")
+        assert not result[0].startswith("payment ")
+
+    def test_event_anchor_detected(self):
+        result = extract_keywords("Event planning app for community meetups")
+        all_text = " ".join(result)
+        assert "event" in all_text or "meetup" in all_text or "gathering" in all_text
+
+    def test_rsvp_anchor_detected(self):
+        result = extract_keywords("RSVP tracker for small private events")
+        all_text = " ".join(result)
+        assert "rsvp" in all_text or "invitation" in all_text or "attendance" in all_text
+
+    def test_poll_anchor_detected(self):
+        result = extract_keywords("Poll app for scheduling group dinners")
+        all_text = " ".join(result)
+        assert "poll" in all_text or "voting" in all_text
+
+    def test_negated_payment_does_not_hijack(self):
+        """'no payment processing' must not anchor the query on payment (regression).
+
+        Before v0.5.1, any INTENT_ANCHOR in the first sentence dominated even when
+        negated. With reunion/event anchors added, a reunion idea that mentions
+        'no payment processing' gets a reunion-anchored primary query instead.
+        """
+        result = extract_keywords(
+            "A reunion and event planner for friend groups. Features include rsvp, "
+            "date poll, attendance tracking, and host election — no payment processing."
+        )
+        assert not result[0].startswith("payment ")
+        assert "reunion" in " ".join(result) or "event" in " ".join(result)
+
+    # ---- Stage C: Event / social planning synonym expansion ----
+
+    def test_reunion_expands_synonyms(self):
+        result = extract_keywords("reunion planner for alumni groups")
+        all_text = " ".join(result)
+        assert any(
+            s in all_text
+            for s in ["alumni reunion", "gathering", "meetup", "class reunion"]
+        )
+
+    def test_event_expands_synonyms(self):
+        result = extract_keywords("Event app with rsvp and itinerary")
+        all_text = " ".join(result)
+        assert any(s in all_text for s in ["gathering", "meetup", "party", "function"])
+
+    # ---- Stage A: Chinese event-planning mappings (v0.5.1) ----
+
+    def test_chinese_reunion_mapped(self):
+        """同學會 should map to alumni reunion (not lost to ASCII stripping)."""
+        result = extract_keywords("同學會 聚會 輪流主辦 app")
+        all_text = " ".join(result)
+        assert "alumni" in all_text or "reunion" in all_text
+        assert "rotating" in all_text or "host" in all_text
+
+    def test_chinese_gathering_mapped(self):
+        result = extract_keywords("家族聚會規劃工具 投票 出席")
+        all_text = " ".join(result)
+        assert "family reunion" in all_text or "gathering" in all_text
+        assert "voting" in all_text or "attendance" in all_text
+
+    def test_chinese_rsvp_mapped(self):
+        result = extract_keywords("活動邀請 出席回覆 紀錄")
+        all_text = " ".join(result)
+        assert "event" in all_text or "invitation" in all_text
+
+    def test_compound_chinese_host_rotation(self):
+        """輪流主辦 (longer compound) must be matched before 主辦 alone."""
+        result = extract_keywords("聚會輪流主辦系統")
+        all_text = " ".join(result)
+        assert "rotating host" in all_text or "rotating" in all_text
+
 
 # ===========================================================================
 # Score function tests
