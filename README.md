@@ -14,7 +14,7 @@ idea-reality-mcp is an MCP server that scans GitHub, npm, PyPI, Hacker News, and
 > **Not just checking — building it?** After a reality check, open your idea as a public project on **[AngelRun](https://angelrun.vercel.app/new?utm_source=idea-reality&utm_medium=readme&utm_campaign=demand-cta)** — ship updates, climb the season, and get seen by angels.
 
 [![PyPI](https://img.shields.io/pypi/v/idea-reality-mcp.svg)](https://pypi.org/project/idea-reality-mcp/)
-[![Smithery](https://smithery.ai/badge/idea-reality-mcp)](https://smithery.ai/server/idea-reality-mcp)
+[![Listed on Skillselion](https://skillselion.com/badge/mcp/tool/io.github.mnemox-ai/idea-reality-mcp.svg)](https://skillselion.com/mcp/tool/io.github.mnemox-ai/idea-reality-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/mnemox-ai/idea-reality-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mnemox-ai/idea-reality-mcp/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/mnemox-ai/idea-reality-mcp)](https://github.com/mnemox-ai/idea-reality-mcp)
