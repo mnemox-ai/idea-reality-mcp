@@ -10,6 +10,11 @@ import httpx
 
 SO_API = "https://api.stackexchange.com/2.3/search"
 
+# The previous filter (!9_bDDxJY5) plus `.total`, the number of questions matching
+# the search, which the API leaves out of the default response. Built with
+# /2.3/filters/create?base=!9_bDDxJY5&include=.total; filters never expire.
+SO_FILTER = "!DHxAajErkbpt4)B*BAnHKFbTlVAQs9ufhmI*4WpnVPPbrj3lwv0"
+
 
 @dataclass
 class StackOverflowResults:
@@ -83,7 +88,7 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
                 "intitle": query,
                 "site": "stackoverflow",
                 "pagesize": 10,
-                "filter": "!9_bDDxJY5",
+                "filter": SO_FILTER,
             }
             if key:
                 params["key"] = key
@@ -111,10 +116,7 @@ async def search_stackoverflow(keywords: list[str]) -> StackOverflowResults:
                     backoff_hit = True
 
                 items = data.get("items", [])
-                count = len(items)
-                if data.get("has_more"):
-                    # Bump count to signal there are more results beyond pagesize
-                    count = count + 1
+                count = data.get("total", len(items))
 
                 ratio = _compute_recent_ratio(items, three_months_ago)
 
