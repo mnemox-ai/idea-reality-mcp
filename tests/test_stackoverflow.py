@@ -7,7 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 
-from idea_reality_mcp.sources.stackoverflow import StackOverflowResults, search_stackoverflow
+from idea_reality_mcp.sources.stackoverflow import (
+    SO_FILTER,
+    StackOverflowResults,
+    search_stackoverflow,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -92,8 +96,30 @@ class TestSearchStackOverflowSuccess:
         assert result.evidence[0]["count"] == 3
 
     @pytest.mark.asyncio
-    async def test_has_more_bumps_count(self):
-        """When has_more is True, total_count should be pagesize + 1."""
+    async def test_total_is_the_api_total_not_the_page_size(self):
+        """total_count is the API's `total`, not the number of items on the page."""
+        response_with_more = {
+            "items": SAMPLE_ITEMS,
+            "has_more": True,
+            "total": 3685,
+            "quota_remaining": 290,
+        }
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.get.return_value = _mock_response(response_with_more)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("idea_reality_mcp.sources.stackoverflow.httpx.AsyncClient", return_value=mock_client):
+            result = await search_stackoverflow(["python cli"])
+
+        assert result.total_count == 3685
+        assert result.evidence[0]["count"] == 3685
+        _, kwargs = mock_client.get.call_args
+        assert kwargs["params"]["filter"] == SO_FILTER
+
+    @pytest.mark.asyncio
+    async def test_counts_items_when_total_is_missing(self):
+        """Without `total` in the response, fall back to the items returned."""
         response_with_more = {
             "items": SAMPLE_ITEMS,
             "has_more": True,
@@ -107,7 +133,7 @@ class TestSearchStackOverflowSuccess:
         with patch("idea_reality_mcp.sources.stackoverflow.httpx.AsyncClient", return_value=mock_client):
             result = await search_stackoverflow(["python cli"])
 
-        assert result.total_count == 4  # 3 items + 1 for has_more
+        assert result.total_count == 3
 
     @pytest.mark.asyncio
     async def test_top_questions_sorted_by_score(self):
