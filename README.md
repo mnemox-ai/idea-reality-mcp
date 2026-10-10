@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/mnemox-ai-idea-reality-mcp-badge.png)](https://mseep.ai/app/mnemox-ai-idea-reality-mcp)
+
 <!-- mcp-name: io.github.mnemox-ai/idea-reality-mcp -->
 English | [繁體中文](docs/zh/README.zh-TW.md)
 
