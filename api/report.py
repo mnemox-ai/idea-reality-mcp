@@ -703,12 +703,12 @@ async def _generate_strategic_analysis(
 
         client = anthropic.AsyncAnthropic(api_key=api_key, timeout=30.0)
         message = await client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-5-5",
             max_tokens=1000,
             system=_STRATEGIC_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
         )
-        return message.content[0].text.strip()
+        return "".join(block.text for block in message.content if block.type == "text").strip()
 
     except Exception:
         logger.exception("[REPORT] Sonnet analysis failed")
